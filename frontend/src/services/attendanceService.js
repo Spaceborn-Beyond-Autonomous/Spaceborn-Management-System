@@ -176,4 +176,5 @@ async getLiveAttendance() {
   }
 }
 
-export default new AttendanceService();
+const attendanceServiceInstance = new AttendanceService();
+export default attendanceServiceInstance;

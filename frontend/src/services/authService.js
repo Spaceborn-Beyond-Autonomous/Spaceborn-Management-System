@@ -679,7 +679,6 @@ class AuthService {
     }
     
     try {
-      const token = this.getToken();
       const response = await fetch(`${this.API_BASE_URL}/auth/password-resets/pending`, {
         headers: this.getAuthHeaders(),
       });
@@ -740,7 +739,6 @@ class AuthService {
     }
     
     try {
-      const token = this.getToken();
       const response = await fetch(`${this.API_BASE_URL}/auth/password-resets/${requestId}/approve`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
@@ -792,7 +790,6 @@ class AuthService {
     }
     
     try {
-      const token = this.getToken();
       const response = await fetch(`${this.API_BASE_URL}/auth/password-resets/${requestId}/reject`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
@@ -845,7 +842,6 @@ class AuthService {
     }
     
     try {
-      const token = this.getToken();
       const response = await fetch(`${this.API_BASE_URL}/auth/password-resets/stats`, {
         headers: this.getAuthHeaders(),
       });
@@ -1301,4 +1297,5 @@ class AuthService {
   }
 }
 
-export default new AuthService();
+const authServiceInstance = new AuthService();
+export default authServiceInstance;

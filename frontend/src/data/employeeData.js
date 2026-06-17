@@ -1,6 +1,7 @@
 // src/data/employeeData.js
 
 // Google Drive folder IDs for different document types
+// eslint-disable-next-line no-unused-vars
 const DRIVE_FOLDERS = {
   profilePhotos: 'https://drive.google.com/drive/folders/your-profile-photos-folder-id',
   aadhaar: 'https://drive.google.com/drive/folders/your-aadhaar-folder-id',
