@@ -167,19 +167,13 @@ const LoginSystem = ({ onLoginSuccess }) => {
       setError('Please enter your Employee ID before requesting password reset');
       return;
     }
-const handleForgotPasswordClick = () => {
-  if (!employeeId) {
-    setError('Please enter your Employee ID before requesting password reset');
-    return;
-  }
+    setShowForgotPassword(true);
+  };
 
-  setShowForgotPassword(true);
-};
-
-const handleBackToLogin = () => {
-  setShowForgotPassword(false);
-  setError('');
-};
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
+    setError('');
+  };
 
   const lockStatus = isAccountLocked();
 
