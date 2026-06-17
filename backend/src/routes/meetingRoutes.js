@@ -1,0 +1,35 @@
+const express = require('express');
+const router = express.Router();
+const { protect, authorize } = require('../middleware/authMiddleware');
+const {
+  createMeeting,
+  getAllMeetings,
+  getMyDepartmentMeetings,
+  getMeeting,
+  updateMeeting,
+  deleteMeeting,
+  addAttendee
+} = require('../controllers/meetingController');
+
+// Create meeting - CEO, Manager, Team Lead
+router.post('/', protect, authorize('CEO', 'Manager', 'Team Lead'), createMeeting);
+
+// Get all meetings - All roles
+router.get('/', protect, getAllMeetings);
+
+// Get meetings for my department - All roles
+router.get('/my-department', protect, getMyDepartmentMeetings);
+
+// Get single meeting - All roles
+router.get('/:id', protect, getMeeting);
+
+// Update meeting - Creator, CEO, Manager
+router.put('/:id', protect, authorize('CEO', 'Manager', 'Team Lead'), updateMeeting);
+
+// Delete meeting - any authenticated user can delete
+router.delete('/:id', protect, deleteMeeting);
+
+// Join/attend meeting - All roles
+router.post('/:id/attend', protect, addAttendee);
+
+module.exports = router;

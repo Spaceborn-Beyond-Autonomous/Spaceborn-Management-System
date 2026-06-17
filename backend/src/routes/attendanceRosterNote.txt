@@ -1,0 +1,2 @@
+Temp note: roster endpoint to be added to attendanceRoutes.js and controller.
+
