@@ -18,16 +18,16 @@ router.post('/apply', protect, applyLeave);
 router.get('/my/:userId', protect, getMyLeaves);
 
 // Get all leaves (CEO, Manager)
-router.get('/all', protect, authorize('CEO', 'Manager'), getAllLeaves);
+router.get('/all', protect, authorize('CEO', 'COO', 'Manager'), getAllLeaves);
 
 // Get pending leaves for approval (CEO, Manager)
-router.get('/pending', protect, authorize('CEO', 'Manager'), getPendingLeaves);
+router.get('/pending', protect, authorize('CEO', 'COO', 'Manager'), getPendingLeaves);
 
 // Get leave balance
 router.get('/balance/:userId', protect, getLeaveBalance);
 
 // Approve/Reject leave (CEO, Manager)
-router.put('/:leaveId/status', protect, authorize('CEO', 'Manager'), updateLeaveStatus);
+router.put('/:leaveId/status', protect, authorize('CEO', 'COO', 'Manager'), updateLeaveStatus);
 
 // Cancel leave (User own)
 router.put('/:leaveId/cancel', protect, cancelLeave);

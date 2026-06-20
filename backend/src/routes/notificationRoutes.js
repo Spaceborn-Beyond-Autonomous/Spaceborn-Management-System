@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.post('/bulk', authorize('CEO', 'Manager'), async (req, res) => {
+router.post('/bulk', authorize('CEO', 'COO', 'Manager'), async (req, res) => {
   try {
     const userQuery = req.user.role === 'Manager' ? { department: req.user.department, isActive: true } : { isActive: true };
     const users = await User.find(userQuery).select('_id');

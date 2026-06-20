@@ -191,7 +191,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Engineering', 'Design', 'Marketing', 'Operations', 'HR', 'Sales', 'Finance']);
+      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation']);
     }
   };
 
@@ -206,10 +206,10 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         allocated: isCEO ? 45 : 8, 
         total: isCEO ? 48 : 10, 
         status: 'Available',
-        allocatedTo: ['Engineering', 'Design', 'Management'],
+        allocatedTo: ['Core Systems', 'Hardware & Integration', 'Management'],
         utilization: isCEO ? 93.75 : 80,
         cost: isCEO ? '₹2,08,000 each' : '₹2,08,000 each',
-        department: isCEO ? 'All' : 'Engineering'
+        department: isCEO ? 'All' : 'Core Systems'
       },
       { 
         id: 2, 
@@ -231,10 +231,10 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         allocated: isCEO ? 12 : 5, 
         total: isCEO ? 15 : 8, 
         status: 'Limited',
-        allocatedTo: ['Engineering', 'Design'],
+        allocatedTo: ['Core Systems', 'Hardware & Integration'],
         utilization: isCEO ? 80 : 62.5,
         cost: '₹25,000 each',
-        department: isCEO ? 'All' : 'Engineering'
+        department: isCEO ? 'All' : 'Core Systems'
       },
       { 
         id: 4, 
@@ -255,10 +255,10 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         allocated: isCEO ? 12 : 4, 
         total: isCEO ? 15 : 5, 
         status: 'Available',
-        allocatedTo: ['Design', 'Marketing'],
+        allocatedTo: ['Hardware & Integration', 'AI/LLM & Perception'],
         utilization: isCEO ? 80 : 80,
         cost: '₹6,250/user/month',
-        department: isCEO ? 'All' : 'Design'
+        department: isCEO ? 'All' : 'Hardware & Integration'
       },
       { 
         id: 6, 
@@ -297,7 +297,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         id: 1,
         requester: 'Ravi Das',
         requesterRole: 'Member',
-        department: 'Engineering',
+        department: 'Core Systems',
         resourceName: 'MacBook Pro M3',
         resourceType: 'Hardware',
         quantity: 1,
@@ -311,7 +311,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         id: 2,
         requester: 'Priya Sharma',
         requesterRole: 'Member',
-        department: 'Engineering',
+        department: 'Core Systems',
         resourceName: 'Dual Monitor Setup',
         resourceType: 'Hardware',
         quantity: 1,
@@ -325,7 +325,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         id: 3,
         requester: 'Nisha Kumar',
         requesterRole: 'Team Lead',
-        department: 'Design',
+        department: 'Hardware & Integration',
         resourceName: 'Figma Pro License',
         resourceType: 'Software',
         quantity: 2,
@@ -341,7 +341,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         id: 4,
         requester: 'Mike Johnson',
         requesterRole: 'Team Lead',
-        department: 'Engineering',
+        department: 'Core Systems',
         resourceName: 'AWS Credits',
         resourceType: 'Cloud',
         quantity: 5000,
@@ -371,7 +371,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         resourceType: 'Hardware',
         action: 'allocated',
         user: 'Ravi Das',
-        department: 'Engineering',
+        department: 'Core Systems',
         timestamp: new Date(Date.now() - 10 * 86400000).toISOString(),
         details: 'Allocated to new team member'
       },
@@ -381,7 +381,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         resourceType: 'Software',
         action: 'assigned',
         user: 'Sita Krishnan',
-        department: 'Design',
+        department: 'Hardware & Integration',
         timestamp: new Date(Date.now() - 15 * 86400000).toISOString(),
         details: 'License assigned for design team'
       },
@@ -391,7 +391,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         resourceType: 'Cloud',
         action: 'consumed',
         user: 'System',
-        department: 'Engineering',
+        department: 'Core Systems',
         timestamp: new Date(Date.now() - 20 * 86400000).toISOString(),
         details: 'Monthly credit consumption: 3,200 credits'
       }

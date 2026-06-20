@@ -5,7 +5,7 @@ const User = require('../models/User');
 const { formatResponse } = require('../utils/helpers');
 
 // Get all accounts
-router.get('/all', protect, authorize('CEO', 'Manager'), async (req, res) => {
+router.get('/all', protect, authorize('CEO', 'COO', 'Manager'), async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
     res.json(formatResponse(true, 'Accounts fetched', users));
@@ -15,7 +15,7 @@ router.get('/all', protect, authorize('CEO', 'Manager'), async (req, res) => {
 });
 
 // Get account stats
-router.get('/stats', protect, authorize('CEO', 'Manager'), async (req, res) => {
+router.get('/stats', protect, authorize('CEO', 'COO', 'Manager'), async (req, res) => {
   try {
     const total = await User.countDocuments();
     const byRole = await User.aggregate([

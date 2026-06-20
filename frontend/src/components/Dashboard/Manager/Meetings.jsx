@@ -20,7 +20,7 @@ const Meetings = ({ userRole = 'Manager' }) => {
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [showScheduleForm, setShowScheduleForm] = useState(false);
 
-  const departments = ['Engineering', 'Design', 'Marketing', 'Operations', 'HR', 'All'];
+  const departments = ['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'All'];
 
   useEffect(() => {
     fetchMeetings();
@@ -84,7 +84,7 @@ const Meetings = ({ userRole = 'Manager' }) => {
       { 
         id: 1, 
         title: 'Q2 Sprint Planning', 
-        department: 'Engineering', 
+        department: 'Core Systems', 
         createdBy: 'Priya Sharma',
         createdById: 1,
         date: '2026-06-05', 
@@ -98,7 +98,7 @@ const Meetings = ({ userRole = 'Manager' }) => {
       { 
         id: 2, 
         title: 'Design System Review', 
-        department: 'Design', 
+        department: 'Hardware & Integration', 
         createdBy: 'John Doe',
         createdById: 2,
         date: '2026-06-06', 

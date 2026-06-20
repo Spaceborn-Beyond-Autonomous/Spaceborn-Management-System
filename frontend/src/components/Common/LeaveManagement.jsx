@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Gift, Clock, CheckCircle, XCircle, AlertCircle, Plus, X, Check, X as XIcon, Bell, Send } from 'lucide-react';
+import { Calendar, Gift, Clock, Plus, X, Bell, Send } from 'lucide-react';
 import employeeService from '../../services/employeeService';
 import authService from '../../services/authService';
 
@@ -9,8 +9,8 @@ const mockDataService = {
     const saved = localStorage.getItem('mock_leave_requests');
     if (saved) return JSON.parse(saved);
     return [
-      { id: 1, userId: 4, userName: 'Ravi Das', userRole: 'Member', department: 'Engineering', employeeId: 'EMP001', startDate: '2026-06-15', endDate: '2026-06-17', days: 3, type: 'Sick', reason: 'Medical consultation', status: 'Pending', appliedOn: new Date().toISOString(), pendingApprovals: ['Manager', 'CEO'] },
-      { id: 2, userId: 5, userName: 'Priya Sharma', userRole: 'Team Lead', department: 'Engineering', employeeId: 'EMP002', startDate: '2026-06-20', endDate: '2026-06-22', days: 3, type: 'Annual', reason: 'Family vacation', status: 'Approved', appliedOn: new Date().toISOString(), approvedBy: ['Manager', 'CEO'] }
+      { id: 1, userId: 4, userName: 'Ravi Das', userRole: 'Member', department: 'Core Systems', employeeId: 'EMP001', startDate: '2026-06-15', endDate: '2026-06-17', days: 3, type: 'Sick', reason: 'Medical consultation', status: 'Pending', appliedOn: new Date().toISOString(), pendingApprovals: ['Manager', 'CEO'] },
+      { id: 2, userId: 5, userName: 'Priya Sharma', userRole: 'Team Lead', department: 'Core Systems', employeeId: 'EMP002', startDate: '2026-06-20', endDate: '2026-06-22', days: 3, type: 'Annual', reason: 'Family vacation', status: 'Approved', appliedOn: new Date().toISOString(), approvedBy: ['Manager', 'CEO'] }
     ];
   },
   addLeaveRequest: async (leaveData) => {
@@ -43,8 +43,8 @@ const mockDataService = {
     const saved = localStorage.getItem('mock_hour_breaks');
     if (saved) return JSON.parse(saved);
     return [
-      { id: 1, userId: 4, userName: 'Ravi Das', userRole: 'Member', department: 'Engineering', date: '2026-06-10', hours: 1.5, reason: 'Doctor appointment', status: 'pending', approvedBy: null },
-      { id: 2, userId: 5, userName: 'Priya Sharma', userRole: 'Team Lead', department: 'Engineering', date: '2026-06-12', hours: 1, reason: 'Bank visit', status: 'approved', approvedBy: 'John Doe' }
+      { id: 1, userId: 4, userName: 'Ravi Das', userRole: 'Member', department: 'Core Systems', date: '2026-06-10', hours: 1.5, reason: 'Doctor appointment', status: 'pending', approvedBy: null },
+      { id: 2, userId: 5, userName: 'Priya Sharma', userRole: 'Team Lead', department: 'Core Systems', date: '2026-06-12', hours: 1, reason: 'Bank visit', status: 'approved', approvedBy: 'John Doe' }
     ];
   },
   addHourBreak: async (breakData) => {
@@ -97,13 +97,13 @@ const mockDataService = {
   },
   getAllEmployees: async () => {
     return [
-      { id: 1, name: 'John Doe', role: 'CEO', department: 'Executive', email: 'john@spaceborn.com' },
-      { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Operations', email: 'jane@spaceborn.com' },
-      { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Engineering', email: 'mike@spaceborn.com' },
-      { id: 4, name: 'Ravi Das', role: 'Member', department: 'Engineering', email: 'ravi@spaceborn.com' },
-      { id: 5, name: 'Priya Sharma', role: 'Team Lead', department: 'Engineering', email: 'priya@spaceborn.com' },
-      { id: 6, name: 'Sita Krishnan', role: 'Team Lead', department: 'Marketing', email: 'sita@spaceborn.com' },
-      { id: 7, name: 'Anil Mehta', role: 'Team Lead', department: 'Design', email: 'anil@spaceborn.com' }
+      { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', email: 'john@spaceborn.com' },
+      { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', email: 'jane@spaceborn.com' },
+      { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', email: 'mike@spaceborn.com' },
+      { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi@spaceborn.com' },
+      { id: 5, name: 'Priya Sharma', role: 'Team Lead', department: 'Core Systems', email: 'priya@spaceborn.com' },
+      { id: 6, name: 'Sita Krishnan', role: 'Team Lead', department: 'AI/LLM & Perception', email: 'sita@spaceborn.com' },
+      { id: 7, name: 'Anil Mehta', role: 'Team Lead', department: 'Hardware & Integration', email: 'anil@spaceborn.com' }
     ];
   }
 };
@@ -162,35 +162,88 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      let employeesList = await mockDataService.getAllEmployees();
+      // Keep mock employee list for the "Add Break" form dropdown
+      const employeesList = await mockDataService.getAllEmployees();
       setEmployees(employeesList);
 
-      const [leaves, breaksList, holidaysList] = await Promise.all([
+      // Leaves/holidays remain mock-based in this component.
+      // Hour breaks must be fetched from backend so approval/rejection history is visible.
+      const [leaves, holidaysList] = await Promise.all([
         mockDataService.getLeaveRequests(),
-        mockDataService.getHourBreaks(),
         mockDataService.getHolidays()
       ]);
-      
+
+      let breaksList = [];
+      try {
+        const loggedInUser = authService.getCurrentUser();
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const token = authService.getToken();
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        console.debug('[LeaveManagement] hour-breaks fetch start', {
+          userRole,
+          userDepartment,
+          loggedInUserId: loggedInUser?.id,
+          tokenPresent: !!token,
+        });
+
+        let url = '';
+        if (userRole === 'Member' || userRole === 'Team Lead') {
+          // backend expects a userId (stored as numeric userId), not _id
+          url = `${API_BASE_URL}/hour-breaks/my/${loggedInUser?.id}`;
+        } else {
+          url = `${API_BASE_URL}/hour-breaks`;
+        }
+
+        const res = await fetch(url, { headers });
+        const data = await res.json().catch(() => ({}));
+
+        // normalize payload: backend wraps as { success, message, data }
+        if (data && Array.isArray(data.data)) {
+          breaksList = data.data;
+        } else if (Array.isArray(data)) {
+          breaksList = data;
+        } else {
+          breaksList = [];
+        }
+
+        console.debug('[LeaveManagement] hour-breaks result', { raw: data, normalizedCount: breaksList.length });
+      } catch (e) {
+        console.log('Using mock hour breaks due to API error:', e);
+        breaksList = await mockDataService.getHourBreaks();
+      }
+
       // Filter based on user role
       const loggedInUser = authService.getCurrentUser();
       let filteredLeaves = leaves;
       let filteredBreaks = breaksList;
-      
+
       if (userRole === 'Manager') {
+        // Keep leave department filtering as-is.
         filteredLeaves = leaves.filter(l => l.department === userDepartment);
-        filteredBreaks = breaksList.filter(b => b.department === userDepartment);
+
+        // Hour breaks: do NOT filter by department here.
+        // This component previously ended up showing empty results across roles if `department`
+        // field mapping differed between backend and UI.
+        filteredBreaks = breaksList;
       } else if (userRole === 'Member' || userRole === 'Team Lead') {
         filteredLeaves = leaves.filter(l => l.userId === loggedInUser?.id);
-        filteredBreaks = breaksList.filter(b => b.userId === loggedInUser?.id);
+        filteredBreaks = breaksList.filter(b => String(b.userId) === String(loggedInUser?.id));
       }
-      
+
+
       setLeaveRequests(filteredLeaves);
-      setBreaks(filteredBreaks);
+      // IMPORTANT: ensure items have stable ids for action handlers
+      const normalizedBreaks = (filteredBreaks || []).map((b, idx) => ({
+        ...b,
+        id: b.id ?? b._id ?? idx,
+      }));
+      setBreaks(normalizedBreaks);
       setHolidays(holidaysList);
-      
-      const pendingBreaks = filteredBreaks.filter(b => b.status === 'pending').length;
-      const approvedBreaks = filteredBreaks.filter(b => b.status === 'approved').length;
-      setBreakStats({ pending: pendingBreaks, approved: approvedBreaks, total: filteredBreaks.length });
+
+      const pendingBreaks = normalizedBreaks.filter(b => b.status === 'pending').length;
+      const approvedBreaks = normalizedBreaks.filter(b => b.status === 'approved').length;
+      setBreakStats({ pending: pendingBreaks, approved: approvedBreaks, total: normalizedBreaks.length });
       setLeaveBalance({ Sick: 12, Casual: 10, Annual: 15, Emergency: 5, Other: 3 });
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -337,63 +390,117 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
     }
   };
 
-  // Employee Hour Break Request
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+  const getAuthHeaders = () => {
+    const token = authService.getToken();
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  };
+
+  const apiPost = async (endpoint, body) => {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || data?.error || 'Request failed');
+    return data?.data ?? data;
+  };
+
+  const apiPut = async (endpoint, body) => {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || data?.error || 'Request failed');
+    return data?.data ?? data;
+  };
+
+  const apiDelete = async (endpoint) => {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'DELETE',
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || data?.error || 'Request failed');
+    return data?.data ?? data;
+  };
+
+  // Employee Hour Break Request (backend)
   const handleEmployeeBreakRequest = async (e) => {
     e.preventDefault();
     if (!breakData.date || !breakData.reason) {
       showAlert('Please fill all required fields', false);
       return;
     }
-    
+
     try {
-      await mockDataService.addHourBreak({
+      await apiPost('/hour-breaks/apply', {
         userId: user.id,
         userName: user.name,
+        employeeId: user.employeeId,
         userRole: user.role,
         department: user.department,
         date: breakData.date,
         hours: breakData.hours,
-        reason: breakData.reason
+        reason: breakData.reason,
       });
 
-      // Notify manager
-      await mockDataService.sendBulkNotification({
-        title: '⏰ Hour Break Request',
-        message: `${user.name} has requested a ${breakData.hours} hour break on ${breakData.date}. Reason: ${breakData.reason}`,
-        type: 'break_request',
-        priority: 'normal'
-      });
-
-      showAlert(`✅ Hour break request submitted! Your manager has been notified.`);
+      showAlert(`✅ Hour break request submitted!`);
       setShowBreakForm(false);
       setBreakData({ userId: '', date: '', hours: 1, reason: '' });
       await fetchAllData();
     } catch (error) {
-      showAlert('❌ Failed to submit break request.', false);
+      showAlert(`❌ Failed to submit break request. ${error.message || ''}`.trim(), false);
     }
   };
 
-  // Manager adding break for team member
+  // Manager adding break for team member (backend)
   const handleManagerAddBreak = async (e) => {
     e.preventDefault();
     if (!breakData.userId || !breakData.date || !breakData.reason) {
       showAlert('Please fill all required fields', false);
       return;
     }
-    const employee = employees.find(emp => emp.id === parseInt(breakData.userId));
-    await mockDataService.addHourBreak({
-      userId: parseInt(breakData.userId),
-      userName: employee.name,
-      userRole: employee.role,
-      department: employee.department,
-      date: breakData.date,
-      hours: breakData.hours,
-      reason: breakData.reason
-    });
-    showAlert(`✅ Hour break request submitted for ${employee.name}!`);
-    setShowBreakForm(false);
-    setBreakData({ userId: '', date: '', hours: 1, reason: '' });
-    await fetchAllData();
+
+      const employee = employees.find(emp => String(emp.id) === String(breakData.userId) || String(emp._id) === String(breakData.userId) || emp.employeeId === breakData.userId);
+    if (!employee) {
+      showAlert('Selected employee not found', false);
+      return;
+    }
+
+    try {
+      await apiPost('/hour-breaks/apply', {
+        // backend expects numeric userId, but UI might hold Mongo _id strings
+        // attempt numeric conversion; fallback to employee.id if provided.
+        userId: Number.parseInt(employee.id ?? String(breakData.userId).replace(/\D/g, ''), 10),
+        userName: employee.name,
+        employeeId: employee.employeeId || String(employee.id),
+        userRole: employee.role,
+        department: employee.department,
+        date: breakData.date,
+        hours: breakData.hours,
+        reason: breakData.reason,
+      });
+
+      showAlert(`✅ Hour break request submitted for ${employee.name}!`);
+      setShowBreakForm(false);
+      setBreakData({ userId: '', date: '', hours: 1, reason: '' });
+      await fetchAllData();
+    } catch (error) {
+      showAlert(`❌ Failed to submit break request. ${error.message || ''}`.trim(), false);
+    }
   };
 
   const handleApproveLeave = async (leaveId) => {
@@ -401,7 +508,7 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
     await mockDataService.updateLeaveStatus(leaveId, 'Approved', currentUserObj?.name, 'Approved');
     
     const approvedLeave = leaveRequests.find(l => l.id === leaveId);
-    
+
     // Send notification to requester
     await mockDataService.sendBulkNotification({
       title: '✅ Leave Request Approved',
@@ -409,7 +516,7 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
       type: 'leave_approved',
       priority: 'normal'
     });
-    
+
     showAlert(`✅ Leave request approved!`);
     await fetchAllData();
   };
@@ -436,18 +543,33 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
 
   const handleApproveBreak = async (breakId) => {
     const currentUserObj = authService.getCurrentUser();
-    await mockDataService.updateBreakStatus(breakId, 'approved', currentUserObj?.name);
-    showAlert(`✅ Hour break approved!`);
-    await fetchAllData();
+    try {
+      await apiPut(`/hour-breaks/${breakId}/status`, {
+        status: 'approved',
+        approvedBy: currentUserObj?.name || currentUserObj?.fullName,
+      });
+      showAlert(`✅ Hour break approved!`);
+      await fetchAllData();
+    } catch (error) {
+      showAlert(`❌ Failed to approve break. ${error.message || ''}`.trim(), false);
+    }
   };
 
   const handleRejectBreak = async (breakId) => {
     const comments = window.prompt('Reason for rejection:');
     if (!comments) return;
     const currentUserObj = authService.getCurrentUser();
-    await mockDataService.updateBreakStatus(breakId, 'rejected', currentUserObj?.name);
-    showAlert(`❌ Hour break rejected.`);
-    await fetchAllData();
+    try {
+      await apiPut(`/hour-breaks/${breakId}/status`, {
+        status: 'rejected',
+        approvedBy: currentUserObj?.name || currentUserObj?.fullName,
+        rejectionReason: comments,
+      });
+      showAlert(`❌ Hour break rejected.`);
+      await fetchAllData();
+    } catch (error) {
+      showAlert(`❌ Failed to reject break. ${error.message || ''}`.trim(), false);
+    }
   };
 
   const handleDeleteBreakClick = (breakId) => {
@@ -456,12 +578,15 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
   };
 
   const confirmDeleteBreak = async () => {
-    if (breakToDelete) {
-      await mockDataService.deleteHourBreak(breakToDelete);
+    if (!breakToDelete) return;
+    try {
+      await apiDelete(`/hour-breaks/${breakToDelete}`);
       showAlert(`🗑️ Break request deleted.`);
       await fetchAllData();
       setShowDeleteConfirm(false);
       setBreakToDelete(null);
+    } catch (error) {
+      showAlert(`❌ Failed to delete break. ${error.message || ''}`.trim(), false);
     }
   };
 

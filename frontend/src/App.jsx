@@ -21,6 +21,7 @@ function DashboardRouter() {
       case 'CEO':
         return <CEODashboard />;
       case 'Manager':
+      case 'COO':
         return <ManagerDashboard />;
       case 'TeamLead':
         return <TeamLeadDashboard />;

@@ -12,7 +12,7 @@ const {
 } = require('../controllers/meetingController');
 
 // Create meeting - CEO, Manager, Team Lead
-router.post('/', protect, authorize('CEO', 'Manager', 'Team Lead'), createMeeting);
+router.post('/', protect, authorize('CEO', 'COO', 'Manager', 'Team Lead'), createMeeting);
 
 // Get all meetings - All roles
 router.get('/', protect, getAllMeetings);
@@ -24,7 +24,7 @@ router.get('/my-department', protect, getMyDepartmentMeetings);
 router.get('/:id', protect, getMeeting);
 
 // Update meeting - Creator, CEO, Manager
-router.put('/:id', protect, authorize('CEO', 'Manager', 'Team Lead'), updateMeeting);
+router.put('/:id', protect, authorize('CEO', 'COO', 'Manager', 'Team Lead'), updateMeeting);
 
 // Delete meeting - any authenticated user can delete
 router.delete('/:id', protect, deleteMeeting);

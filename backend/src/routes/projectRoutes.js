@@ -67,7 +67,7 @@ const synthesizeProjectsFromTasks = async () => {
   });
 };
 
-router.use(protect, authorize('CEO', 'Manager', 'Team Lead'));
+router.use(protect, authorize('CEO', 'COO', 'Manager', 'Team Lead'));
 
 router.get('/', async (req, res) => {
   try {

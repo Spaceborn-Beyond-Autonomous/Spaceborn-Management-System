@@ -12,18 +12,18 @@ class EmployeeService {
   // Mock data for development
   getMockEmployees() {
     return [
-      { id: 1, name: 'John Doe', role: 'CEO', department: 'Executive', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', phone: '+1 (555) 000-0001', joinDate: '2020-01-15', status: 'Active', manager: 'N/A' },
-      { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Operations', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', phone: '+1 (555) 000-0002', joinDate: '2020-03-20', status: 'Active', manager: 'John Doe' },
-      { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Engineering', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', phone: '+1 (555) 000-0003', joinDate: '2021-02-10', status: 'Active', manager: 'Jane Smith' },
-      { id: 4, name: 'Ravi Das', role: 'Member', department: 'Engineering', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', phone: '+1 (555) 000-0004', joinDate: '2022-06-01', status: 'Active', manager: 'Mike Johnson' },
-      { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Engineering', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', phone: '+1 (555) 000-0005', joinDate: '2022-08-15', status: 'Active', manager: 'Mike Johnson' },
-      { id: 6, name: 'Sita Krishnan', role: 'Member', department: 'Marketing', email: 'sita.krishnan@spaceborn.com', employeeId: 'EMP003', phone: '+1 (555) 000-0006', joinDate: '2023-01-10', status: 'Active', manager: 'Jane Smith' },
-      { id: 7, name: 'Anil Mehta', role: 'Member', department: 'Design', email: 'anil.mehta@spaceborn.com', employeeId: 'EMP004', phone: '+1 (555) 000-0007', joinDate: '2023-03-15', status: 'Active', manager: 'Jane Smith' },
-      { id: 8, name: 'Sarah Williams', role: 'Team Lead', department: 'Sales', email: 'sarah.williams@spaceborn.com', employeeId: 'LD002', phone: '+1 (555) 000-0008', joinDate: '2021-05-20', status: 'Active', manager: 'Jane Smith' },
-      { id: 9, name: 'David Brown', role: 'Member', department: 'Sales', email: 'david.brown@spaceborn.com', employeeId: 'EMP005', phone: '+1 (555) 000-0009', joinDate: '2022-09-01', status: 'Active', manager: 'Sarah Williams' },
-      { id: 10, name: 'Emily Davis', role: 'Member', department: 'Sales', email: 'emily.davis@spaceborn.com', employeeId: 'EMP006', phone: '+1 (555) 000-0010', joinDate: '2023-03-15', status: 'Active', manager: 'Sarah Williams' },
-      { id: 11, name: 'Alex Chen', role: 'Member', department: 'Engineering', email: 'alex.chen@spaceborn.com', employeeId: 'EMP007', phone: '+1 (555) 000-0011', joinDate: '2023-01-10', status: 'Active', manager: 'Mike Johnson' },
-      { id: 12, name: 'Nisha Kumar', role: 'Member', department: 'Operations', email: 'nisha.kumar@spaceborn.com', employeeId: 'EMP008', phone: '+1 (555) 000-0012', joinDate: '2022-11-15', status: 'Active', manager: 'Jane Smith' }
+      { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', phone: '+1 (555) 000-0001', joinDate: '2020-01-15', status: 'Active', manager: 'N/A' },
+      { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', phone: '+1 (555) 000-0002', joinDate: '2020-03-20', status: 'Active', manager: 'John Doe' },
+      { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', phone: '+1 (555) 000-0003', joinDate: '2021-02-10', status: 'Active', manager: 'Jane Smith' },
+      { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', phone: '+1 (555) 000-0004', joinDate: '2022-06-01', status: 'Active', manager: 'Mike Johnson' },
+      { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', phone: '+1 (555) 000-0005', joinDate: '2022-08-15', status: 'Active', manager: 'Mike Johnson' },
+      { id: 6, name: 'Sita Krishnan', role: 'Member', department: 'AI/LLM & Perception', email: 'sita.krishnan@spaceborn.com', employeeId: 'EMP003', phone: '+1 (555) 000-0006', joinDate: '2023-01-10', status: 'Active', manager: 'Jane Smith' },
+      { id: 7, name: 'Anil Mehta', role: 'Member', department: 'Hardware & Integration', email: 'anil.mehta@spaceborn.com', employeeId: 'EMP004', phone: '+1 (555) 000-0007', joinDate: '2023-03-15', status: 'Active', manager: 'Jane Smith' },
+      { id: 8, name: 'Sarah Williams', role: 'Team Lead', department: 'Robotics & Simulation', email: 'sarah.williams@spaceborn.com', employeeId: 'LD002', phone: '+1 (555) 000-0008', joinDate: '2021-05-20', status: 'Active', manager: 'Jane Smith' },
+      { id: 9, name: 'David Brown', role: 'Member', department: 'Robotics & Simulation', email: 'david.brown@spaceborn.com', employeeId: 'EMP005', phone: '+1 (555) 000-0009', joinDate: '2022-09-01', status: 'Active', manager: 'Sarah Williams' },
+      { id: 10, name: 'Emily Davis', role: 'Member', department: 'Robotics & Simulation', email: 'emily.davis@spaceborn.com', employeeId: 'EMP006', phone: '+1 (555) 000-0010', joinDate: '2023-03-15', status: 'Active', manager: 'Sarah Williams' },
+      { id: 11, name: 'Alex Chen', role: 'Member', department: 'Core Systems', email: 'alex.chen@spaceborn.com', employeeId: 'EMP007', phone: '+1 (555) 000-0011', joinDate: '2023-01-10', status: 'Active', manager: 'Mike Johnson' },
+      { id: 12, name: 'Nisha Kumar', role: 'Member', department: 'Platform and DevOps', email: 'nisha.kumar@spaceborn.com', employeeId: 'EMP008', phone: '+1 (555) 000-0012', joinDate: '2022-11-15', status: 'Active', manager: 'Jane Smith' }
     ];
   }
 

@@ -191,21 +191,21 @@ const ManagerDashboard = () => {
     } catch (error) {
       console.error('Error fetching top performers:', error);
       setTopPerformers([
-        { name: 'Priya Sharma', role: 'Senior Engineer', department: 'Engineering', tasks: 31, initials: 'PS', avatar: 'P' },
-        { name: 'Ravi Das', role: 'Frontend Developer', department: 'Engineering', tasks: 28, initials: 'RD', avatar: 'R' },
-        { name: 'Nisha Kumar', role: 'Backend Developer', department: 'Engineering', tasks: 22, initials: 'NK', avatar: 'N' }
+        { name: 'Priya Sharma', role: 'Senior Engineer', department: 'Core Systems', tasks: 31, initials: 'PS', avatar: 'P' },
+        { name: 'Ravi Das', role: 'Frontend Developer', department: 'Core Systems', tasks: 28, initials: 'RD', avatar: 'R' },
+        { name: 'Nisha Kumar', role: 'Backend Developer', department: 'Core Systems', tasks: 22, initials: 'NK', avatar: 'N' }
       ]);
     }
   };
 
   const loadMockData = () => {
     const user = authService.getCurrentUser();
-    const managerDepartment = user?.department || 'Engineering';
+    const managerDepartment = user?.department || 'Core Systems';
     
     setDashboardData({
       departmentProgress: [
         { name: managerDepartment, members: 8, progress: 78, completedTasks: 156, pendingTasks: 44 },
-        { name: 'Design', members: 4, progress: 65, completedTasks: 78, pendingTasks: 42 },
+        { name: 'Hardware & Integration', members: 4, progress: 65, completedTasks: 78, pendingTasks: 42 },
         { name: 'QA', members: 3, progress: 82, completedTasks: 89, pendingTasks: 19 }
       ],
       upcomingMeetings: [
@@ -228,7 +228,7 @@ const ManagerDashboard = () => {
       recentActivity: [
         { id: 1, action: 'Ravi Das completed login module', time: new Date(Date.now() - 2 * 3600000).toISOString(), user: 'Ravi Das', type: 'milestone' },
         { id: 2, action: 'Sprint review completed', time: new Date(Date.now() - 6 * 3600000).toISOString(), user: 'Team', type: 'review' },
-        { id: 3, action: 'New member joined team', time: new Date(Date.now() - 1 * 86400000).toISOString(), user: 'HR', type: 'hire' }
+        { id: 3, action: 'New member joined team', time: new Date(Date.now() - 1 * 86400000).toISOString(), user: 'Robotics & Simulation', type: 'hire' }
       ]
     });
     
@@ -244,11 +244,11 @@ const ManagerDashboard = () => {
     });
     
     setTopPerformers([
-      { name: 'Priya Sharma', role: 'Senior Engineer', department: 'Engineering', tasks: 31, initials: 'PS', avatar: 'P' },
-      { name: 'Ravi Das', role: 'Frontend Developer', department: 'Engineering', tasks: 28, initials: 'RD', avatar: 'R' },
-      { name: 'Nisha Kumar', role: 'Backend Developer', department: 'Engineering', tasks: 22, initials: 'NK', avatar: 'N' },
-      { name: 'Suresh M', role: 'Database Admin', department: 'Engineering', tasks: 18, initials: 'SM', avatar: 'S' },
-      { name: 'Alex Chen', role: 'QA Engineer', department: 'Engineering', tasks: 15, initials: 'AC', avatar: 'A' }
+      { name: 'Priya Sharma', role: 'Senior Engineer', department: 'Core Systems', tasks: 31, initials: 'PS', avatar: 'P' },
+      { name: 'Ravi Das', role: 'Frontend Developer', department: 'Core Systems', tasks: 28, initials: 'RD', avatar: 'R' },
+      { name: 'Nisha Kumar', role: 'Backend Developer', department: 'Core Systems', tasks: 22, initials: 'NK', avatar: 'N' },
+      { name: 'Suresh M', role: 'Database Admin', department: 'Core Systems', tasks: 18, initials: 'SM', avatar: 'S' },
+      { name: 'Alex Chen', role: 'QA Engineer', department: 'Core Systems', tasks: 15, initials: 'AC', avatar: 'A' }
     ]);
   };
 

@@ -11,9 +11,9 @@ const {
 } = require('../controllers/dashboardController');
 
 router.get('/ceo', protect, authorize('CEO'), getCeoDashboard);
-router.get('/manager', protect, authorize('CEO', 'Manager'), getManagerDashboard);
-router.get('/team-lead', protect, authorize('CEO', 'Manager', 'Team Lead'), getTeamLeadDashboard);
-router.get('/member', protect, authorize('CEO', 'Manager', 'Team Lead', 'Member'), getMemberDashboard);
+router.get('/manager', protect, authorize('CEO', 'COO', 'Manager'), getManagerDashboard);
+router.get('/team-lead', protect, authorize('CEO', 'COO', 'Manager', 'Team Lead'), getTeamLeadDashboard);
+router.get('/member', protect, authorize('CEO', 'COO', 'Manager', 'Team Lead', 'Member'), getMemberDashboard);
 router.get('/stats', protect, getDashboardStats);
 
 module.exports = router;

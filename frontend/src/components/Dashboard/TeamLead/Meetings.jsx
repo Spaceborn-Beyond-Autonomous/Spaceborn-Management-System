@@ -22,7 +22,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
   });
 
   // Available departments
-  const departments = ['Engineering', 'Design', 'Marketing', 'Operations', 'HR', 'All'];
+  const departments = ['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'All'];
 // Safe array helper
 const safeMeetings = scheduledMeetings || [];
   // Fetch meetings from API
@@ -85,7 +85,7 @@ const safeMeetings = scheduledMeetings || [];
       { 
         id: 1, 
         title: 'Q2 Sprint Planning', 
-        department: 'Engineering', 
+        department: 'Core Systems', 
         createdBy: 'Priya Sharma',
         createdById: 1,
         date: '2026-06-05', 
@@ -100,7 +100,7 @@ const safeMeetings = scheduledMeetings || [];
       { 
         id: 2, 
         title: 'Design System Review', 
-        department: 'Design', 
+        department: 'Hardware & Integration', 
         createdBy: 'John Doe',
         createdById: 2,
         date: '2026-06-06', 
@@ -130,7 +130,7 @@ const safeMeetings = scheduledMeetings || [];
       { 
         id: 4, 
         title: 'Marketing Campaign Kickoff', 
-        department: 'Marketing', 
+        department: 'AI/LLM & Perception', 
         createdBy: 'Sita Krishnan',
         createdById: 4,
         date: '2026-06-07', 

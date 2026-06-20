@@ -15,7 +15,7 @@ const isOverdue = (task) => {
   return due < today;
 };
 
-router.get('/', protect, authorize('CEO', 'Manager'), async (req, res) => {
+router.get('/', protect, authorize('CEO', 'COO', 'Manager'), async (req, res) => {
   try {
     const { severity, status } = req.query;
     const departmentFilter = req.user.role === 'Manager' ? { department: req.user.department } : {};

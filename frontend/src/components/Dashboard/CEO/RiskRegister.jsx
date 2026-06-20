@@ -122,7 +122,7 @@ const RiskRegister = ({ userRole = 'CEO' }) => {
         mitigation: 'Alternative suppliers, inventory buffer',
         trend: 'decreasing',
         status: 'monitoring',
-        owner: 'Operations',
+        owner: 'Platform and DevOps',
         mitigationStatus: 'completed',
         createdAt: '2026-06-01',
         updatedAt: '2026-06-06',

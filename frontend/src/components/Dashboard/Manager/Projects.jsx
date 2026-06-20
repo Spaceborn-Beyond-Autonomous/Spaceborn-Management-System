@@ -101,7 +101,7 @@ const Projects = ({ userRole = 'Manager' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Engineering', 'Design', 'Marketing', 'Operations', 'HR']);
+      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
     }
   };
 
@@ -117,7 +117,7 @@ const Projects = ({ userRole = 'Manager' }) => {
 
   const loadMockData = () => {
     const user = authService.getCurrentUser();
-    const managerDepartment = user?.department || 'Engineering';
+    const managerDepartment = user?.department || 'Core Systems';
     
     const mockProjects = [
       { 

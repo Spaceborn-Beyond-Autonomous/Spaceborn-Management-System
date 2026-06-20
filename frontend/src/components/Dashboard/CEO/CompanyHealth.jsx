@@ -123,11 +123,11 @@ const CompanyHealth = ({ userRole = 'CEO' }) => {
     setOverallScore(86);
     setHealthStatus('Healthy Organization');
     setDepartmentHealth([
-      { name: 'Engineering', score: 88, trend: '+2%', status: 'good' },
-      { name: 'Design', score: 85, trend: '+1%', status: 'good' },
-      { name: 'Marketing', score: 91, trend: '+5%', status: 'excellent' },
-      { name: 'Operations', score: 76, trend: '-1%', status: 'warning' },
-      { name: 'HR', score: 82, trend: '+3%', status: 'good' }
+      { name: 'Core Systems', score: 88, trend: '+2%', status: 'good' },
+      { name: 'Hardware & Integration', score: 85, trend: '+1%', status: 'good' },
+      { name: 'AI/LLM & Perception', score: 91, trend: '+5%', status: 'excellent' },
+      { name: 'Platform and DevOps', score: 76, trend: '-1%', status: 'warning' },
+      { name: 'Robotics & Simulation', score: 82, trend: '+3%', status: 'good' }
     ]);
     setRiskLevel('Low Risk Level');
     setTrend('+5%');

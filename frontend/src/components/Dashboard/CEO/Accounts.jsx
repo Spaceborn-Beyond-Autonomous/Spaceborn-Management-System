@@ -37,7 +37,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
   // Available roles based on user role
   const getAvailableRoles = () => {
     if (userRole === 'CEO') {
-      return ['CEO', 'Manager', 'Team Lead', 'Member', 'HR'];
+      return ['CEO', 'Manager', 'Team Lead', 'Member', 'Robotics & Simulation'];
     }
     if (userRole === 'Manager') {
       return ['Team Lead', 'Member'];
@@ -54,7 +54,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
       'Manager': 'MGR',
       'Team Lead': 'LD',
       'Member': 'EMP',
-      'HR': 'HR'
+      'Robotics & Simulation': 'Robotics & Simulation'
     };
     
     const prefix = rolePrefix[formData.role] || 'EMP';
@@ -183,13 +183,13 @@ const Accounts = ({ userRole = 'CEO' }) => {
 
   const loadMockAllAccounts = () => {
     const mockAccounts = [
-      { id: 1, name: 'John Doe', initials: 'JD', role: 'CEO', department: 'Executive', date: '2020-01-15', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', password: 'Pass@123', phone: '+1 (555) 000-0001', designation: 'Chief Executive Officer', status: 'Active', joinDate: '2020-01-15', createdAt: '2020-01-15T00:00:00Z' },
-      { id: 2, name: 'Jane Smith', initials: 'JS', role: 'Manager', department: 'Operations', date: '2020-03-20', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', password: 'Pass@456', phone: '+1 (555) 000-0002', designation: 'Operations Manager', status: 'Active', joinDate: '2020-03-20', createdAt: '2020-03-20T00:00:00Z' },
-      { id: 3, name: 'Mike Johnson', initials: 'MJ', role: 'Team Lead', department: 'Engineering', date: '2021-02-10', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', password: 'Pass@789', phone: '+1 (555) 000-0003', designation: 'Engineering Lead', status: 'Active', joinDate: '2021-02-10', createdAt: '2021-02-10T00:00:00Z' },
-      { id: 4, name: 'Ravi Das', initials: 'RD', role: 'Member', department: 'Engineering', date: '2022-06-01', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', password: 'Pass@101', phone: '+1 (555) 000-0004', designation: 'Frontend Developer', status: 'Active', joinDate: '2022-06-01', createdAt: '2022-06-01T00:00:00Z' },
-      { id: 5, name: 'Priya Sharma', initials: 'PS', role: 'Member', department: 'Engineering', date: '2022-08-15', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', password: 'Pass@202', phone: '+1 (555) 000-0005', designation: 'Backend Developer', status: 'Active', joinDate: '2022-08-15', createdAt: '2022-08-15T00:00:00Z' },
-      { id: 6, name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: 'Marketing', date: '2023-01-10', email: 'sita.krishnan@spaceborn.com', employeeId: 'LD002', password: 'Pass@303', phone: '+1 (555) 000-0006', designation: 'Marketing Lead', status: 'Active', joinDate: '2023-01-10', createdAt: '2023-01-10T00:00:00Z' },
-      { id: 7, name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: 'Design', date: '2023-03-15', email: 'anil.mehta@spaceborn.com', employeeId: 'LD003', password: 'Pass@404', phone: '+1 (555) 000-0007', designation: 'Design Lead', status: 'Active', joinDate: '2023-03-15', createdAt: '2023-03-15T00:00:00Z' }
+      { id: 1, name: 'John Doe', initials: 'JD', role: 'CEO', department: 'Founding Team', date: '2020-01-15', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', password: 'Pass@123', phone: '+1 (555) 000-0001', designation: 'Chief Executive Officer', status: 'Active', joinDate: '2020-01-15', createdAt: '2020-01-15T00:00:00Z' },
+      { id: 2, name: 'Jane Smith', initials: 'JS', role: 'Manager', department: 'Platform and DevOps', date: '2020-03-20', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', password: 'Pass@456', phone: '+1 (555) 000-0002', designation: 'Operations Manager', status: 'Active', joinDate: '2020-03-20', createdAt: '2020-03-20T00:00:00Z' },
+      { id: 3, name: 'Mike Johnson', initials: 'MJ', role: 'Team Lead', department: 'Core Systems', date: '2021-02-10', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', password: 'Pass@789', phone: '+1 (555) 000-0003', designation: 'Engineering Lead', status: 'Active', joinDate: '2021-02-10', createdAt: '2021-02-10T00:00:00Z' },
+      { id: 4, name: 'Ravi Das', initials: 'RD', role: 'Member', department: 'Core Systems', date: '2022-06-01', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', password: 'Pass@101', phone: '+1 (555) 000-0004', designation: 'Frontend Developer', status: 'Active', joinDate: '2022-06-01', createdAt: '2022-06-01T00:00:00Z' },
+      { id: 5, name: 'Priya Sharma', initials: 'PS', role: 'Member', department: 'Core Systems', date: '2022-08-15', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', password: 'Pass@202', phone: '+1 (555) 000-0005', designation: 'Backend Developer', status: 'Active', joinDate: '2022-08-15', createdAt: '2022-08-15T00:00:00Z' },
+      { id: 6, name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: 'AI/LLM & Perception', date: '2023-01-10', email: 'sita.krishnan@spaceborn.com', employeeId: 'LD002', password: 'Pass@303', phone: '+1 (555) 000-0006', designation: 'Marketing Lead', status: 'Active', joinDate: '2023-01-10', createdAt: '2023-01-10T00:00:00Z' },
+      { id: 7, name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: 'Hardware & Integration', date: '2023-03-15', email: 'anil.mehta@spaceborn.com', employeeId: 'LD003', password: 'Pass@404', phone: '+1 (555) 000-0007', designation: 'Design Lead', status: 'Active', joinDate: '2023-03-15', createdAt: '2023-03-15T00:00:00Z' }
     ];
     setAllAccounts(mockAccounts);
     setRecentlyCreated(mockAccounts.slice(-4).reverse());
@@ -216,7 +216,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
       setDepartments(depts);
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Engineering', 'Design', 'Marketing', 'Operations', 'HR', 'Sales', 'Finance', 'Executive']);
+      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation', 'Founding Team']);
     }
   };
 
@@ -253,7 +253,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
         'Manager': 1,
         'Team Lead': 3,
         'Member': 2,
-        'HR': 0
+        'Robotics & Simulation': 0
       }
     });
   };

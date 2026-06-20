@@ -20,17 +20,17 @@ const CEODashboard = ({ user, onLogout }) => {
   const atRiskProjects = [{ name: 'Project Beta — Design', completion: 45 }];
   const delayedProjects = [{ name: 'Project Delta — Ops', completion: 30 }];
   const departmentProgress = [
-    { name: 'Engineering', members: 48, progress: 82 },
-    { name: 'Design', members: 12, progress: 65 }
+    { name: 'Core Systems', members: 48, progress: 82 },
+    { name: 'Hardware & Integration', members: 12, progress: 65 }
   ];
   const topPerformers = [
-    { name: 'Sita Krishnan', role: 'Marketing', tasks: 31, initials: 'SK' },
-    { name: 'Priya Sharma', role: 'Engineering', tasks: 28, initials: 'PS' },
-    { name: 'Anil Mehta', role: 'Design', tasks: 22, initials: 'AM' }
+    { name: 'Sita Krishnan', role: 'AI/LLM & Perception', tasks: 31, initials: 'SK' },
+    { name: 'Priya Sharma', role: 'Core Systems', tasks: 28, initials: 'PS' },
+    { name: 'Anil Mehta', role: 'Hardware & Integration', tasks: 22, initials: 'AM' }
   ];
   const upcomingMeetings = [
-    { date: '2026-06-05', title: 'Q2 Sprint Planning', dept: 'Engineering', time: '10:00 AM' },
-    { date: '2026-06-06', title: 'Design System Review', dept: 'Design', time: '2:00 PM' },
+    { date: '2026-06-05', title: 'Q2 Sprint Planning', dept: 'Core Systems', time: '10:00 AM' },
+    { date: '2026-06-06', title: 'Design System Review', dept: 'Hardware & Integration', time: '2:00 PM' },
     { date: '2026-06-10', title: 'All-Hands Q2', dept: 'All', time: '9:00 AM' }
   ];
   const resourceRequests = [

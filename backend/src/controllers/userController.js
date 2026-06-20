@@ -1,6 +1,35 @@
 const User = require('../models/User');
 const { formatResponse } = require('../utils/helpers');
 
+const DEPARTMENTS = [
+  'Platform and DevOps',
+  'Core Systems',
+  'Hardware & Integration',
+  'Robotics & Simulation',
+  'Founding Team',
+  'AI/LLM & Perception'
+];
+
+const DEPARTMENT_RENAMES = {
+  Operations: 'Platform and DevOps',
+  Engineering: 'Core Systems',
+  Design: 'Hardware & Integration',
+  Sales: 'Robotics & Simulation',
+  HR: 'Robotics & Simulation',
+  Finance: 'Robotics & Simulation',
+  Executive: 'Founding Team',
+  Marketing: 'AI/LLM & Perception'
+};
+
+const normalizeDepartment = (department) => DEPARTMENT_RENAMES[department] || department;
+
+const normalizeDepartments = (departments) => {
+  const normalized = departments.map(normalizeDepartment).filter(Boolean);
+  return DEPARTMENTS
+    .concat(normalized.filter((department) => !DEPARTMENTS.includes(department)))
+    .filter((department, index, list) => list.indexOf(department) === index);
+};
+
 const getFullName = (user) =>
   user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim();
 
@@ -19,7 +48,7 @@ const toEmployeeDto = (user) => {
     email: plain.email,
     phone: plain.phone || '',
     role: plain.role,
-    department: plain.department || '',
+    department: normalizeDepartment(plain.department || ''),
     designation: plain.designation || '',
     team: plain.team || '',
     manager: plain.manager || '',
@@ -51,12 +80,12 @@ const buildEmployeeQuery = (queryParams = {}, currentUser = null) => {
   const { department, role, status, search } = queryParams;
   const query = {};
 
-  if (department) query.department = department;
+  if (department) query.department = normalizeDepartment(department);
   if (role) query.role = role;
   if (status) query.isActive = status === 'Active' || status === 'active';
 
   if (currentUser?.role === 'Team Lead') {
-    query.department = currentUser.department || department;
+    query.department = normalizeDepartment(currentUser.department || department);
     query.role = 'Member';
     query.isActive = true;
   }
@@ -109,7 +138,7 @@ exports.createEmployee = async (req, res) => {
       email: email.toLowerCase(),
       phone: phone || '',
       role: employeeRole,
-      department: department || 'Engineering',
+      department: normalizeDepartment(department || 'Core Systems'),
       designation: designation || employeeRole,
       team: team || '',
       manager: manager || createdByName,
@@ -147,13 +176,13 @@ exports.getAllEmployees = async (req, res) => {
 
     if (req.user?.role === 'Team Lead') {
       const currentUser = await User.findById(req.user.id).select('department');
-      query.department = currentUser?.department || department;
+      query.department = normalizeDepartment(currentUser?.department || department);
       query.role = 'Member';
       query.isActive = true;
     }
 
     if (department && req.user?.role !== 'Team Lead') {
-      query.department = department;
+      query.department = normalizeDepartment(department);
     }
 
     if (role && req.user?.role !== 'Team Lead') {
@@ -241,7 +270,7 @@ exports.updateEmployee = async (req, res) => {
     if (lastName) user.lastName = lastName;
     if (phone !== undefined) user.phone = phone;
     if (role) user.role = role;
-    if (department) user.department = department;
+    if (department) user.department = normalizeDepartment(department);
     if (designation !== undefined) user.designation = designation;
     if (team !== undefined) user.team = team;
     if (manager !== undefined) user.manager = manager;
@@ -384,7 +413,7 @@ exports.getEmployeeByEmployeeId = async (req, res) => {
 exports.getEmployeeDepartments = async (req, res) => {
   try {
     const departments = await User.distinct('department', { department: { $nin: [null, ''] } });
-    res.status(200).json(formatResponse(true, 'Departments fetched successfully', departments.sort()));
+    res.status(200).json(formatResponse(true, 'Departments fetched successfully', normalizeDepartments(departments)));
   } catch (error) {
     res.status(500).json(formatResponse(false, error.message));
   }
@@ -394,7 +423,7 @@ exports.getEmployeeStats = async (req, res) => {
   try {
     const employees = await User.find({}).select('-password');
     const dtos = employees.map(toEmployeeDto);
-    const departments = [...new Set(dtos.map(employee => employee.department).filter(Boolean))];
+    const departments = normalizeDepartments(dtos.map(employee => employee.department));
     const roles = [...new Set(dtos.map(employee => employee.role).filter(Boolean))];
     const now = new Date();
 
@@ -427,7 +456,7 @@ exports.getEmployeeStats = async (req, res) => {
 
 exports.getEmployeesByDepartment = async (req, res) => {
   try {
-    const employees = await User.find({ department: req.params.department }).select('-password').sort({ firstName: 1 });
+    const employees = await User.find({ department: normalizeDepartment(req.params.department) }).select('-password').sort({ firstName: 1 });
     res.status(200).json(formatResponse(true, 'Department employees fetched successfully', employees.map(toEmployeeDto)));
   } catch (error) {
     res.status(500).json(formatResponse(false, error.message));

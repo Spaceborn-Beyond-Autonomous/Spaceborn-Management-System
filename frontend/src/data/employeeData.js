@@ -1,7 +1,6 @@
 // src/data/employeeData.js
 
 // Google Drive folder IDs for different document types
-// eslint-disable-next-line no-unused-vars
 const DRIVE_FOLDERS = {
   profilePhotos: 'https://drive.google.com/drive/folders/your-profile-photos-folder-id',
   aadhaar: 'https://drive.google.com/drive/folders/your-aadhaar-folder-id',
@@ -91,7 +90,7 @@ export const employeeMasterData = {
     education: {
       college: 'IIT Bombay',
       degree: 'B.Tech Computer Science',
-      specialization: 'Software Engineering',
+      specialization: 'Software Core Systems',
       graduationYear: 2018,
       cgpa: 8.5,
       documents: [
@@ -121,7 +120,7 @@ export const employeeMasterData = {
     
     // Professional Details
     designation: 'Frontend Developer',
-    department: 'Engineering',
+    department: 'Core Systems',
     role: 'Member',
     joinDate: '2024-01-15',
     experience: '2 years',
@@ -317,7 +316,7 @@ export const employeeMasterData = {
     },
     
     designation: 'Backend Developer',
-    department: 'Engineering',
+    department: 'Core Systems',
     role: 'Member',
     joinDate: '2024-02-10',
     experience: '1.5 years',

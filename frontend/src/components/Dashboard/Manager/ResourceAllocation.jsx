@@ -200,7 +200,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
 
   const loadMockData = () => {
     const user = authService.getCurrentUser();
-    const managerDepartment = user?.department || 'Engineering';
+    const managerDepartment = user?.department || 'Core Systems';
     
     const mockResources = [
       { 
@@ -210,7 +210,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
         allocated: 8, 
         total: 10, 
         status: 'Available',
-        allocatedTo: [managerDepartment, 'Design'],
+        allocatedTo: [managerDepartment, 'Hardware & Integration'],
         utilization: 80,
         cost: '₹2,08,000 each',
         department: managerDepartment
@@ -297,7 +297,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
 
   const loadMockRequests = () => {
     const user = authService.getCurrentUser();
-    const managerDepartment = user?.department || 'Engineering';
+    const managerDepartment = user?.department || 'Core Systems';
     
     const mockRequests = [
       {
@@ -332,7 +332,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
         id: 3,
         requester: 'Nisha Kumar',
         requesterRole: 'Team Lead',
-        department: 'Design',
+        department: 'Hardware & Integration',
         resourceName: 'Figma Pro License',
         resourceType: 'Software',
         quantity: 2,
@@ -352,7 +352,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
 
   const loadMockTrackingHistory = () => {
     const user = authService.getCurrentUser();
-    const managerDepartment = user?.department || 'Engineering';
+    const managerDepartment = user?.department || 'Core Systems';
     
     const mockTracking = [
       {
@@ -371,7 +371,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
         resourceType: 'Software',
         action: 'assigned',
         user: 'Sita Krishnan',
-        department: 'Design',
+        department: 'Hardware & Integration',
         timestamp: new Date(Date.now() - 15 * 86400000).toISOString(),
         details: 'License assigned for design team'
       },
@@ -393,7 +393,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
 
   const loadMockStats = () => {
     const user = authService.getCurrentUser();
-    const managerDepartment = user?.department || 'Engineering';
+    const managerDepartment = user?.department || 'Core Systems';
     
     setStats({
       budgetUsed: 3750000,

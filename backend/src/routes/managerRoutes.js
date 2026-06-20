@@ -10,7 +10,7 @@ const {
   getManagerRecentActivity,
 } = require('../controllers/dashboardController');
 
-router.use(protect, authorize('CEO', 'Manager'));
+router.use(protect, authorize('CEO', 'COO', 'Manager'));
 
 router.get('/department-progress', getManagerDepartmentProgress);
 router.get('/upcoming-meetings', getManagerUpcomingMeetings);

@@ -15,13 +15,13 @@ const {
 // Public routes (none)
 
 // Protected routes - Manager and CEO only
-router.post('/create', protect, authorize('CEO', 'Manager'), createEmployee);
-router.get('/', protect, authorize('CEO', 'Manager', 'Team Lead'), getAllEmployees);
+router.post('/create', protect, authorize('CEO', 'COO', 'Manager'), createEmployee);
+router.get('/', protect, authorize('CEO', 'COO', 'Manager', 'Team Lead'), getAllEmployees);
 router.get('/:id/has-role/:role', protect, hasRole);
-router.get('/:id', protect, authorize('CEO', 'Manager'), getEmployee);
-router.put('/:id', protect, authorize('CEO', 'Manager'), updateEmployee);
-router.post('/:id/reset-password', protect, authorize('CEO', 'Manager'), resetPassword);
-router.post('/:id/deactivate', protect, authorize('CEO', 'Manager'), deactivateEmployee);
-router.post('/:id/activate', protect, authorize('CEO', 'Manager'), activateEmployee);
+router.get('/:id', protect, authorize('CEO', 'COO', 'Manager'), getEmployee);
+router.put('/:id', protect, authorize('CEO', 'COO', 'Manager'), updateEmployee);
+router.post('/:id/reset-password', protect, authorize('CEO', 'COO', 'Manager'), resetPassword);
+router.post('/:id/deactivate', protect, authorize('CEO', 'COO', 'Manager'), deactivateEmployee);
+router.post('/:id/activate', protect, authorize('CEO', 'COO', 'Manager'), activateEmployee);
 
 module.exports = router;

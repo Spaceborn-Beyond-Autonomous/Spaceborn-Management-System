@@ -21,8 +21,8 @@ const Meetings = ({ userRole = 'CEO' }) => {
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [departments, setDepartments] = useState([]);
 
-  const departmentsList = ['Engineering', 'Design', 'Marketing', 'Operations', 'HR', 'All'];
-  const filterButtons = ['All', 'Engineering', 'Design', 'Marketing'];
+  const departmentsList = ['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'All'];
+  const filterButtons = ['All', 'Core Systems', 'Hardware & Integration', 'AI/LLM & Perception'];
 
   useEffect(() => {
     fetchMeetings();
@@ -96,7 +96,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Engineering', 'Design', 'Marketing', 'Operations', 'HR']);
+      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
     }
   };
 
@@ -105,7 +105,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
       {
         id: 1,
         title: 'Q2 Sprint Planning',
-        department: 'Engineering',
+        department: 'Core Systems',
         createdBy: 'Priya Sharma',
         createdById: 1,
         date: '2026-06-05',
@@ -119,7 +119,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
       {
         id: 2,
         title: 'Design System Review',
-        department: 'Design',
+        department: 'Hardware & Integration',
         createdBy: 'John Doe',
         createdById: 2,
         date: '2026-06-06',
@@ -147,7 +147,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
       {
         id: 4,
         title: 'Marketing Campaign Kickoff',
-        department: 'Marketing',
+        department: 'AI/LLM & Perception',
         createdBy: 'Sita Krishnan',
         createdById: 4,
         date: '2026-06-07',

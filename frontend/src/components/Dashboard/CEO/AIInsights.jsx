@@ -23,7 +23,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
         id: 'member_1',
         name: 'Ravi Das',
         role: 'Frontend Dev',
-        department: 'Engineering',
+        department: 'Core Systems',
         avatar: 'RD',
         status: 'on_track',
         taskStats: {
@@ -55,7 +55,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
         id: 'member_2',
         name: 'Nisha Kumar',
         role: 'Backend Dev',
-        department: 'Engineering',
+        department: 'Core Systems',
         avatar: 'NK',
         status: 'overdue',
         taskStats: {
@@ -88,7 +88,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
         id: 'member_3',
         name: 'Priya Sharma',
         role: 'Sr.Engineer — Lead',
-        department: 'Engineering',
+        department: 'Core Systems',
         avatar: 'PS',
         status: 'on_track',
         taskStats: {
@@ -121,7 +121,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
         id: 'member_4',
         name: 'Pooja B',
         role: 'UI Designer',
-        department: 'Design',
+        department: 'Hardware & Integration',
         avatar: 'PB',
         status: 'on_track',
         taskStats: {
@@ -152,7 +152,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
         id: 'member_5',
         name: 'Anil Mehta',
         role: 'Design Head — Lead',
-        department: 'Design',
+        department: 'Hardware & Integration',
         avatar: 'AM',
         status: 'at_risk',
         taskStats: {
@@ -187,7 +187,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
       {
         id: 'meeting_1',
         title: 'Q2 Sprint Planning',
-        department: 'Engineering',
+        department: 'Core Systems',
         date: '2026-06-05',
         time: '10:00 AM',
         status: 'upcoming',
@@ -212,7 +212,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
       {
         id: 'meeting_2',
         title: 'Design System Review',
-        department: 'Design',
+        department: 'Hardware & Integration',
         date: '2026-06-06',
         time: '2:00 PM',
         status: 'upcoming',
@@ -250,7 +250,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
       {
         id: 'meeting_4',
         title: 'Marketing Campaign Kickoff',
-        department: 'Marketing',
+        department: 'AI/LLM & Perception',
         date: '2026-06-07',
         time: '3:30 PM',
         status: 'upcoming',
@@ -279,7 +279,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
         id: 'lead_1',
         name: 'Priya Sharma',
         role: 'Engineering Lead',
-        department: 'Engineering',
+        department: 'Core Systems',
         date: '2026-06-11',
         status: 'on_track',
         summary: 'Team completed 8 tasks today, bringing the Alpha project to 82% completion — ahead of the projected milestone. Ravi Das resolved two critical frontend bugs that were blocking QA sign-off. Nisha Kumar completed the database schema migration for the new auth module. No blockers reported. Sprint velocity is trending above average at 94%. The team is well-positioned to hit the Beta handoff by end of next week.',
@@ -300,7 +300,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
         id: 'lead_2',
         name: 'Anil Mehta',
         role: 'Design Lead',
-        department: 'Design',
+        department: 'Hardware & Integration',
         date: '2026-06-11',
         status: 'at_risk',
         summary: 'The Design team made progress on Gamma project assets but Beta design iteration remains behind schedule at 45%. The primary cause is a resource bottleneck — Pooja B has been pulled across two simultaneous projects and is nearing capacity. Anil has formally flagged this in the daily summary and is requesting either a temporary resource reallocation or a deadline extension for the Beta design phase.',

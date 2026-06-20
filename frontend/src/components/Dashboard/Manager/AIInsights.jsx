@@ -23,7 +23,7 @@ const AIInsights = ({ userRole = 'Manager' }) => {
         id: 'member_1',
         name: 'Ravi Das',
         role: 'Frontend Dev',
-        department: 'Engineering',
+        department: 'Core Systems',
         avatar: 'RD',
         status: 'on_track',
         taskStats: {
@@ -55,7 +55,7 @@ const AIInsights = ({ userRole = 'Manager' }) => {
         id: 'member_2',
         name: 'Nisha Kumar',
         role: 'Backend Dev',
-        department: 'Engineering',
+        department: 'Core Systems',
         avatar: 'NK',
         status: 'overdue',
         taskStats: {
@@ -88,7 +88,7 @@ const AIInsights = ({ userRole = 'Manager' }) => {
         id: 'member_3',
         name: 'Priya Sharma',
         role: 'Sr.Engineer — Lead',
-        department: 'Engineering',
+        department: 'Core Systems',
         avatar: 'PS',
         status: 'on_track',
         taskStats: {
@@ -123,7 +123,7 @@ const AIInsights = ({ userRole = 'Manager' }) => {
       {
         id: 'meeting_1',
         title: 'Q2 Sprint Planning',
-        department: 'Engineering',
+        department: 'Core Systems',
         date: '2026-06-05',
         time: '10:00 AM',
         status: 'upcoming',
@@ -165,7 +165,7 @@ const AIInsights = ({ userRole = 'Manager' }) => {
         id: 'lead_1',
         name: 'Priya Sharma',
         role: 'Engineering Lead',
-        department: 'Engineering',
+        department: 'Core Systems',
         date: '2026-06-11',
         status: 'on_track',
         summary: 'Team completed 8 tasks today, bringing the Alpha project to 82% completion — ahead of the projected milestone. Ravi Das resolved two critical frontend bugs that were blocking QA sign-off. Nisha Kumar completed the database schema migration for the new auth module. No blockers reported. Sprint velocity is trending above average at 94%.',

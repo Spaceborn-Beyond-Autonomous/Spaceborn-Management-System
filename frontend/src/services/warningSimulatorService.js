@@ -12,7 +12,7 @@ class WarningSimulatorService {
         id: 'warn_001',
         employeeId: 'EMP001',
         employeeName: 'Ravi Das',
-        department: 'Engineering',
+        department: 'Core Systems',
         role: 'Frontend Developer',
         type: 'daily_report',
         level: 2,
@@ -28,7 +28,7 @@ class WarningSimulatorService {
         id: 'warn_002',
         employeeId: 'EMP002',
         employeeName: 'Nisha Kumar',
-        department: 'Engineering',
+        department: 'Core Systems',
         role: 'Backend Developer',
         type: 'attendance',
         level: 1,
@@ -44,7 +44,7 @@ class WarningSimulatorService {
         id: 'warn_003',
         employeeId: 'EMP003',
         employeeName: 'Priya Sharma',
-        department: 'Engineering',
+        department: 'Core Systems',
         role: 'Engineering Lead',
         type: 'meeting',
         level: 1,
@@ -60,7 +60,7 @@ class WarningSimulatorService {
         id: 'warn_004',
         employeeId: 'EMP004',
         employeeName: 'Pooja B',
-        department: 'Design',
+        department: 'Hardware & Integration',
         role: 'UI Designer',
         type: 'task_overdue',
         level: 2,
@@ -76,7 +76,7 @@ class WarningSimulatorService {
         id: 'warn_005',
         employeeId: 'EMP005',
         employeeName: 'Anil Mehta',
-        department: 'Design',
+        department: 'Hardware & Integration',
         role: 'Design Lead',
         type: 'performance',
         level: 3,
@@ -138,9 +138,9 @@ class WarningSimulatorService {
             performance: this.warnings.filter(w => w.type === 'performance').length,
           },
           byDepartment: {
-            Engineering: this.warnings.filter(w => w.department === 'Engineering').length,
-            Design: this.warnings.filter(w => w.department === 'Design').length,
-            Sales: this.warnings.filter(w => w.department === 'Sales').length,
+            Engineering: this.warnings.filter(w => w.department === 'Core Systems').length,
+            Design: this.warnings.filter(w => w.department === 'Hardware & Integration').length,
+            Sales: this.warnings.filter(w => w.department === 'Robotics & Simulation').length,
           }
         });
       }, 300);
@@ -217,11 +217,11 @@ class WarningSimulatorService {
 
   getEmployeeById(id) {
     const employees = {
-      'EMP001': { name: 'Ravi Das', department: 'Engineering', role: 'Frontend Developer', email: 'ravi.das@spaceborn.com' },
-      'EMP002': { name: 'Nisha Kumar', department: 'Engineering', role: 'Backend Developer', email: 'nisha.kumar@spaceborn.com' },
-      'EMP003': { name: 'Priya Sharma', department: 'Engineering', role: 'Engineering Lead', email: 'priya.sharma@spaceborn.com' },
-      'EMP004': { name: 'Pooja B', department: 'Design', role: 'UI Designer', email: 'pooja.b@spaceborn.com' },
-      'EMP005': { name: 'Anil Mehta', department: 'Design', role: 'Design Lead', email: 'anil.mehta@spaceborn.com' },
+      'EMP001': { name: 'Ravi Das', department: 'Core Systems', role: 'Frontend Developer', email: 'ravi.das@spaceborn.com' },
+      'EMP002': { name: 'Nisha Kumar', department: 'Core Systems', role: 'Backend Developer', email: 'nisha.kumar@spaceborn.com' },
+      'EMP003': { name: 'Priya Sharma', department: 'Core Systems', role: 'Engineering Lead', email: 'priya.sharma@spaceborn.com' },
+      'EMP004': { name: 'Pooja B', department: 'Hardware & Integration', role: 'UI Designer', email: 'pooja.b@spaceborn.com' },
+      'EMP005': { name: 'Anil Mehta', department: 'Hardware & Integration', role: 'Design Lead', email: 'anil.mehta@spaceborn.com' },
     };
     return employees[id] || { name: 'Unknown', department: 'Unknown', role: 'Unknown', email: 'unknown@spaceborn.com' };
   }

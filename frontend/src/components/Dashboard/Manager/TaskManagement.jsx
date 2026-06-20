@@ -54,7 +54,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
     try {
       // Get current logged in user
       const currentUser = authService.getCurrentUser();
-      const managerDepartment = currentUser?.department || 'Engineering';
+      const managerDepartment = currentUser?.department || 'Core Systems';
       
       // Mock tasks data as shown in the image
       const allTasks = [
@@ -63,7 +63,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
           name: 'Ravi Das', 
           initials: 'RD', 
           task: 'Build login UI', 
-          department: 'Engineering', 
+          department: 'Core Systems', 
           progress: 74, 
           status: 'In progress', 
           priority: 'High', 
@@ -75,7 +75,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
           name: 'Nisha Kumar', 
           initials: 'NK', 
           task: 'Write unit tests', 
-          department: 'Engineering', 
+          department: 'Core Systems', 
           progress: 0, 
           status: 'Pending', 
           priority: 'Medium', 
@@ -87,7 +87,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
           name: 'Suresh M', 
           initials: 'SM', 
           task: 'DB schema design', 
-          department: 'Engineering', 
+          department: 'Core Systems', 
           progress: 40, 
           status: 'Overdue', 
           priority: 'High', 
@@ -99,7 +99,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
           name: 'Pooja B', 
           initials: 'PB', 
           task: 'Brand style guide', 
-          department: 'Design', 
+          department: 'Hardware & Integration', 
           progress: 55, 
           status: 'In progress', 
           priority: 'Medium', 
@@ -111,7 +111,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
           name: 'Anita M', 
           initials: 'AM', 
           task: 'Email campaign', 
-          department: 'Marketing', 
+          department: 'AI/LLM & Perception', 
           progress: 20, 
           status: 'Pending', 
           priority: 'Low', 
@@ -164,7 +164,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
       setDepartments(depts);
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Engineering', 'Design', 'Marketing', 'Operations', 'HR', 'Sales', 'Finance']);
+      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation']);
     }
   };
 
@@ -181,9 +181,9 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
     } catch (error) {
       console.error('Error fetching employees:', error);
       setEmployees([
-        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Engineering' },
-        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Engineering' },
-        { id: 6, name: 'Nisha Kumar', role: 'Member', department: 'Engineering' },
+        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems' },
+        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems' },
+        { id: 6, name: 'Nisha Kumar', role: 'Member', department: 'Core Systems' },
       ]);
     }
   };

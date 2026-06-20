@@ -95,7 +95,7 @@ const Projects = ({ userRole = 'CEO' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Engineering', 'Design', 'Marketing', 'Operations', 'HR']);
+      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
     }
   };
 
@@ -117,7 +117,7 @@ const Projects = ({ userRole = 'CEO' }) => {
         description: 'Complete redesign of the design system', 
         progress: 45, 
         status: 'at-risk', 
-        department: 'Design', 
+        department: 'Hardware & Integration', 
         dueDate: '2026-06-15', 
         tasks: { completed: 11, total: 24 },
         lead: 'Anil Mehta'
@@ -128,7 +128,7 @@ const Projects = ({ userRole = 'CEO' }) => {
         description: 'Operations optimization project', 
         progress: 30, 
         status: 'delayed', 
-        department: 'Operations', 
+        department: 'Platform and DevOps', 
         dueDate: '2026-06-20', 
         tasks: { completed: 9, total: 32 },
         lead: 'Vikram Singh'
@@ -139,7 +139,7 @@ const Projects = ({ userRole = 'CEO' }) => {
         description: 'Upgrade API infrastructure', 
         progress: 75, 
         status: 'on-track', 
-        department: 'Engineering', 
+        department: 'Core Systems', 
         dueDate: '2026-06-10', 
         tasks: { completed: 34, total: 45 },
         lead: 'Mike Johnson'
@@ -150,7 +150,7 @@ const Projects = ({ userRole = 'CEO' }) => {
         description: 'Create new dashboard', 
         progress: 65, 
         status: 'on-track', 
-        department: 'Design', 
+        department: 'Hardware & Integration', 
         dueDate: '2026-06-25', 
         tasks: { completed: 25, total: 38 },
         lead: 'Pooja B'

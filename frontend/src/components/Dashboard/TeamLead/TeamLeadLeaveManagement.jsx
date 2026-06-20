@@ -107,16 +107,16 @@ const TeamLeadLeaveManagement = ({ userRole = 'Team Lead' }) => {
     } catch (error) {
       console.error('Error fetching team members:', error);
       setTeamMembers([
-        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Engineering', initials: 'RD', email: 'ravi@spaceborn.com' },
-        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Engineering', initials: 'PS', email: 'priya@spaceborn.com' },
-        { id: 6, name: 'Nisha Kumar', role: 'Member', department: 'Engineering', initials: 'NK', email: 'nisha@spaceborn.com' },
-        { id: 10, name: 'Suresh M', role: 'Member', department: 'Engineering', initials: 'SM', email: 'suresh@spaceborn.com' }
+        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', initials: 'RD', email: 'ravi@spaceborn.com' },
+        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems', initials: 'PS', email: 'priya@spaceborn.com' },
+        { id: 6, name: 'Nisha Kumar', role: 'Member', department: 'Core Systems', initials: 'NK', email: 'nisha@spaceborn.com' },
+        { id: 10, name: 'Suresh M', role: 'Member', department: 'Core Systems', initials: 'SM', email: 'suresh@spaceborn.com' }
       ]);
     }
   };
 
   const loadMockData = () => {
-    const department = currentUser?.department || 'Engineering';
+    const department = currentUser?.department || 'Core Systems';
     
     setLeaveRequests([
       { 

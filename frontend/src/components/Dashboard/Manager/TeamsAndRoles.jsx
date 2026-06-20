@@ -155,7 +155,7 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
 
   const loadMockData = () => {
     const user = authService.getCurrentUser();
-    const managerDepartment = user?.department || 'Engineering';
+    const managerDepartment = user?.department || 'Core Systems';
     
     if (activeTab === 'teams') {
       const mockTeams = [

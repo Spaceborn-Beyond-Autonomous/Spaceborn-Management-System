@@ -388,19 +388,19 @@ class ApiService {
           id: 'EMP001',
           name: 'John Doe',
           role: 'CEO',
-          department: 'Executive',
+          department: 'Founding Team',
           email: 'john.doe@spaceborn.com'
         }
       },
       '/employees': [
-        { id: 1, name: 'John Doe', role: 'CEO', department: 'Executive', email: 'john.doe@spaceborn.com', employeeId: 'CEO001' },
-        { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Operations', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001' },
-        { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Engineering', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001' },
-        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Engineering', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001' }
+        { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', email: 'john.doe@spaceborn.com', employeeId: 'CEO001' },
+        { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001' },
+        { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001' },
+        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001' }
       ],
       '/meetings': [
-        { id: 1, title: 'Q2 Sprint Planning', department: 'Engineering', date: '2026-06-10', time: '10:00 AM' },
-        { id: 2, title: 'Design Review', department: 'Design', date: '2026-06-11', time: '2:00 PM' }
+        { id: 1, title: 'Q2 Sprint Planning', department: 'Core Systems', date: '2026-06-10', time: '10:00 AM' },
+        { id: 2, title: 'Design Review', department: 'Hardware & Integration', date: '2026-06-11', time: '2:00 PM' }
       ],
       '/notifications': [
         { id: 1, title: 'Task assigned to you', read: false, category: 'Task' },

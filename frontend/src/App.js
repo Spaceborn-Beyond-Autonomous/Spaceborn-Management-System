@@ -1,4 +1,4 @@
-// src/App.js - Updated with MemberProfileView
+// src/App.js
 import React, { useState, useEffect } from 'react';
 import ShiftTimer from './components/Common/ShiftTimer';
 import LoginSystem from './components/Login/LoginSystem';
@@ -7,7 +7,7 @@ import SessionManager from './components/Login/SessionManager';
 import ProtectedRoute from './components/Login/ProtectedRoute';
 import authService from './services/authService';
 import employeeService from './services/employeeService';
-import logo from './assets/spaceborn-logo.png';
+import { normalizeDepartmentFields } from './utils/departments';
 
 // Common Components
 import DailyWorkReport from './components/Common/DailyWorkReport';
@@ -30,7 +30,7 @@ import AutomationDashboard from './components/Dashboard/CEO/AutomationDashboard'
 
 // Manager Imports
 import ManagerDashboard from './components/Dashboard/Manager/ManagerDashboard';
-import ManagerTaskManagement from './components/Dashboard/Manager/TaskManagement';
+import ManagerTaskManagement from './components/Dashboard/Manager/TaskManagement.jsx';
 import ManagerProjects from './components/Dashboard/Manager/Projects';
 import ManagerTeamsAndRoles from './components/Dashboard/Manager/TeamsAndRoles';
 import ManagerResourceAllocation from './components/Dashboard/Manager/ResourceAllocation';
@@ -45,14 +45,31 @@ import ManagerAttendanceView from './components/Dashboard/Manager/AttendanceView
 import ManagerAutomationDashboard from './components/Dashboard/Manager/AutomationDashboard';
 import PasswordResetRequests from './components/Dashboard/Manager/PasswordResetRequests';
 
+// COO Imports
+import COODashboard from './components/Dashboard/COO/COODashboard';
+import COOTaskManagement from './components/Dashboard/COO/TaskManagement.jsx';
+import COOProjects from './components/Dashboard/COO/Projects';
+import COOTeamsAndRoles from './components/Dashboard/COO/TeamsAndRoles';
+import COOResourceAllocation from './components/Dashboard/COO/ResourceAllocation';
+import COOAccounts from './components/Dashboard/COO/Accounts';
+import COOMeetings from './components/Dashboard/COO/Meetings';
+import COOAIInsights from './components/Dashboard/COO/AIInsights';
+import COONotifications from './components/Dashboard/COO/Notifications';
+import COOActivityMonitor from './components/Dashboard/COO/ActivityMonitor';
+import COOEmployeeManagement from './components/Dashboard/COO/EmployeeManagement';
+import COOTeamReports from './components/Dashboard/COO/TeamReports';
+import COOAttendanceView from './components/Dashboard/COO/AttendanceView';
+import COOAutomationDashboard from './components/Dashboard/COO/AutomationDashboard';
+import COOPasswordResetRequests from './components/Dashboard/COO/PasswordResetRequests';
+
 // Team Lead Imports
 import TeamLeadDashboard from './components/Dashboard/TeamLead/TeamLeadDashboard';
-import TeamLeadTaskManagement from './components/Dashboard/TeamLead/TaskManagement';
+import TeamLeadTaskManagement from './components/Dashboard/TeamLead/TaskManagement.jsx';
 import TeamLeadTeamsAndRoles from './components/Dashboard/TeamLead/TeamsAndRoles';
+
 import TeamLeadResources from './components/Dashboard/TeamLead/Resources';
 import TeamLeadMeetings from './components/Dashboard/TeamLead/Meetings';
 import TeamLeadNotifications from './components/Dashboard/TeamLead/Notifications';
-import TeamLeadLeaveManagement from './components/Dashboard/TeamLead/TeamLeadLeaveManagement';
 import MVPRoadmap from './components/Dashboard/TeamLead/MVPRoadmap';
 
 // Member Imports
@@ -84,16 +101,16 @@ function App() {
     } catch (error) {
       console.error('Error fetching employees:', error);
       setEmployees([
-        { id: 1, name: 'John Doe', role: 'CEO', department: 'Executive', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', phone: '+1 (555) 000-0001', joinDate: '2020-01-15', status: 'Active', manager: 'N/A' },
-        { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Operations', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', phone: '+1 (555) 000-0002', joinDate: '2020-03-20', status: 'Active', manager: 'John Doe' },
-        { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Engineering', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', phone: '+1 (555) 000-0003', joinDate: '2021-02-10', status: 'Active', manager: 'Jane Smith' },
-        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Engineering', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', phone: '+1 (555) 000-0004', joinDate: '2022-06-01', status: 'Active', manager: 'Mike Johnson' },
-        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Engineering', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', phone: '+1 (555) 000-0005', joinDate: '2022-08-15', status: 'Active', manager: 'Mike Johnson' },
-        { id: 6, name: 'Alex Chen', role: 'Member', department: 'Engineering', email: 'alex.chen@spaceborn.com', employeeId: 'EMP003', phone: '+1 (555) 000-0006', joinDate: '2023-01-10', status: 'Active', manager: 'Mike Johnson' },
-        { id: 7, name: 'Sarah Williams', role: 'Team Lead', department: 'Sales', email: 'sarah.williams@spaceborn.com', employeeId: 'LD002', phone: '+1 (555) 000-0007', joinDate: '2021-05-20', status: 'Active', manager: 'Jane Smith' },
-        { id: 8, name: 'David Brown', role: 'Member', department: 'Sales', email: 'david.brown@spaceborn.com', employeeId: 'EMP004', phone: '+1 (555) 000-0008', joinDate: '2022-09-01', status: 'Active', manager: 'Sarah Williams' },
-        { id: 9, name: 'Emily Davis', role: 'Member', department: 'Sales', email: 'emily.davis@spaceborn.com', employeeId: 'EMP005', phone: '+1 (555) 000-0009', joinDate: '2023-03-15', status: 'Active', manager: 'Sarah Williams' },
-        { id: 10, name: 'Anil Mehta', role: 'Team Lead', department: 'Design', email: 'anil.mehta@spaceborn.com', employeeId: 'LD003', phone: '+1 (555) 000-0010', joinDate: '2021-06-10', status: 'Active', manager: 'Jane Smith' },
+        { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', phone: '+1 (555) 000-0001', joinDate: '2020-01-15', status: 'Active', manager: 'N/A' },
+        { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', phone: '+1 (555) 000-0002', joinDate: '2020-03-20', status: 'Active', manager: 'John Doe' },
+        { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', phone: '+1 (555) 000-0003', joinDate: '2021-02-10', status: 'Active', manager: 'Jane Smith' },
+        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', phone: '+1 (555) 000-0004', joinDate: '2022-06-01', status: 'Active', manager: 'Mike Johnson' },
+        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', phone: '+1 (555) 000-0005', joinDate: '2022-08-15', status: 'Active', manager: 'Mike Johnson' },
+        { id: 6, name: 'Alex Chen', role: 'Member', department: 'Core Systems', email: 'alex.chen@spaceborn.com', employeeId: 'EMP003', phone: '+1 (555) 000-0006', joinDate: '2023-01-10', status: 'Active', manager: 'Mike Johnson' },
+        { id: 7, name: 'Sarah Williams', role: 'Team Lead', department: 'Robotics & Simulation', email: 'sarah.williams@spaceborn.com', employeeId: 'LD002', phone: '+1 (555) 000-0007', joinDate: '2021-05-20', status: 'Active', manager: 'Jane Smith' },
+        { id: 8, name: 'David Brown', role: 'Member', department: 'Robotics & Simulation', email: 'david.brown@spaceborn.com', employeeId: 'EMP004', phone: '+1 (555) 000-0008', joinDate: '2022-09-01', status: 'Active', manager: 'Sarah Williams' },
+        { id: 9, name: 'Emily Davis', role: 'Member', department: 'Robotics & Simulation', email: 'emily.davis@spaceborn.com', employeeId: 'EMP005', phone: '+1 (555) 000-0009', joinDate: '2023-03-15', status: 'Active', manager: 'Sarah Williams' },
+        { id: 10, name: 'Anil Mehta', role: 'Team Lead', department: 'Hardware & Integration', email: 'anil.mehta@spaceborn.com', employeeId: 'LD003', phone: '+1 (555) 000-0010', joinDate: '2021-06-10', status: 'Active', manager: 'Jane Smith' },
       ]);
     }
   };
@@ -111,7 +128,7 @@ function App() {
       
       if (savedUser && session) {
         try {
-          const userData = JSON.parse(savedUser);
+          const userData = normalizeDepartmentFields(JSON.parse(savedUser));
           const sessionData = JSON.parse(session);
           const sessionAge = Date.now() - sessionData.timestamp;
           const SESSION_TIMEOUT = 8 * 60 * 60 * 1000;
@@ -136,10 +153,10 @@ function App() {
     // checkExistingSession();  // <-- COMMENT THIS FOR DEV MODE (forces login)
   }, []);
 
-  // Fetch pending reset requests count for Manager
+  // Fetch pending reset requests count for Manager/COO
   useEffect(() => {
     const fetchPendingCount = async () => {
-      if (user?.role === 'Manager') {
+      if (user?.role === 'Manager' || user?.role === 'COO') {
         try {
           const stats = await authService.getResetRequestStats();
           setPendingResetCount(stats.pending || 0);
@@ -161,7 +178,9 @@ function App() {
       return;
     }
     
-    setUser(userData);
+    const normalizedUserData = normalizeDepartmentFields(userData);
+    localStorage.setItem('user', JSON.stringify(normalizedUserData));
+    setUser(normalizedUserData);
     setIsLoggedIn(true);
     setActiveMenu('Dashboard');
     await fetchEmployees();
@@ -191,10 +210,9 @@ function App() {
   const getFilteredEmployees = () => {
     if (!user) return [];
     
-    if (user.role === 'CEO' || user.role === 'Manager') {
+    if (user.role === 'CEO' || user.role === 'Manager' || user.role === 'COO') {
       return employees;
     }
-    
     if (user.role === 'Team Lead') {
       const userDept = getUserDepartment();
       return employees.filter(emp => emp.department === userDept);
@@ -211,6 +229,7 @@ function App() {
     if (!user) return '';
     if (user.role === 'CEO') return 'Full company access — Viewing all employees';
     if (user.role === 'Manager') return 'Full company access — Viewing all employees';
+    if (user.role === 'COO') return 'Full company access - Viewing all employees';
     if (user.role === 'Team Lead') {
       const dept = getUserDepartment();
       return `Department-level access — Viewing ${dept} team (${getFilteredEmployees().length} members)`;
@@ -340,7 +359,7 @@ function App() {
                   </div>
                 </div>
 
-                {/* REPORTS Section - MVP Roadmaps integrated inside TeamReports */}
+                {/* REPORTS Section */}
                 <div className="mb-6">
                   <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">REPORTS</div>
                   <div className="space-y-1">
@@ -476,10 +495,29 @@ function App() {
     );
   }
 
-  // ==================== MANAGER DASHBOARD ====================
-  if (user.role === 'Manager') {
+  // ==================== MANAGER / COO DASHBOARD ====================
+  if (user.role === 'Manager' || user.role === 'COO') {
+    const isCOO = user.role === 'COO';
+    const managerFeatureRole = 'Manager';
+    const managerDisplayRole = user.role;
+    const DashboardComponent = isCOO ? COODashboard : ManagerDashboard;
+    const TaskManagementComponent = isCOO ? COOTaskManagement : ManagerTaskManagement;
+    const ProjectsComponent = isCOO ? COOProjects : ManagerProjects;
+    const TeamsAndRolesComponent = isCOO ? COOTeamsAndRoles : ManagerTeamsAndRoles;
+    const ResourceAllocationComponent = isCOO ? COOResourceAllocation : ManagerResourceAllocation;
+    const AccountsComponent = isCOO ? COOAccounts : ManagerAccounts;
+    const EmployeeManagementComponent = isCOO ? COOEmployeeManagement : EmployeeManagement;
+    const TeamReportsComponent = isCOO ? COOTeamReports : ManagerTeamReports;
+    const AutomationDashboardComponent = isCOO ? COOAutomationDashboard : ManagerAutomationDashboard;
+    const AttendanceViewComponent = isCOO ? COOAttendanceView : ManagerAttendanceView;
+    const MeetingsComponent = isCOO ? COOMeetings : ManagerMeetings;
+    const AIInsightsComponent = isCOO ? COOAIInsights : ManagerAIInsights;
+    const NotificationsComponent = isCOO ? COONotifications : ManagerNotifications;
+    const ActivityMonitorComponent = isCOO ? COOActivityMonitor : ManagerActivityMonitor;
+    const PasswordResetRequestsComponent = isCOO ? COOPasswordResetRequests : PasswordResetRequests;
+
     return (
-      <ProtectedRoute user={user} requiredRoles={['Manager']}>
+      <ProtectedRoute user={user} requiredRoles={['Manager', 'COO']}>
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
@@ -490,7 +528,7 @@ function App() {
               <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100">
                 <div className="flex space-x-2">
                   <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">CEO</span>
-                  <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">Manager</span>
+                  <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">{managerDisplayRole}</span>
                 </div>
                 <div className="flex space-x-2">
                   <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">Lead</span>
@@ -621,7 +659,7 @@ function App() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-500">Manager</p>
+                    <p className="text-xs text-gray-500">{managerDisplayRole}</p>
                   </div>
                   <LogoutButton onLogout={handleLogout} />
                 </div>
@@ -629,16 +667,16 @@ function App() {
             </aside>
             <main className="flex-1 ml-64 overflow-y-auto mt-[73px]">
               <div className="p-8">
-                {managerActiveMenu === 'Dashboard' && <ManagerDashboard user={user} onLogout={handleLogout} />}
-                {managerActiveMenu === 'TaskManagement' && <ManagerTaskManagement userRole={user.role} />}
-                {managerActiveMenu === 'Projects' && <ManagerProjects userRole={user.role} />}
-                {managerActiveMenu === 'TeamsAndRoles' && <ManagerTeamsAndRoles userRole={user.role} />}
-                {managerActiveMenu === 'ResourceAllocation' && <ManagerResourceAllocation userRole={user.role} />}
-                {managerActiveMenu === 'Accounts' && <ManagerAccounts userRole={user.role} />}
+                {managerActiveMenu === 'Dashboard' && <DashboardComponent user={user} onLogout={handleLogout} />}
+                {managerActiveMenu === 'TaskManagement' && <TaskManagementComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'Projects' && <ProjectsComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'TeamsAndRoles' && <TeamsAndRolesComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'ResourceAllocation' && <ResourceAllocationComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'Accounts' && <AccountsComponent userRole={managerDisplayRole} />}
                 {managerActiveMenu === 'EmployeeManagement' && (
-                  <EmployeeManagement 
+                  <EmployeeManagementComponent 
                     employees={getFilteredEmployees()}
-                    userRole={user.role}
+                    userRole={managerFeatureRole}
                     accessLevel={getAccessLevelText()}
                     userDepartment={getUserDepartment()}
                     canEdit={true}
@@ -649,21 +687,21 @@ function App() {
                     onDeleteEmployee={handleDeleteEmployee}
                   />
                 )}
-                {managerActiveMenu === 'TeamReports' && <ManagerTeamReports userRole={user.role} department={getUserDepartment()} user={user} />}
+                {managerActiveMenu === 'TeamReports' && <TeamReportsComponent userRole={managerDisplayRole} department={isCOO ? null : getUserDepartment()} user={user} />}
                 {managerActiveMenu === 'LeaveManagement' && (
                   <LeaveManagement 
                     user={user}
-                    userRole={user.role}
+                    userRole={managerFeatureRole}
                     userDepartment={user.department}
                   />
                 )}
-                {managerActiveMenu === 'Automation' && <ManagerAutomationDashboard user={user} userRole={user.role} />}
-                {managerActiveMenu === 'Attendance' && <ManagerAttendanceView userRole={user.role} />}
-                {managerActiveMenu === 'Meetings' && <ManagerMeetings userRole={user.role} />}
-                {managerActiveMenu === 'AIInsights' && <ManagerAIInsights userRole={user.role} />}
-                {managerActiveMenu === 'Notifications' && <ManagerNotifications userRole={user.role} />}
-                {managerActiveMenu === 'ActivityMonitor' && <ManagerActivityMonitor userRole={user.role} />}
-                {managerActiveMenu === 'PasswordResetRequests' && <PasswordResetRequests userRole={user.role} />}
+                {managerActiveMenu === 'Automation' && <AutomationDashboardComponent user={user} userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'Attendance' && <AttendanceViewComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'Meetings' && <MeetingsComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'AIInsights' && <AIInsightsComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'Notifications' && <NotificationsComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'ActivityMonitor' && <ActivityMonitorComponent userRole={managerFeatureRole} />}
+                {managerActiveMenu === 'PasswordResetRequests' && <PasswordResetRequestsComponent userRole={managerFeatureRole} />}
               </div>
             </main>
           </div>
@@ -765,7 +803,13 @@ function App() {
                 {teamLeadActiveMenu === 'MVPRoadmap' && <MVPRoadmap userRole={user.role} />}
                 {teamLeadActiveMenu === 'Meetings' && <TeamLeadMeetings userRole={user.role} />}
                 {teamLeadActiveMenu === 'Notifications' && <TeamLeadNotifications userRole={user.role} />}
-                {teamLeadActiveMenu === 'LeaveManagement' && <TeamLeadLeaveManagement userRole={user.role} />}
+                {teamLeadActiveMenu === 'LeaveManagement' && (
+                  <LeaveManagement 
+                    user={user}
+                    userRole={user.role}
+                    userDepartment={user.department}
+                  />
+                )}
               </div>
             </main>
           </div>

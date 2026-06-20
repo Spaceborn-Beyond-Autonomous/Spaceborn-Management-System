@@ -48,10 +48,10 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
       if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         // Mock team members
         setTeamMembers([
-          { id: 4, name: 'Ravi Das', role: 'Member', department: currentUser?.department || 'Engineering', email: 'ravi.das@spaceborn.com', initials: 'RD' },
-          { id: 5, name: 'Priya Sharma', role: 'Member', department: currentUser?.department || 'Engineering', email: 'priya.sharma@spaceborn.com', initials: 'PS' },
-          { id: 6, name: 'Nisha Kumar', role: 'Member', department: currentUser?.department || 'Engineering', email: 'nisha.kumar@spaceborn.com', initials: 'NK' },
-          { id: 10, name: 'Suresh M', role: 'Member', department: currentUser?.department || 'Engineering', email: 'suresh.m@spaceborn.com', initials: 'SM' }
+          { id: 4, name: 'Ravi Das', role: 'Member', department: currentUser?.department || 'Core Systems', email: 'ravi.das@spaceborn.com', initials: 'RD' },
+          { id: 5, name: 'Priya Sharma', role: 'Member', department: currentUser?.department || 'Core Systems', email: 'priya.sharma@spaceborn.com', initials: 'PS' },
+          { id: 6, name: 'Nisha Kumar', role: 'Member', department: currentUser?.department || 'Core Systems', email: 'nisha.kumar@spaceborn.com', initials: 'NK' },
+          { id: 10, name: 'Suresh M', role: 'Member', department: currentUser?.department || 'Core Systems', email: 'suresh.m@spaceborn.com', initials: 'SM' }
         ]);
         return;
       }
@@ -69,8 +69,8 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
       console.error('Error fetching team members:', error);
       // Mock fallback
       setTeamMembers([
-        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Engineering', email: 'ravi.das@spaceborn.com', initials: 'RD' },
-        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Engineering', email: 'priya.sharma@spaceborn.com', initials: 'PS' }
+        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi.das@spaceborn.com', initials: 'RD' },
+        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems', email: 'priya.sharma@spaceborn.com', initials: 'PS' }
       ]);
     }
   };
@@ -123,7 +123,7 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
 
   const loadMockData = () => {
     const currentUser = authService.getCurrentUser();
-    const department = currentUser?.department || 'Engineering';
+    const department = currentUser?.department || 'Core Systems';
     
     const mockTasks = [
       { 

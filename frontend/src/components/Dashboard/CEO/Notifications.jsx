@@ -104,7 +104,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
         details: {
           resourceType: 'GPU Server A',
           requester: 'Nisha Kumar',
-          department: 'Engineering',
+          department: 'Core Systems',
           purpose: 'ML Model Training',
           urgency: 'High',
           estimatedCost: '$500/month'
@@ -124,7 +124,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
         details: {
           memberName: 'Arjun Singh',
           role: 'Software Engineer',
-          department: 'Engineering',
+          department: 'Core Systems',
           startDate: '2026-06-08',
           reportingTo: 'Priya Sharma',
           email: 'arjun.singh@company.com'
@@ -205,7 +205,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
         details: {
           author: 'Priya Sharma',
           date: '2026-06-07',
-          department: 'Engineering',
+          department: 'Core Systems',
           highlights: ['8 tasks completed', 'No blockers', 'Alpha at 82%'],
           metrics: { velocity: 94, quality: 88, morale: 85 }
         }

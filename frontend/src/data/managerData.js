@@ -2,7 +2,7 @@ export const managerData = {
   user: {
     name: 'John Doe',
     role: 'Manager',
-    department: 'Engineering'
+    department: 'Core Systems'
   },
   
   teamMetrics: {
@@ -37,7 +37,7 @@ export const managerData = {
   pendingApprovals: [
     { id: 1, type: 'Leave Request', requester: 'Priya Sharma', dates: 'Jun 10-15', priority: 'medium' },
     { id: 2, type: 'Budget Request', requester: 'Design Team', amount: '$5,000', priority: 'high' },
-    { id: 3, type: 'Resource Request', requester: 'Marketing', item: 'AWS Credits', priority: 'medium' }
+    { id: 3, type: 'Resource Request', requester: 'AI/LLM & Perception', item: 'AWS Credits', priority: 'medium' }
   ],
   
   resourceAllocation: {

@@ -8,7 +8,7 @@ const {
   getMemberUpcomingDeadlines,
 } = require('../controllers/dashboardController');
 
-router.use(protect, authorize('CEO', 'Manager', 'Team Lead', 'Member'));
+router.use(protect, authorize('CEO', 'COO', 'Manager', 'Team Lead', 'Member'));
 
 router.get('/profile', getMemberProfile);
 router.get('/sprint-overview', getMemberSprintOverview);

@@ -102,18 +102,18 @@ const AttendanceView = ({ userRole = 'CEO' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Engineering', 'Design', 'Marketing', 'Operations', 'HR']);
+      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
     }
   };
 
   const loadMockData = () => {
     const mockAttendance = [
-      { id: 1, name: 'John Doe', role: 'CEO', department: 'Executive', checkIn: '09:00 AM', checkOut: '06:00 PM', status: 'present', hoursWorked: 9 },
-      { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Operations', checkIn: '09:15 AM', checkOut: '06:30 PM', status: 'late', hoursWorked: 9.25 },
-      { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Engineering', checkIn: '08:45 AM', checkOut: '05:30 PM', status: 'present', hoursWorked: 8.75 },
-      { id: 4, name: 'Ravi Das', role: 'Member', department: 'Engineering', checkIn: '', checkOut: '', status: 'absent', hoursWorked: 0 },
-      { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Engineering', checkIn: '09:30 AM', checkOut: '', status: 'working-from-home', hoursWorked: 4.5 },
-      { id: 6, name: 'Nisha Kumar', role: 'Member', department: 'Engineering', checkIn: '', checkOut: '', status: 'on-leave', hoursWorked: 0 }
+      { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', checkIn: '09:00 AM', checkOut: '06:00 PM', status: 'present', hoursWorked: 9 },
+      { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', checkIn: '09:15 AM', checkOut: '06:30 PM', status: 'late', hoursWorked: 9.25 },
+      { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', checkIn: '08:45 AM', checkOut: '05:30 PM', status: 'present', hoursWorked: 8.75 },
+      { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', checkIn: '', checkOut: '', status: 'absent', hoursWorked: 0 },
+      { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems', checkIn: '09:30 AM', checkOut: '', status: 'working-from-home', hoursWorked: 4.5 },
+      { id: 6, name: 'Nisha Kumar', role: 'Member', department: 'Core Systems', checkIn: '', checkOut: '', status: 'on-leave', hoursWorked: 0 }
     ];
     
     setAttendanceRecords(mockAttendance);
@@ -126,9 +126,9 @@ const AttendanceView = ({ userRole = 'CEO' }) => {
       totalEmployees: 7
     });
     setDepartmentStats([
-      { department: 'Engineering', present: 2, absent: 1, late: 0, onLeave: 1, total: 4 },
-      { department: 'Operations', present: 0, absent: 0, late: 1, onLeave: 0, total: 1 },
-      { department: 'Executive', present: 1, absent: 0, late: 0, onLeave: 0, total: 1 }
+      { department: 'Core Systems', present: 2, absent: 1, late: 0, onLeave: 1, total: 4 },
+      { department: 'Platform and DevOps', present: 0, absent: 0, late: 1, onLeave: 0, total: 1 },
+      { department: 'Founding Team', present: 1, absent: 0, late: 0, onLeave: 0, total: 1 }
     ]);
     setLiveStatus([
       { id: 1, name: 'John Doe', status: 'active', lastActive: '2 minutes ago', currentTask: 'Reviewing reports' },

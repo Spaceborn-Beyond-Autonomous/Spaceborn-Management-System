@@ -131,7 +131,7 @@ const MemberDashboard = () => {
     setMemberData({
       name: currentUser?.name || 'Ravi Das',
       role: currentUser?.role || 'Member',
-      title: `${currentUser?.department || 'Engineering'} · Joined ${new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`,
+      title: `${currentUser?.department || 'Core Systems'} · Joined ${new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`,
       description: 'Frontend developer passionate about building clean, accessible interfaces. Currently focused on the authentication and dashboard modules.',
       myTasks: [
         { 

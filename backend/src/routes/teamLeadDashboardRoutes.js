@@ -10,7 +10,7 @@ const {
   getTeamLeadPerformance,
 } = require('../controllers/dashboardController');
 
-router.use(protect, authorize('CEO', 'Manager', 'Team Lead'));
+router.use(protect, authorize('CEO', 'COO', 'Manager', 'Team Lead'));
 
 router.get('/profile', getTeamLeadProfile);
 router.get('/stats', getTeamLeadStats);

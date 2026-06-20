@@ -73,7 +73,7 @@ const DepartmentOverview = ({ userRole = 'CEO' }) => {
     setDepartments([
       { 
         id: 1, 
-        name: 'Engineering', 
+        name: 'Core Systems', 
         lead: 'Priya Sharma',
         leadAvatar: 'PS',
         members: 48, 
@@ -90,7 +90,7 @@ const DepartmentOverview = ({ userRole = 'CEO' }) => {
       },
       { 
         id: 2, 
-        name: 'Design', 
+        name: 'Hardware & Integration', 
         lead: 'Anil Mehta',
         leadAvatar: 'AM',
         members: 12, 
@@ -107,7 +107,7 @@ const DepartmentOverview = ({ userRole = 'CEO' }) => {
       },
       { 
         id: 3, 
-        name: 'Marketing', 
+        name: 'AI/LLM & Perception', 
         lead: 'Sita Krishnan',
         leadAvatar: 'SK',
         members: 18, 
@@ -124,7 +124,7 @@ const DepartmentOverview = ({ userRole = 'CEO' }) => {
       },
       { 
         id: 4, 
-        name: 'Operations', 
+        name: 'Platform and DevOps', 
         lead: 'Vikram Singh',
         leadAvatar: 'VS',
         members: 30, 
@@ -141,7 +141,7 @@ const DepartmentOverview = ({ userRole = 'CEO' }) => {
       },
       { 
         id: 5, 
-        name: 'HR', 
+        name: 'Robotics & Simulation', 
         lead: 'Neha Gupta',
         leadAvatar: 'NG',
         members: 10, 

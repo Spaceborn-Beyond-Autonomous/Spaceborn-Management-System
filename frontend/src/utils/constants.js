@@ -19,7 +19,7 @@ export const getRoles = async () => {
     MANAGER: 'Manager',
     TEAM_LEAD: 'Team Lead',
     MEMBER: 'Member',
-    HR: 'HR'
+    HR: 'Robotics & Simulation'
   };
 };
 

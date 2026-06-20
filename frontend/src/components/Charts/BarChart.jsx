@@ -160,7 +160,7 @@ const BarChart = ({
     switch (type) {
       case 'reports':
         return {
-          labels: ['Engineering', 'Sales', 'Operations', 'HR', 'Finance'],
+          labels: ['Core Systems', 'Robotics & Simulation', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation'],
           datasets: [{
             label: 'Reports Submitted',
             data: [45, 32, 28, 15, 20],

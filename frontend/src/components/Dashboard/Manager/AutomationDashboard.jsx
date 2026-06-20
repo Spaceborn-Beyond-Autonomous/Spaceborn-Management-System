@@ -57,7 +57,7 @@ const AutomationDashboard = ({ user, userRole = 'Manager' }) => {
   });
 
   const currentUser = authService.getCurrentUser();
-  const managerDepartment = currentUser?.department || 'Engineering';
+  const managerDepartment = currentUser?.department || 'Core Systems';
 
   useEffect(() => {
     fetchAllData();

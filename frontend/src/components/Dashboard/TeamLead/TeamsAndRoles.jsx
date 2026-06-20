@@ -32,7 +32,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
   // Available options
   const roles = ['Member', 'Lead', 'Manager', 'CEO'];
   const statuses = ['Active', 'Inactive', 'On Leave'];
-  const departmentsList = ['Engineering', 'Design', 'Marketing', 'Operations', 'HR', 'Sales', 'Finance'];
+  const departmentsList = ['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation'];
 
   // Fetch team members from API
   useEffect(() => {
@@ -110,7 +110,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
     } catch (error) {
       console.error('Error fetching departments:', error);
       if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
-        setDepartments(['Engineering', 'Design', 'Marketing', 'Operations', 'HR']);
+        setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
       }
     }
   };
@@ -123,7 +123,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
         initials: 'RD', 
         name: 'Ravi Das', 
         email: 'ravi.das@spaceborn.com',
-        department: 'Engineering', 
+        department: 'Core Systems', 
         designation: 'Frontend Developer', 
         role: 'Member', 
         status: 'Active',
@@ -136,7 +136,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
         initials: 'NK', 
         name: 'Nisha Kumar', 
         email: 'nisha.kumar@spaceborn.com',
-        department: 'Engineering', 
+        department: 'Core Systems', 
         designation: 'DevOps Engineer', 
         role: 'Member', 
         status: 'Active',
@@ -149,7 +149,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
         initials: 'PS', 
         name: 'Priya Sharma', 
         email: 'priya.sharma@spaceborn.com',
-        department: 'Engineering', 
+        department: 'Core Systems', 
         designation: 'Senior Engineer', 
         role: 'Lead', 
         status: 'Active',
@@ -162,7 +162,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
         initials: 'AM', 
         name: 'Anil Mehta', 
         email: 'anil.mehta@spaceborn.com',
-        department: 'Design', 
+        department: 'Hardware & Integration', 
         designation: 'UI/UX Designer', 
         role: 'Member', 
         status: 'Active',
@@ -175,7 +175,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
         initials: 'PB', 
         name: 'Pooja B', 
         email: 'pooja.b@spaceborn.com',
-        department: 'Design', 
+        department: 'Hardware & Integration', 
         designation: 'UI Designer', 
         role: 'Member', 
         status: 'Active',
@@ -188,7 +188,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
         initials: 'SK', 
         name: 'Sita Krishnan', 
         email: 'sita.krishnan@spaceborn.com',
-        department: 'Marketing', 
+        department: 'AI/LLM & Perception', 
         designation: 'Marketing Lead', 
         role: 'Lead', 
         status: 'Active',

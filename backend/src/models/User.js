@@ -10,8 +10,8 @@ const userSchema = new mongoose.Schema({
   fullName: { type: String },
   email: { type: String, unique: true, required: true },
   phone: String,
-  role: { type: String, enum: ['CEO', 'Manager', 'Team Lead', 'Member', 'HR'], default: 'Member' },
-  department: { type: String, default: 'Engineering' },
+  role: { type: String, enum: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member', 'HR'], default: 'Member' },
+  department: { type: String, default: 'Core Systems' },
   designation: String,
   team: String,
   manager: String,
@@ -43,7 +43,7 @@ userSchema.methods.getSignedJwtToken = function() {
 };
 
 userSchema.statics.generateEmployeeId = async function(role) {
-  const prefix = role === 'CEO' ? 'CEO' : role === 'Manager' ? 'MGR' : role === 'Team Lead' ? 'LD' : role === 'HR' ? 'HR' : 'EMP';
+  const prefix = role === 'CEO' ? 'CEO' : role === 'COO' ? 'COO' : role === 'Manager' ? 'MGR' : role === 'Team Lead' ? 'LD' : role === 'HR' ? 'HR' : 'EMP';
   const count = await this.countDocuments({ employeeId: { $regex: `^${prefix}` } });
   return `${prefix}${String(count + 1).padStart(3, '0')}`;
 };

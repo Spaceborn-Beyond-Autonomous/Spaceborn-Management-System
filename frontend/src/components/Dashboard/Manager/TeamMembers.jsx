@@ -92,7 +92,7 @@ const TeamMembers = ({ userRole = 'Team Lead' }) => {
         tasksCompleted: 28,
         tasksInProgress: 2,
         phone: '+91 98765 43210',
-        department: 'Engineering'
+        department: 'Core Systems'
       },
       { 
         id: 2, 
@@ -104,7 +104,7 @@ const TeamMembers = ({ userRole = 'Team Lead' }) => {
         tasksCompleted: 24,
         tasksInProgress: 3,
         phone: '+91 98765 43211',
-        department: 'Engineering'
+        department: 'Core Systems'
       },
       { 
         id: 3, 
@@ -116,7 +116,7 @@ const TeamMembers = ({ userRole = 'Team Lead' }) => {
         tasksCompleted: 26,
         tasksInProgress: 1,
         phone: '+91 98765 43212',
-        department: 'Engineering'
+        department: 'Core Systems'
       },
       { 
         id: 4, 
@@ -128,7 +128,7 @@ const TeamMembers = ({ userRole = 'Team Lead' }) => {
         tasksCompleted: 20,
         tasksInProgress: 4,
         phone: '+91 98765 43213',
-        department: 'Engineering'
+        department: 'Core Systems'
       },
       { 
         id: 5, 
@@ -140,7 +140,7 @@ const TeamMembers = ({ userRole = 'Team Lead' }) => {
         tasksCompleted: 22,
         tasksInProgress: 2,
         phone: '+91 98765 43214',
-        department: 'Engineering'
+        department: 'Core Systems'
       },
       { 
         id: 6, 
@@ -152,7 +152,7 @@ const TeamMembers = ({ userRole = 'Team Lead' }) => {
         tasksCompleted: 18,
         tasksInProgress: 0,
         phone: '+91 98765 43215',
-        department: 'Engineering'
+        department: 'Core Systems'
       }
     ];
     
@@ -407,7 +407,7 @@ const TeamMembers = ({ userRole = 'Team Lead' }) => {
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-500">Department</span>
-                  <span className="text-sm text-gray-900">{selectedMember.department || 'Engineering'}</span>
+                  <span className="text-sm text-gray-900">{selectedMember.department || 'Core Systems'}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-500">Join Date</span>

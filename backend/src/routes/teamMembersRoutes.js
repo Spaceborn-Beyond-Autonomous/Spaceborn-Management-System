@@ -4,6 +4,35 @@ const router = express.Router();
 const User = require('../models/User');
 const { protect } = require('../middleware/authMiddleware');
 
+const DEPARTMENTS = [
+  'Platform and DevOps',
+  'Core Systems',
+  'Hardware & Integration',
+  'Robotics & Simulation',
+  'Founding Team',
+  'AI/LLM & Perception'
+];
+
+const DEPARTMENT_RENAMES = {
+  Operations: 'Platform and DevOps',
+  Engineering: 'Core Systems',
+  Design: 'Hardware & Integration',
+  Sales: 'Robotics & Simulation',
+  HR: 'Robotics & Simulation',
+  Finance: 'Robotics & Simulation',
+  Executive: 'Founding Team',
+  Marketing: 'AI/LLM & Perception'
+};
+
+const normalizeDepartment = (department) => DEPARTMENT_RENAMES[department] || department;
+
+const normalizeDepartments = (departments) => {
+  const normalized = departments.map(normalizeDepartment).filter(Boolean);
+  return DEPARTMENTS
+    .concat(normalized.filter((department) => !DEPARTMENTS.includes(department)))
+    .filter((department, index, list) => list.indexOf(department) === index);
+};
+
 const getUserName = (user) =>
   user.fullName || [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
 
@@ -27,7 +56,7 @@ const toEmployeeDto = (u) => {
     firstName: u.firstName,
     lastName: u.lastName,
     role: u.role,
-    department: u.department,
+    department: normalizeDepartment(u.department),
     designation: u.designation || u.role,
     team: u.team || '',
     manager: u.manager || '',
@@ -52,7 +81,7 @@ const buildEmployeeQuery = (req) => {
     query.role = 'Member';
     query.isActive = true;
   } else {
-    if (department && department !== 'All' && department !== 'all') query.department = department;
+    if (department && department !== 'All' && department !== 'all') query.department = normalizeDepartment(department);
     if (role && role !== 'All' && role !== 'all') query.role = role;
   }
 
@@ -108,7 +137,7 @@ router.get('/employees/departments', protect, async (req, res) => {
     const departments = await User.distinct('department', query);
     res.json({
       success: true,
-      data: departments.filter(Boolean).sort()
+      data: normalizeDepartments(departments)
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -119,7 +148,7 @@ router.get('/employees/departments', protect, async (req, res) => {
 router.get('/employees/stats', protect, async (req, res) => {
   try {
     const employees = await User.find(buildEmployeeQuery(req)).select('-password');
-    const departments = [...new Set(employees.map((u) => u.department).filter(Boolean))];
+    const departments = normalizeDepartments(employees.map((u) => u.department));
     const roles = [...new Set(employees.map((u) => u.role).filter(Boolean))];
     const now = new Date();
 
@@ -206,7 +235,7 @@ router.post('/employees', protect, async (req, res) => {
       email: req.body.email.toLowerCase(),
       phone: req.body.phone || '',
       role,
-      department: req.body.department || req.user.department || 'Engineering',
+      department: req.body.department || req.user.department || 'Core Systems',
       designation: req.body.designation || role,
       team: req.body.team || '',
       manager: req.body.manager || req.user.name || '',
