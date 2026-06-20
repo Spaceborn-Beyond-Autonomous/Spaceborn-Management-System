@@ -323,6 +323,16 @@ const LoginSystem = ({ onLoginSuccess }) => {
               </div>
             </button>
             <button
+              onClick={() => handleQuickLogin('COO001', 'admin123')}
+              className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
+            >
+              <div className="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-xs font-bold">AK</div>
+              <div>
+                <div className="text-xs font-medium text-black">Alex Kim</div>
+                <div className="text-xs text-gray-400">COO001 · COO</div>
+              </div>
+            </button>
+            <button
               onClick={() => handleQuickLogin('MGR001', 'manager123')}
               className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
             >
