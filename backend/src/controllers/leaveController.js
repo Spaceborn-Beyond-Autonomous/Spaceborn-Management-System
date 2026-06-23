@@ -1,7 +1,10 @@
 const Leave = require('../models/Leave');
 const LeaveBalance = require('../models/LeaveBalance');
-const Notification = require('../models/Notification');
 const { formatResponse } = require('../utils/helpers');
+const {
+  notifyLeaveRequested,
+  notifyLeaveDecision
+} = require('../utils/notificationDispatcher');
 
 // ==================== APPLY FOR LEAVE ====================
 exports.applyLeave = async (req, res) => {
@@ -18,7 +21,7 @@ exports.applyLeave = async (req, res) => {
 
     let pendingApprovals = [];
     let status = 'Pending';
-    
+
     if (userRole === 'CEO') {
       status = 'Approved';
       pendingApprovals = ['CEO'];
@@ -29,27 +32,24 @@ exports.applyLeave = async (req, res) => {
     }
 
     const leave = await Leave.create({
-      userId, userName, employeeId, userRole, department, startDate, endDate, days, type, reason, halfDay, halfDayType, status, pendingApprovals, approvedBy: userRole === 'CEO' ? ['CEO'] : []
+      userId,
+      userName,
+      employeeId,
+      userRole,
+      department,
+      startDate,
+      endDate,
+      days,
+      type,
+      reason,
+      halfDay,
+      halfDayType,
+      status,
+      pendingApprovals,
+      approvedBy: userRole === 'CEO' ? ['CEO'] : []
     });
 
-    // Create notification
-    if (userRole === 'CEO') {
-      await Notification.create({
-        type: 'announcement',
-        title: '📢 CEO Leave Announcement',
-        message: `${userName} (CEO) will be on leave from ${startDate} to ${endDate}`,
-        toRole: 'All',
-        priority: 'high'
-      });
-    } else {
-      await Notification.create({
-        type: 'leave_request',
-        title: '📋 New Leave Request',
-        message: `${userName} (${userRole}) requested ${days} day(s) ${type} leave`,
-        toRole: 'CEO',
-        priority: 'normal'
-      });
-    }
+    await notifyLeaveRequested(leave);
 
     res.status(201).json(formatResponse(true, 'Leave applied', leave));
   } catch (error) {
@@ -62,7 +62,7 @@ exports.getAllLeaves = async (req, res) => {
   try {
     const { role, department } = req.query;
     let query = {};
-    if (role === 'Manager' && department) query.department = department;
+    if ((role === 'Manager' || role === 'COO') && department) query.department = department;
     const leaves = await Leave.find(query).sort({ createdAt: -1 });
     res.status(200).json(formatResponse(true, 'Leaves fetched', leaves));
   } catch (error) {
@@ -74,7 +74,7 @@ exports.getAllLeaves = async (req, res) => {
 exports.getMyLeaves = async (req, res) => {
   try {
     const { userId } = req.params;
-    const leaves = await Leave.find({ userId: parseInt(userId) }).sort({ createdAt: -1 });
+    const leaves = await Leave.find({ userId: parseInt(userId, 10) }).sort({ createdAt: -1 });
     res.status(200).json(formatResponse(true, 'Leaves fetched', leaves));
   } catch (error) {
     res.status(500).json(formatResponse(false, error.message));
@@ -94,17 +94,10 @@ exports.updateLeaveStatus = async (req, res) => {
     leave.approvedBy = [...(leave.approvedBy || []), approvedBy];
     leave.approvedOn = new Date();
     leave.comments = comments;
-    leave.pendingApprovals = leave.pendingApprovals.filter(a => a !== approvedBy);
+    leave.pendingApprovals = leave.pendingApprovals.filter((approval) => approval !== approvedBy);
     await leave.save();
 
-    // Notify employee
-    await Notification.create({
-      type: status === 'Approved' ? 'leave_approved' : 'leave_rejected',
-      title: status === 'Approved' ? '✅ Leave Approved' : '❌ Leave Rejected',
-      message: `Your ${leave.type} leave has been ${status.toLowerCase()}`,
-      toUserId: leave.userId,
-      priority: 'normal'
-    });
+    await notifyLeaveDecision(leave);
 
     res.status(200).json(formatResponse(true, `Leave ${status}`, leave));
   } catch (error) {
@@ -117,9 +110,9 @@ exports.getLeaveBalance = async (req, res) => {
   try {
     const { userId } = req.params;
     const year = new Date().getFullYear();
-    let balance = await LeaveBalance.findOne({ userId: parseInt(userId), year });
+    let balance = await LeaveBalance.findOne({ userId: parseInt(userId, 10), year });
     if (!balance) {
-      balance = await LeaveBalance.create({ userId: parseInt(userId), Sick: 12, Casual: 10, Annual: 15, Emergency: 5, Other: 3, year });
+      balance = await LeaveBalance.create({ userId: parseInt(userId, 10), Sick: 12, Casual: 10, Annual: 15, Emergency: 5, Other: 3, year });
     }
     res.status(200).json(formatResponse(true, 'Balance fetched', balance));
   } catch (error) {
@@ -132,7 +125,7 @@ exports.getPendingLeaves = async (req, res) => {
   try {
     const { role, department } = req.query;
     let query = { status: 'Pending' };
-    if (role === 'Manager') {
+    if (role === 'Manager' || role === 'COO') {
       query.pendingApprovals = { $in: ['Manager'] };
       if (department) query.department = department;
     } else if (role === 'CEO') {

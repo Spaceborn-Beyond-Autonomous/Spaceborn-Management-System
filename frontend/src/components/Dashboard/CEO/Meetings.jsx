@@ -21,8 +21,8 @@ const Meetings = ({ userRole = 'CEO' }) => {
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [departments, setDepartments] = useState([]);
 
-  const departmentsList = ['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'All'];
-  const filterButtons = ['All', 'Core Systems', 'Hardware & Integration', 'AI/LLM & Perception'];
+  const departmentsList = ['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception', 'All'];
+  const filterButtons = ['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception', 'All'];
 
   useEffect(() => {
     fetchMeetings();
@@ -96,7 +96,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
     }
   };
 
@@ -118,7 +118,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
       },
       {
         id: 2,
-        title: 'Design System Review',
+        title: 'Hardware & Integration System Review',
         department: 'Hardware & Integration',
         createdBy: 'John Doe',
         createdById: 2,
@@ -146,7 +146,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
       },
       {
         id: 4,
-        title: 'Marketing Campaign Kickoff',
+        title: 'AI/LLM & Perception Campaign Kickoff',
         department: 'AI/LLM & Perception',
         createdBy: 'Sita Krishnan',
         createdById: 4,
@@ -156,7 +156,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
         description: 'Kickoff the new marketing campaign',
         meetingLink: 'https://meet.google.com/jkl-mno-pqr',
         status: 'upcoming',
-        attendees: ['Sita Krishnan', 'Marketing Team']
+        attendees: ['Sita Krishnan', 'AI/LLM & Perception Team']
       }
     ];
     

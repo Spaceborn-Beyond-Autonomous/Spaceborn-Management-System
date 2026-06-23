@@ -5,7 +5,7 @@ const roadmapSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     version: { type: String, default: '1.0' },
     description: { type: String, default: '' },
-    department: { type: String, default: 'Engineering' },
+    department: { type: String, default: 'Core Systems' },
     startDate: { type: String, default: '' },
     targetDate: { type: String, default: '' },
     status: { type: String, default: 'draft' },

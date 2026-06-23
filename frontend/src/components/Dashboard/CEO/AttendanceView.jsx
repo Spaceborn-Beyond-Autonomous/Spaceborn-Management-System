@@ -70,13 +70,32 @@ const AttendanceView = ({ userRole = 'CEO' }) => {
     const filters = { date: selectedDate };
     if (selectedDepartment !== 'all') filters.department = selectedDepartment;
     
-    const records = await attendanceService.getAllAttendance(filters);
+const records = await attendanceService.getAttendanceRoster(filters);
     setAttendanceRecords(records);
   };
 
   const fetchAttendanceStats = async () => {
-    const statsData = await attendanceService.getAttendanceStats(selectedDate);
-    setStats(statsData);
+    try {
+      // Use roster endpoint to derive counts so UI matches your roster logic (approved leave + absent for non-login)
+      const roster = await attendanceService.getAttendanceRoster({
+        date: selectedDate,
+        department: selectedDepartment !== 'all' ? selectedDepartment : 'all'
+      });
+
+      const computed = {
+        totalEmployees: roster.length,
+        present: roster.filter(r => r.status === 'present').length,
+        absent: roster.filter(r => r.status === 'absent').length,
+        late: roster.filter(r => r.status === 'late').length,
+        onLeave: roster.filter(r => r.status === 'on-leave').length,
+        workingFromHome: roster.filter(r => r.status === 'working-from-home').length
+      };
+
+      setStats(computed);
+    } catch (e) {
+      const statsData = await attendanceService.getAttendanceStats(selectedDate);
+      setStats(statsData);
+    }
   };
 
   const fetchDepartmentStats = async () => {
@@ -102,13 +121,13 @@ const AttendanceView = ({ userRole = 'CEO' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
     }
   };
 
   const loadMockData = () => {
     const mockAttendance = [
-      { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', checkIn: '09:00 AM', checkOut: '06:00 PM', status: 'present', hoursWorked: 9 },
+      { id: 1, name: 'John Doe', role: 'CEO', department: 'Platform and DevOps', checkIn: '09:00 AM', checkOut: '06:00 PM', status: 'present', hoursWorked: 9 },
       { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', checkIn: '09:15 AM', checkOut: '06:30 PM', status: 'late', hoursWorked: 9.25 },
       { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', checkIn: '08:45 AM', checkOut: '05:30 PM', status: 'present', hoursWorked: 8.75 },
       { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', checkIn: '', checkOut: '', status: 'absent', hoursWorked: 0 },
@@ -128,7 +147,7 @@ const AttendanceView = ({ userRole = 'CEO' }) => {
     setDepartmentStats([
       { department: 'Core Systems', present: 2, absent: 1, late: 0, onLeave: 1, total: 4 },
       { department: 'Platform and DevOps', present: 0, absent: 0, late: 1, onLeave: 0, total: 1 },
-      { department: 'Founding Team', present: 1, absent: 0, late: 0, onLeave: 0, total: 1 }
+      { department: 'Platform and DevOps', present: 1, absent: 0, late: 0, onLeave: 0, total: 1 }
     ]);
     setLiveStatus([
       { id: 1, name: 'John Doe', status: 'active', lastActive: '2 minutes ago', currentTask: 'Reviewing reports' },
@@ -321,8 +340,10 @@ const AttendanceView = ({ userRole = 'CEO' }) => {
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {record.name.split(' ').map((n) => n[0]).join('')}
-                  </div>
+                    {(record.name || 'Unknown')
+  .split(' ')
+  .map((n) => n[0])
+  .join('')}                  </div>
                   <div>
                     <p className="font-medium text-gray-900">{record.name}</p>
                     <p className="text-xs text-gray-500">{record.role} · {record.department}</p>

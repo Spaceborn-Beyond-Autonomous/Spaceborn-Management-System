@@ -15,6 +15,7 @@ import taskService from '../../../services/taskService';
 import projectService from '../../../services/projectService';
 import meetingService from '../../../services/meetingService';
 import resourceService from '../../../services/resourceService';
+import { DEPARTMENTS } from '../utils/departments';
 
 const CEODashboard = ({ userRole = 'CEO', user, onLogout }) => {
   const [dashboardData, setDashboardData] = useState({
@@ -61,7 +62,7 @@ const CEODashboard = ({ userRole = 'CEO', user, onLogout }) => {
       ]);
 
       // Calculate real stats from API data
-      const departments = [...new Set(employees.map(emp => emp.department).filter(Boolean))];
+      const departments = DEPARTMENTS;
       const totalMembers = employees.length;
       
       // Calculate active projects from projects API

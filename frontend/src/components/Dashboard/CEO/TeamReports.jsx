@@ -1,6 +1,8 @@
 // src/components/Dashboard/CEO/TeamReports.jsx
 import React, { useState, useEffect } from 'react';
 import reportService from '../../../services/reportService';
+import roadmapService from '../../../services/roadmapService';
+import { DEPARTMENTS } from '../../../utils/departments';
 
 const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
   const [reports, setReports] = useState([]);
@@ -24,13 +26,116 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
   });
 
   useEffect(() => {
+  fetchAllData();
+}, []);
+
+const fetchAllData = async () => {
+  setLoading(true);
+  try {
+    const reportsData = await reportService.getAllReports();
+    const safeReports = Array.isArray(reportsData) ? reportsData : [];
+    const roadmapsData = await roadmapService.getAllRoadmaps({ status: 'shared' });
+    const issuedRoadmaps = roadmapsData.length > 0 ? roadmapsData : getIssuedMockRoadmaps();
+    setReports(safeReports);
+    setSharedRoadmaps(issuedRoadmaps);
+    
+    setDepartments(DEPARTMENTS);
+    
+    const totalReportsCount = safeReports.length;
+    const totalEmployeesCount = [...new Set(safeReports.map(r => r.userId))].length;
+    const activeRoadmapsCount = issuedRoadmaps.filter(r => ['active', 'shared'].includes(r.status)).length;
+    const avgProgressValue = issuedRoadmaps.reduce((sum, r) => sum + (r.overallProgress || 0), 0) / issuedRoadmaps.length || 0;
+    
+    setStats({
+      totalReports: totalReportsCount,
+      totalEmployees: totalEmployeesCount,
+      avgTasksPerDay: 0,
+      activeRoadmaps: activeRoadmapsCount,
+      avgProgress: Math.round(avgProgressValue),
+      pendingReviews: safeReports.filter(r => !r.reviewed).length
+    });
+  } catch (error) {
+    console.error('Error:', error);
     loadMockData();
-  }, []);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const showToastMessage = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
+
+  const getIssuedMockRoadmaps = () => [
+    {
+      id: 1,
+      title: 'SpaceBorn CMS MVP Roadmap',
+      version: '2.1',
+      description: 'Complete roadmap for SpaceBorn CMS MVP development including core features, milestones, and delivery timeline.',
+      startDate: '2026-01-15',
+      targetDate: '2026-12-20',
+      lastUpdated: '2026-06-10T10:00:00Z',
+      status: 'active',
+      sharedBy: {
+        id: 'lead_001',
+        name: 'Priya Sharma',
+        role: 'Core Systems Lead',
+        email: 'priya.sharma@spaceborn.com',
+        avatar: 'PS'
+      },
+      sharedAt: '2026-06-10T10:00:00Z',
+      department: 'Core Systems',
+      overallProgress: 45,
+      milestones: [
+        { id: 1, title: 'Phase 1: Foundation', dueDate: '2026-03-15', status: 'completed', description: 'Basic setup and architecture', progress: 100 },
+        { id: 2, title: 'Phase 2: Core Features', dueDate: '2026-06-30', status: 'in-progress', description: 'Authentication, Dashboard, Content Management', progress: 65 },
+        { id: 3, title: 'Phase 3: Advanced Features', dueDate: '2026-09-30', status: 'planned', description: 'Analytics, AI Insights, Collaboration', progress: 20 },
+        { id: 4, title: 'Phase 4: Polish & Launch', dueDate: '2026-12-20', status: 'planned', description: 'Testing, Optimization, Deployment', progress: 0 }
+      ],
+      features: [
+        { id: 1, name: 'User Authentication', priority: 'high', status: 'completed' },
+        { id: 2, name: 'Dashboard UI', priority: 'high', status: 'completed' },
+        { id: 3, name: 'Content Management System', priority: 'high', status: 'in-progress' },
+        { id: 4, name: 'AI-Powered Insights', priority: 'medium', status: 'planned' }
+      ],
+      risks: [
+        { id: 1, description: 'Third-party API dependency', impact: 'high', mitigation: 'Have fallback strategy', status: 'monitoring' }
+      ]
+    },
+    {
+      id: 2,
+      title: 'Mobile App MVP Roadmap',
+      version: '1.0',
+      description: 'Mobile application development roadmap for iOS and Android platforms',
+      startDate: '2026-03-01',
+      targetDate: '2026-08-31',
+      lastUpdated: '2026-06-08T14:30:00Z',
+      status: 'active',
+      sharedBy: {
+        id: 'lead_002',
+        name: 'Anil Mehta',
+        role: 'Hardware & Integration Head',
+        email: 'anil.mehta@spaceborn.com',
+        avatar: 'AM'
+      },
+      sharedAt: '2026-06-08T14:30:00Z',
+      department: 'Hardware & Integration',
+      overallProgress: 30,
+      milestones: [
+        { id: 1, title: 'UI/UX Hardware & Integration', dueDate: '2026-04-15', status: 'completed', description: 'Complete mobile app designs', progress: 100 },
+        { id: 2, title: 'Development Setup', dueDate: '2026-05-30', status: 'completed', description: 'Setup development environment', progress: 100 },
+        { id: 3, title: 'Core Features', dueDate: '2026-07-15', status: 'in-progress', description: 'Implement core app features', progress: 45 }
+      ],
+      features: [
+        { id: 1, name: 'User Onboarding', priority: 'high', status: 'completed' },
+        { id: 2, name: 'Push Notifications', priority: 'high', status: 'in-progress' }
+      ],
+      risks: [
+        { id: 1, description: 'App store approval delays', impact: 'medium', mitigation: 'Submit early for review', status: 'monitoring' }
+      ]
+    }
+  ];
 
   const loadMockData = () => {
     // Mock reports data
@@ -69,7 +174,7 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
         id: 3,
         userId: 'emp_003',
         userName: 'Priya Sharma',
-        userRole: 'Engineering Lead',
+        userRole: 'Core Systems Lead',
         department: 'Core Systems',
         employeeId: 'ENG003',
         date: '2026-06-10',
@@ -88,9 +193,9 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
         department: 'Hardware & Integration',
         employeeId: 'DES001',
         date: '2026-06-10',
-        completedTasks: '- Dashboard mockups\n- Design system updates\n- Icon set creation',
+        completedTasks: '- Dashboard mockups\n- Hardware & Integration system updates\n- Icon set creation',
         ongoingWork: 'Mobile app designs',
-        issuesFaced: 'Design tool compatibility',
+        issuesFaced: 'Hardware & Integration tool compatibility',
         nextDayPlan: 'Complete user flow diagrams',
         submittedAt: '2026-06-10T16:45:00Z',
         reviewed: false
@@ -99,12 +204,12 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
         id: 5,
         userId: 'emp_005',
         userName: 'Anil Mehta',
-        userRole: 'Design Lead',
+        userRole: 'Hardware & Integration Lead',
         department: 'Hardware & Integration',
         employeeId: 'DES002',
         date: '2026-06-10',
-        completedTasks: '- Design review sessions\n- Client feedback integration\n- Team mentorship',
-        ongoingWork: 'Design system documentation',
+        completedTasks: '- Hardware & Integration review sessions\n- Client feedback integration\n- Team mentorship',
+        ongoingWork: 'Hardware & Integration system documentation',
         issuesFaced: 'Feedback delays from client',
         nextDayPlan: 'Finalize design assets',
         submittedAt: '2026-06-10T17:30:00Z',
@@ -113,8 +218,7 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
     ];
     setReports(mockReports);
     
-    const depts = [...new Set(mockReports.map(r => r.department))];
-    setDepartments(depts);
+    setDepartments(DEPARTMENTS);
     
     // Mock roadmaps data
     const mockRoadmaps = [
@@ -130,7 +234,7 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
         sharedBy: {
           id: 'lead_001',
           name: 'Priya Sharma',
-          role: 'Engineering Lead',
+          role: 'Core Systems Lead',
           email: 'priya.sharma@spaceborn.com',
           avatar: 'PS'
         },
@@ -165,7 +269,7 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
         sharedBy: {
           id: 'lead_002',
           name: 'Anil Mehta',
-          role: 'Design Head',
+          role: 'Hardware & Integration Head',
           email: 'anil.mehta@spaceborn.com',
           avatar: 'AM'
         },
@@ -173,7 +277,7 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
         department: 'Hardware & Integration',
         overallProgress: 30,
         milestones: [
-          { id: 1, title: 'UI/UX Design', dueDate: '2026-04-15', status: 'completed', description: 'Complete mobile app designs', progress: 100 },
+          { id: 1, title: 'UI/UX Hardware & Integration', dueDate: '2026-04-15', status: 'completed', description: 'Complete mobile app designs', progress: 100 },
           { id: 2, title: 'Development Setup', dueDate: '2026-05-30', status: 'completed', description: 'Setup development environment', progress: 100 },
           { id: 3, title: 'Core Features', dueDate: '2026-07-15', status: 'in-progress', description: 'Implement core app features', progress: 45 }
         ],
@@ -196,7 +300,7 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
       return sum + taskCount;
     }, 0) / totalReportsCount || 0).toFixed(1);
     
-    const activeRoadmapsCount = mockRoadmaps.filter(r => r.status === 'active').length;
+    const activeRoadmapsCount = mockRoadmaps.filter(r => ['active', 'shared'].includes(r.status)).length;
     const avgProgressValue = mockRoadmaps.reduce((sum, r) => sum + (r.overallProgress || 0), 0) / mockRoadmaps.length || 0;
     
     setStats({
@@ -241,8 +345,8 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
     if (searchTerm) {
       filtered = filtered.filter(r => 
         r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.sharedBy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.department.toLowerCase().includes(searchTerm.toLowerCase())
+        (r.sharedBy?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (r.department || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     
@@ -254,7 +358,7 @@ const CEOTeamReports = ({ userRole = 'CEO', department, user }) => {
 ==================
 Title: ${roadmap.title}
 Version: ${roadmap.version}
-Shared By: ${roadmap.sharedBy.name}
+Issued By: ${roadmap.sharedBy?.name || 'Team Lead'}
 Department: ${roadmap.department}
 Progress: ${roadmap.overallProgress}%
 
@@ -269,6 +373,9 @@ ${roadmap.features.map(f => `- ${f.name} [${f.priority}] - ${f.status}`).join('\
 
 RISKS
 ${roadmap.risks.map(r => `- ${r.description} (Impact: ${r.impact})`).join('\n')}
+
+ATTACHMENTS
+${roadmap.attachments?.length ? roadmap.attachments.map(a => `- ${a.name} (${formatAttachmentSize(a)})`).join('\n') : 'None'}
     `;
     
     const blob = new Blob([content], { type: 'text/plain' });
@@ -299,6 +406,20 @@ ${roadmap.risks.map(r => `- ${r.description} (Impact: ${r.impact})`).join('\n')}
       low: 'bg-green-100 text-green-700'
     };
     return badges[priority] || badges.medium;
+  };
+
+  const formatAttachmentSize = (attachment) => {
+    if (attachment.displaySize) return attachment.displaySize;
+    if (typeof attachment.size === 'number') return `${(attachment.size / (1024 * 1024)).toFixed(2)} MB`;
+    return attachment.size || 'Unknown size';
+  };
+
+  const downloadAttachment = async (roadmap, attachment) => {
+    const success = await roadmapService.downloadAttachment(roadmap.id || roadmap._id, attachment.id, attachment.name);
+    showToastMessage(
+      success ? `${attachment.name} downloaded successfully` : `Could not download ${attachment.name}`,
+      success ? 'success' : 'error'
+    );
   };
 
   const filteredGroupedReports = getFilteredReports();
@@ -552,7 +673,7 @@ ${roadmap.risks.map(r => `- ${r.description} (Impact: ${r.impact})`).join('\n')}
           {filteredRoadmaps.length === 0 ? (
             <div className="bg-white rounded-xl border p-12 text-center">
               <div className="text-6xl mb-4">📭</div>
-              <p className="text-gray-500">No shared roadmaps available</p>
+              <p className="text-gray-500">No issued roadmaps available</p>
             </div>
           ) : (
             filteredRoadmaps.map(roadmap => (
@@ -561,7 +682,7 @@ ${roadmap.risks.map(r => `- ${r.description} (Impact: ${r.impact})`).join('\n')}
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-xl font-bold text-gray-900">{roadmap.title}</h3>
-                      <p className="text-sm text-gray-500 mt-1">Shared by {roadmap.sharedBy.name} • {roadmap.department}</p>
+                      <p className="text-sm text-gray-500 mt-1">Issued by {roadmap.sharedBy?.name || 'Team Lead'} • {roadmap.department}</p>
                     </div>
                     <button
                       onClick={() => downloadRoadmap(roadmap)}
@@ -623,6 +744,29 @@ ${roadmap.risks.map(r => `- ${r.description} (Impact: ${r.impact})`).join('\n')}
                     <span className={`text-xs px-2 py-0.5 rounded ${getPriorityBadge(f.priority)}`}>{f.priority}</span>
                   </div>
                 ))}
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">Attachments</h3>
+                {selectedRoadmap.attachments?.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedRoadmap.attachments.map(attachment => (
+                      <div key={attachment.id} className="flex items-center justify-between gap-3 p-2 bg-gray-50 rounded">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{attachment.name}</p>
+                          <p className="text-xs text-gray-500">{formatAttachmentSize(attachment)}</p>
+                        </div>
+                        <button
+                          onClick={() => downloadAttachment(selectedRoadmap, attachment)}
+                          className="shrink-0 px-3 py-1.5 text-sm text-purple-600 hover:bg-purple-50 rounded-lg"
+                        >
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No files attached.</p>
+                )}
               </div>
             </div>
           </div>

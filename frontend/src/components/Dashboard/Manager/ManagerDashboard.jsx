@@ -228,7 +228,7 @@ const ManagerDashboard = () => {
       recentActivity: [
         { id: 1, action: 'Ravi Das completed login module', time: new Date(Date.now() - 2 * 3600000).toISOString(), user: 'Ravi Das', type: 'milestone' },
         { id: 2, action: 'Sprint review completed', time: new Date(Date.now() - 6 * 3600000).toISOString(), user: 'Team', type: 'review' },
-        { id: 3, action: 'New member joined team', time: new Date(Date.now() - 1 * 86400000).toISOString(), user: 'Robotics & Simulation', type: 'hire' }
+        { id: 3, action: 'New member joined team', time: new Date(Date.now() - 1 * 86400000).toISOString(), user: 'HR', type: 'hire' }
       ]
     });
     
@@ -313,7 +313,7 @@ const ManagerDashboard = () => {
       <div className="bg-white rounded-xl border p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-900">{managerName}</h2>
         <div className="flex items-center gap-2 mt-1 flex-wrap">
-          <span className="text-sm font-medium text-blue-700 bg-blue-100 px-2 py-0.5 rounded">Manager</span>
+          <span className="text-sm font-medium text-blue-700 bg-blue-100 px-2 py-0.5 rounded">{currentUser?.role || 'Manager'}</span>
           <span className="text-sm text-gray-500">{managerDepartment} Department</span>
           <span className="text-sm text-gray-500">•</span>
           <span className="text-sm text-gray-500">{stats.teamMembers} Team Members</span>

@@ -105,15 +105,15 @@ const TeamLeadDashboard = () => {
       name: currentUser?.name || 'Priya Sharma',
       initials: currentUser?.name?.split(' ').map(n => n[0]).join('') || 'PS',
       role: 'Team Lead',
-      title: 'Sr. Engineer — Team Lead · Engineering',
-      description: 'Leading the Engineering team with a focus on delivery excellence, mentoring, and maintaining technical standards across all projects.',
+      title: 'Sr. Engineer — Team Lead · Core Systems',
+      description: 'Leading the Core Systems team with a focus on delivery excellence, mentoring, and maintaining technical standards across all projects.',
       openTasks: 19,
       overdueTasks: 5,
       inProgress: 7,
       blocked: 1,
       completedThisWeek: 11,
       blockedTasks: [
-        { id: 1, title: 'DB Schema Design', status: 'Overdue', priority: 'high', assignedTo: 'Suresh M', dueDate: '2026-05-24' },
+        { id: 1, title: 'DB Schema Hardware & Integration', status: 'Overdue', priority: 'high', assignedTo: 'Suresh M', dueDate: '2026-05-24' },
         { id: 2, title: 'API Gateway Configuration', status: 'Blocked', priority: 'high', assignedTo: 'Nisha Kumar', dueDate: '2026-06-07' }
       ],
       teamMembers: [

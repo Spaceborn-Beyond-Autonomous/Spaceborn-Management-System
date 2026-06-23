@@ -95,7 +95,7 @@ const Projects = ({ userRole = 'CEO' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
     }
   };
 
@@ -113,7 +113,7 @@ const Projects = ({ userRole = 'CEO' }) => {
     const mockProjects = [
       { 
         id: 1, 
-        name: 'Project Beta — Design', 
+        name: 'Project Beta — Hardware & Integration', 
         description: 'Complete redesign of the design system', 
         progress: 45, 
         status: 'at-risk', 
@@ -125,7 +125,7 @@ const Projects = ({ userRole = 'CEO' }) => {
       { 
         id: 2, 
         name: 'Project Delta — Ops', 
-        description: 'Operations optimization project', 
+        description: 'Platform and DevOps optimization project', 
         progress: 30, 
         status: 'delayed', 
         department: 'Platform and DevOps', 

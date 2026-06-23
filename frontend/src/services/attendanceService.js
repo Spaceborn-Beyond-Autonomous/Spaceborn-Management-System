@@ -31,7 +31,7 @@ class AttendanceService {
   // Mock data for development
   getMockAttendance(filters = {}) {
     const mockAttendance = [
-      { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', checkIn: '09:00 AM', checkOut: '06:00 PM', status: 'present', hoursWorked: 9 },
+      { id: 1, name: 'John Doe', role: 'CEO', department: 'Platform and DevOps', checkIn: '09:00 AM', checkOut: '06:00 PM', status: 'present', hoursWorked: 9 },
       { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', checkIn: '09:15 AM', checkOut: '06:30 PM', status: 'late', hoursWorked: 9.25 },
       { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', checkIn: '08:45 AM', checkOut: '05:30 PM', status: 'present', hoursWorked: 8.75 },
       { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', checkIn: '', checkOut: '', status: 'absent', hoursWorked: 0 },
@@ -61,7 +61,7 @@ class AttendanceService {
     return [
       { department: 'Core Systems', present: 2, absent: 1, late: 0, onLeave: 1, total: 4 },
       { department: 'Platform and DevOps', present: 0, absent: 0, late: 1, onLeave: 0, total: 1 },
-      { department: 'Founding Team', present: 1, absent: 0, late: 0, onLeave: 0, total: 1 }
+      { department: 'Platform and DevOps', present: 1, absent: 0, late: 0, onLeave: 0, total: 1 }
     ];
   }
 
@@ -76,23 +76,50 @@ class AttendanceService {
 
   // Replace all API functions with ones that handle response format:
 
+async getAttendanceRoster(filters = {}) {
+  if (this.USE_MOCK) {
+    // For mock: reuse existing mock attendance; absent logic is not available in mock mode.
+    // Keep signature consistent.
+    return this.getMockAttendance(filters);
+  }
+
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const token = authService.getToken();
+
+  try {
+    const params = new URLSearchParams(filters).toString();
+    const response = await fetch(`${API_BASE_URL}/attendance/roster${params ? `?${params}` : ''}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.data || data;
+    }
+    throw new Error('Failed');
+  } catch (error) {
+    console.log('Using mock - API error:', error.message);
+    return this.getMockAttendance(filters);
+  }
+}
+
 async getAllAttendance(filters = {}) {
+  // left for backward compatibility
   if (this.USE_MOCK) {
     return this.getMockAttendance(filters);
   }
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   const token = authService.getToken();
-  
+
   try {
     const params = new URLSearchParams(filters).toString();
     const response = await fetch(`${API_BASE_URL}/attendance${params ? `?${params}` : ''}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    
+
     if (response.ok) {
       const data = await response.json();
-      // Handle { success: true, data: [...] } format
       return data.data || data;
     }
     throw new Error('Failed');
@@ -176,5 +203,4 @@ async getLiveAttendance() {
   }
 }
 
-const attendanceServiceInstance = new AttendanceService();
-export default attendanceServiceInstance;
+export default new AttendanceService();

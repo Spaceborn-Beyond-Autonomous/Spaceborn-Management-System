@@ -1,6 +1,15 @@
-// src/components/Dashboard/Member/TaskManagement.js (and for other roles)
+// src/components/Dashboard/Member/TaskManagement.jsx
 import React, { useState, useEffect } from 'react';
 import authService from '../../../services/authService';
+import taskService from '../../../services/taskService';
+import {
+  calculateTaskStats,
+  formatPriorityLabel,
+  getTaskId,
+  isTaskOverdue,
+  normalizeTask,
+  normalizeTaskList,
+} from '../../../utils/taskMapper';
 
 const TaskManagement = ({ userRole = 'Member' }) => {
   const [activeTab, setActiveTab] = useState('myTasks');
@@ -17,327 +26,191 @@ const TaskManagement = ({ userRole = 'Member' }) => {
     completedTasks: 0,
     inProgressTasks: 0,
     pendingTasks: 0,
-    overdueTasks: 0
+    overdueTasks: 0,
   });
 
-  // Fetch all task data on component mount
   useEffect(() => {
-    fetchMyTasks();
-    fetchCompletedTasks();
-    fetchDailyLogs();
+    loadAllData();
   }, []);
 
-  // Fetch my tasks
+  const loadAllData = async () => {
+    setIsLoading(true);
+    await Promise.all([fetchMyTasks(), fetchCompletedTasks(), fetchDailyLogs()]);
+    setIsLoading(false);
+  };
+
   const fetchMyTasks = async () => {
     try {
       const token = authService.getToken();
       if (!token) {
-        console.error('No authentication token found');
         if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
           loadMockData();
         }
-        setIsLoading(false);
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/tasks/my-tasks`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const tasks = await response.json();
-        setMyTasks(tasks);
-        
-        // Calculate stats
-        const total = tasks.length;
-        const completed = tasks.filter(t => t.status === 'completed').length;
-        const inProgress = tasks.filter(t => t.status === 'in-progress').length;
-        const pending = tasks.filter(t => t.status === 'pending').length;
-        const overdue = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed').length;
-        
-        setStats({ totalTasks: total, completedTasks: completed, inProgressTasks: inProgress, pendingTasks: pending, overdueTasks: overdue });
-        
-        // Set default selected task
-        if (tasks.length > 0 && !selectedTask) {
-          setSelectedTask(tasks[0].id.toString());
-          setProgress(tasks[0].progress || 0);
-        }
-      } else {
-        throw new Error('Failed to fetch tasks');
+      const rawTasks = await taskService.getMyAssignedTasks();
+      const tasks = normalizeTaskList(rawTasks);
+      setMyTasks(tasks);
+      applyStats(tasks);
+
+      if (tasks.length > 0 && !selectedTask) {
+        setSelectedTask(String(getTaskId(tasks[0])));
+        setProgress(tasks[0].progress || 0);
       }
-      
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
       setError('Failed to load tasks');
       if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockData();
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Fetch completed tasks
   const fetchCompletedTasks = async () => {
     try {
-      const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/tasks/completed`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const tasks = await response.json();
-        setCompletedTasks(tasks);
-      }
-      
-    } catch (error) {
-      console.error('Error fetching completed tasks:', error);
+      const tasks = normalizeTaskList(await taskService.getCompletedTasks());
+      setCompletedTasks(tasks);
+    } catch (err) {
+      console.error('Error fetching completed tasks:', err);
       if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockCompletedTasks();
       }
     }
   };
 
-  // Fetch daily logs
   const fetchDailyLogs = async () => {
     try {
-      const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/tasks/daily-logs`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const logs = await response.json();
-        setDailyLogs(logs);
-      }
-      
-    } catch (error) {
-      console.error('Error fetching daily logs:', error);
+      const logs = await taskService.getDailyLogsList();
+      setDailyLogs(Array.isArray(logs) ? logs : []);
+    } catch (err) {
+      console.error('Error fetching daily logs:', err);
       if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockDailyLogs();
       }
     }
   };
 
-  // Mock data for development
+  const applyStats = (tasks) => {
+    const s = calculateTaskStats(tasks);
+    setStats({
+      totalTasks: s.total,
+      completedTasks: s.completed,
+      inProgressTasks: s.inProgress,
+      pendingTasks: s.pending,
+      overdueTasks: s.overdue,
+    });
+  };
+
   const loadMockData = () => {
-    const mockTasks = [
-      { 
-        id: 1, 
-        name: 'Build login UI', 
-        status: 'in-progress', 
-        dueDate: '2026-05-28', 
-        priority: 'high', 
+    const mockTasks = normalizeTaskList([
+      {
+        id: 1,
+        title: 'Build login UI',
+        status: 'In progress',
+        dueDate: '2026-05-28',
+        priority: 'high',
         progress: 74,
         description: 'Implement the login page with validation',
-        assignedBy: 'Mike Johnson',
-        createdAt: '2026-05-20T10:00:00Z'
+        createdByName: 'Mike Johnson',
+        createdAt: '2026-05-20T10:00:00Z',
       },
-      { 
-        id: 2, 
-        name: 'API Integration', 
-        status: 'pending', 
-        dueDate: '2026-06-05', 
-        priority: 'medium', 
+      {
+        id: 2,
+        title: 'API Integration',
+        status: 'Pending',
+        dueDate: '2026-06-05',
+        priority: 'medium',
         progress: 0,
         description: 'Integrate REST APIs for dashboard',
-        assignedBy: 'Mike Johnson',
-        createdAt: '2026-05-22T14:00:00Z'
+        createdByName: 'Mike Johnson',
+        createdAt: '2026-05-22T14:00:00Z',
       },
-      { 
-        id: 3, 
-        name: 'Write unit tests', 
-        status: 'in-progress', 
-        dueDate: '2026-06-10', 
-        priority: 'low', 
-        progress: 30,
-        description: 'Write unit tests for components',
-        assignedBy: 'Priya Sharma',
-        createdAt: '2026-05-25T09:00:00Z'
-      },
-      { 
-        id: 4, 
-        name: 'Code Review', 
-        status: 'pending', 
-        dueDate: '2026-05-30', 
-        priority: 'high', 
-        progress: 0,
-        description: 'Review pull requests from team',
-        assignedBy: 'Mike Johnson',
-        createdAt: '2026-05-26T11:00:00Z'
-      }
-    ];
-    
+    ]);
     setMyTasks(mockTasks);
-    
-    const total = mockTasks.length;
-    const completed = mockTasks.filter(t => t.status === 'completed').length;
-    const inProgress = mockTasks.filter(t => t.status === 'in-progress').length;
-    const pending = mockTasks.filter(t => t.status === 'pending').length;
-    const overdue = mockTasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed').length;
-    
-    setStats({ totalTasks: total, completedTasks: completed, inProgressTasks: inProgress, pendingTasks: pending, overdueTasks: overdue });
-    
+    applyStats(mockTasks);
     if (mockTasks.length > 0) {
-      setSelectedTask(mockTasks[0].id.toString());
+      setSelectedTask(String(getTaskId(mockTasks[0])));
       setProgress(mockTasks[0].progress);
     }
   };
 
   const loadMockCompletedTasks = () => {
-    setCompletedTasks([
-      { id: 1, name: 'User profile page redesign', completedDate: '2026-05-20', completedBy: 'Ravi Das' },
-      { id: 2, name: 'API integration for dashboard', completedDate: '2026-05-18', completedBy: 'Ravi Das' },
-      { id: 3, name: 'Mobile responsive fixes', completedDate: '2026-05-15', completedBy: 'Ravi Das' },
-      { id: 4, name: 'Performance optimization', completedDate: '2026-05-12', completedBy: 'Ravi Das' }
-    ]);
+    setCompletedTasks(
+      normalizeTaskList([
+        { id: 10, title: 'User profile page redesign', status: 'Completed', updatedAt: '2026-05-20' },
+        { id: 11, title: 'Mobile responsive fixes', status: 'Completed', updatedAt: '2026-05-15' },
+      ])
+    );
   };
 
   const loadMockDailyLogs = () => {
     setDailyLogs([
       { id: 1, date: '2026-05-27T10:00:00Z', taskId: 1, taskName: 'Build login UI', progress: 45, notes: 'Working on form validation', hoursSpent: 4 },
-      { id: 2, date: '2026-05-26T10:00:00Z', taskId: 1, taskName: 'Build login UI', progress: 35, notes: 'Started UI implementation', hoursSpent: 3 },
-      { id: 3, date: '2026-05-25T10:00:00Z', taskId: 3, taskName: 'Write unit tests', progress: 20, notes: 'Setup testing framework', hoursSpent: 2 }
     ]);
   };
 
-  // Update task progress
   const updateTaskProgress = async (taskId, newProgress) => {
     try {
-      const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/progress`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ progress: newProgress }),
-      });
-      
-      if (response.ok) {
-        setMyTasks(myTasks.map(task =>
-          task.id === taskId ? { ...task, progress: newProgress } : task
-        ));
-      }
-      
-    } catch (error) {
-      console.error('Error updating task progress:', error);
+      await taskService.updateTaskProgress(taskId, newProgress);
+      const updated = myTasks.map(task =>
+        getTaskId(task) === taskId ? { ...task, progress: newProgress } : task
+      );
+      setMyTasks(updated);
+    } catch (err) {
+      console.error('Error updating task progress:', err);
     }
   };
 
-  // Mark task as completed
   const markTaskComplete = async (taskId) => {
     try {
-      const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/complete`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const completedTask = myTasks.find(t => t.id === taskId);
-        setMyTasks(myTasks.filter(task => task.id !== taskId));
-        setCompletedTasks([{ ...completedTask, completedDate: new Date().toISOString() }, ...completedTasks]);
-        
-        // Update stats
-        setStats(prev => ({
-          ...prev,
-          completedTasks: prev.completedTasks + 1,
-          totalTasks: prev.totalTasks - 1
-        }));
+      await taskService.completeTaskById(taskId);
+      const completedTask = myTasks.find(t => getTaskId(t) === taskId);
+      setMyTasks(myTasks.filter(task => getTaskId(task) !== taskId));
+      if (completedTask) {
+        setCompletedTasks([normalizeTask({ ...completedTask, status: 'Completed' }), ...completedTasks]);
       }
-      
-    } catch (error) {
-      console.error('Error marking task as complete:', error);
+      applyStats(myTasks.filter(task => getTaskId(task) !== taskId));
+    } catch (err) {
+      console.error('Error marking task as complete:', err);
       alert('Failed to mark task as complete');
     }
   };
 
-  // Submit daily log
   const handleSubmitDailyLog = async () => {
     if (!selectedTask) {
       alert('Please select a task');
       return;
     }
-    
+
+    const task = myTasks.find(t => String(getTaskId(t)) === String(selectedTask));
+    const taskId = getTaskId(task);
+
+    const logData = {
+      taskId,
+      taskName: task?.title,
+      progress,
+      notes,
+      content: notes,
+      date: new Date().toISOString(),
+      hoursSpent: 0,
+    };
+
     try {
-      const token = authService.getToken();
-      const currentUser = authService.getCurrentUser();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const task = myTasks.find(t => t.id === parseInt(selectedTask));
-      
-      const logData = {
-        taskId: parseInt(selectedTask),
-        taskName: task?.name,
-        progress: progress,
-        notes: notes,
-        date: new Date().toISOString(),
-        hoursSpent: 0 // Can be added later
-      };
-      
-      const response = await fetch(`${API_BASE_URL}/tasks/daily-logs`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(logData),
-      });
-      
-      if (response.ok) {
-        const newLog = await response.json();
-        setDailyLogs([newLog, ...dailyLogs]);
-        
-        // Update task progress
-        await updateTaskProgress(parseInt(selectedTask), progress);
-        
-        setNotes('');
-        alert('Daily log submitted successfully!');
-      } else {
-        throw new Error('Failed to submit daily log');
-      }
-      
-    } catch (error) {
-      console.error('Error submitting daily log:', error);
-      
-      // Fallback for development
+      const newLog = await taskService.createDailyLogEntry(logData);
+      setDailyLogs([newLog, ...dailyLogs]);
+      await updateTaskProgress(taskId, progress);
+      setNotes('');
+      alert('Daily log submitted successfully!');
+    } catch (err) {
+      console.error('Error submitting daily log:', err);
       if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
-        const newLog = {
-          id: dailyLogs.length + 1,
-          date: new Date().toISOString(),
-          taskId: parseInt(selectedTask),
-          taskName: myTasks.find(t => t.id === parseInt(selectedTask))?.name,
-          progress: progress,
-          notes: notes,
-          hoursSpent: 0
-        };
-        setDailyLogs([newLog, ...dailyLogs]);
-        await updateTaskProgress(parseInt(selectedTask), progress);
+        setDailyLogs([
+          { id: dailyLogs.length + 1, ...logData },
+          ...dailyLogs,
+        ]);
+        await updateTaskProgress(taskId, progress);
         setNotes('');
-        alert('Daily log submitted successfully! (Mock Mode)');
       } else {
         alert('Failed to submit daily log. Please try again.');
       }
@@ -345,32 +218,43 @@ const TaskManagement = ({ userRole = 'Member' }) => {
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in-progress': return 'bg-yellow-100 text-yellow-800';
-      case 'pending': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+    switch ((status || '').toLowerCase()) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in progress':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'pending':
+        return 'bg-red-100 text-red-800';
+      case 'overdue':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority) => {
-    switch(priority) {
-      case 'high': return 'bg-red-100 text-red-700';
-      case 'medium': return 'bg-yellow-100 text-yellow-700';
-      case 'low': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
+    switch ((priority || '').toLowerCase()) {
+      case 'high':
+        return 'bg-red-100 text-red-700';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'low':
+        return 'bg-green-100 text-green-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   };
 
   const formatRelativeDate = (dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const now = new Date();
     const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
-    
     if (diffDays < 0) return 'Overdue';
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Tomorrow';
@@ -392,7 +276,10 @@ const TaskManagement = ({ userRole = 'Member' }) => {
         <p className="text-gray-500 mt-1">Track and manage your tasks</p>
       </div>
 
-      {/* Stats Overview */}
+      {error && myTasks.length === 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-red-700">{error}</div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-xs text-gray-500">Total Tasks</p>
@@ -416,21 +303,20 @@ const TaskManagement = ({ userRole = 'Member' }) => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex space-x-4 mb-6 border-b border-gray-200">
-        <button 
+        <button
           onClick={() => setActiveTab('myTasks')}
           className={`pb-3 px-4 text-sm font-medium transition-colors ${activeTab === 'myTasks' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
         >
           My Tasks ({myTasks.length})
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('dailyLog')}
           className={`pb-3 px-4 text-sm font-medium transition-colors ${activeTab === 'dailyLog' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
         >
           Daily Log
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('completed')}
           className={`pb-3 px-4 text-sm font-medium transition-colors ${activeTab === 'completed' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
         >
@@ -438,7 +324,6 @@ const TaskManagement = ({ userRole = 'Member' }) => {
         </button>
       </div>
 
-      {/* My Tasks Tab */}
       {activeTab === 'myTasks' && (
         <div>
           {myTasks.length === 0 ? (
@@ -448,34 +333,32 @@ const TaskManagement = ({ userRole = 'Member' }) => {
           ) : (
             <div className="space-y-4">
               {myTasks.map((task) => (
-                <div key={task.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition">
+                <div key={getTaskId(task)} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-semibold text-gray-900">{task.name}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                          {task.status.replace('-', ' ')}
+                          {task.status}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
                         Due {formatDate(task.dueDate)} · {formatRelativeDate(task.dueDate)}
+                        {isTaskOverdue(task) && ' · Overdue'}
                       </p>
                       {task.description && (
                         <p className="text-sm text-gray-600 mt-2">{task.description}</p>
                       )}
                       <div className="flex items-center space-x-3 mt-2">
                         <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                          {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
+                          {formatPriorityLabel(task.priority)} Priority
                         </span>
-                        {task.assignedBy && (
-                          <span className="text-xs text-gray-400">Assigned by: {task.assignedBy}</span>
-                        )}
                       </div>
                     </div>
                     <div className="flex space-x-3">
-                      <button 
+                      <button
                         onClick={() => {
-                          setSelectedTask(task.id.toString());
+                          setSelectedTask(String(getTaskId(task)));
                           setProgress(task.progress);
                           setActiveTab('dailyLog');
                         }}
@@ -483,9 +366,9 @@ const TaskManagement = ({ userRole = 'Member' }) => {
                       >
                         Update progress
                       </button>
-                      {task.status !== 'completed' && (
-                        <button 
-                          onClick={() => markTaskComplete(task.id)}
+                      {task.status !== 'Completed' && (
+                        <button
+                          onClick={() => markTaskComplete(getTaskId(task))}
                           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                         >
                           Mark done
@@ -499,7 +382,7 @@ const TaskManagement = ({ userRole = 'Member' }) => {
                       <span className="font-medium">{task.progress}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-blue-500 rounded-full h-2 transition-all duration-300"
                         style={{ width: `${task.progress}%` }}
                       ></div>
@@ -512,10 +395,8 @@ const TaskManagement = ({ userRole = 'Member' }) => {
         </div>
       )}
 
-      {/* Daily Log Tab */}
       {activeTab === 'dailyLog' && (
         <div>
-          {/* Daily Log Form */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Daily Log</h2>
             <p className="text-sm text-gray-500 mb-6">Log your progress for today</p>
@@ -523,11 +404,11 @@ const TaskManagement = ({ userRole = 'Member' }) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">SELECT TASK *</label>
-                <select 
+                <select
                   value={selectedTask}
                   onChange={(e) => {
                     setSelectedTask(e.target.value);
-                    const task = myTasks.find(t => t.id === parseInt(e.target.value));
+                    const task = myTasks.find(t => String(getTaskId(t)) === e.target.value);
                     if (task) setProgress(task.progress);
                   }}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -535,18 +416,18 @@ const TaskManagement = ({ userRole = 'Member' }) => {
                 >
                   <option value="">Select a task</option>
                   {myTasks.map(task => (
-                    <option key={task.id} value={task.id}>{task.name}</option>
+                    <option key={getTaskId(task)} value={getTaskId(task)}>{task.title}</option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">PROGRESS UPDATE</label>
                 <div className="flex items-center space-x-4">
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
                     value={progress}
                     onChange={(e) => setProgress(parseInt(e.target.value))}
                     className="flex-1"
@@ -554,10 +435,10 @@ const TaskManagement = ({ userRole = 'Member' }) => {
                   <span className="text-sm font-medium min-w-[45px]">{progress}%</span>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">NOTES / BLOCKERS</label>
-                <textarea 
+                <textarea
                   rows="4"
                   placeholder="Share your progress, challenges, or blockers..."
                   value={notes}
@@ -565,8 +446,8 @@ const TaskManagement = ({ userRole = 'Member' }) => {
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
-              <button 
+
+              <button
                 onClick={handleSubmitDailyLog}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
@@ -575,25 +456,24 @@ const TaskManagement = ({ userRole = 'Member' }) => {
             </div>
           </div>
 
-          {/* Past Daily Logs */}
           {dailyLogs.length > 0 && (
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Past Updates</h2>
               <div className="space-y-4">
                 {dailyLogs.map((log) => (
-                  <div key={log.id} className="bg-white rounded-xl border border-gray-200 p-6">
+                  <div key={log.id ?? log._id ?? `${log.date}-${log.taskId}`} className="bg-white rounded-xl border border-gray-200 p-6">
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <p className="text-sm text-gray-500">{formatDate(log.date)}</p>
+                        <p className="text-sm text-gray-500">{formatDate(log.date || log.createdAt)}</p>
                         <p className="text-sm font-medium text-gray-900 mt-1">
-                          {log.progress}% · {log.taskName}
+                          {log.progress}% · {log.taskName || log.content}
                         </p>
                       </div>
                       {log.hoursSpent > 0 && (
                         <span className="text-xs text-gray-400">{log.hoursSpent} hours</span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600">{log.notes}</p>
+                    <p className="text-sm text-gray-600">{log.notes || log.content}</p>
                   </div>
                 ))}
               </div>
@@ -602,7 +482,6 @@ const TaskManagement = ({ userRole = 'Member' }) => {
         </div>
       )}
 
-      {/* Completed Tasks Tab */}
       {activeTab === 'completed' && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           {completedTasks.length === 0 ? (
@@ -612,7 +491,7 @@ const TaskManagement = ({ userRole = 'Member' }) => {
           ) : (
             <div className="divide-y divide-gray-100">
               {completedTasks.map((task) => (
-                <div key={task.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition">
+                <div key={getTaskId(task)} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition">
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                       <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -620,10 +499,9 @@ const TaskManagement = ({ userRole = 'Member' }) => {
                       </svg>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{task.name}</p>
+                      <p className="font-medium text-gray-900">{task.title}</p>
                       <p className="text-sm text-gray-500">
-                        Completed - {formatDate(task.completedDate)}
-                        {task.completedBy && ` by ${task.completedBy}`}
+                        Completed - {formatDate(task.updatedAt || task.completedDate || task.dueDate)}
                       </p>
                     </div>
                   </div>

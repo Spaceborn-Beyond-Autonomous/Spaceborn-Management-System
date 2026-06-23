@@ -97,7 +97,7 @@ const mockDataService = {
   },
   getAllEmployees: async () => {
     return [
-      { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', email: 'john@spaceborn.com' },
+      { id: 1, name: 'John Doe', role: 'CEO', department: 'Platform and DevOps', email: 'john@spaceborn.com' },
       { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', email: 'jane@spaceborn.com' },
       { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', email: 'mike@spaceborn.com' },
       { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi@spaceborn.com' },

@@ -51,7 +51,7 @@ export const Header = ({ userName, role, notifications, onMenuClick }) => {
                   </div>
                   <div className="max-h-96 overflow-y-auto">
                     <div className="p-4 hover:bg-gray-50 cursor-pointer">
-                      <p className="text-sm text-gray-900">New member joined Engineering</p>
+                      <p className="text-sm text-gray-900">New member joined Core Systems</p>
                       <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
                     </div>
                     <div className="p-4 hover:bg-gray-50 cursor-pointer border-t border-gray-100">

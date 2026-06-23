@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import warningSimulatorService from '../../../services/warningSimulatorService';
 import emailSimulatorService from '../../../services/emailSimulatorService';
 import EmailPreviewModal from '../../Common/EmailPreviewModal';
+import { DEPARTMENTS, normalizeDepartment } from '../../../utils/departments';
 
 const WarningMonitor = ({ userRole }) => {
   const [warnings, setWarnings] = useState([]);
@@ -133,11 +134,11 @@ const WarningMonitor = ({ userRole }) => {
 
   const filteredWarnings = warnings.filter(warning => {
     if (filterType !== 'all' && warning.type !== filterType) return false;
-    if (filterDepartment !== 'all' && warning.department !== filterDepartment) return false;
+    if (filterDepartment !== 'all' && normalizeDepartment(warning.department) !== filterDepartment) return false;
     return true;
   });
 
-  const departments = [...new Set(warnings.map(w => w.department))];
+  const departments = DEPARTMENTS;
 
   return (
     <div className="space-y-6">

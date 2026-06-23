@@ -87,7 +87,7 @@ export const getRoleColor = (role) => {
     'Team Lead': 'bg-green-100 text-green-700',
     'Lead': 'bg-green-100 text-green-700',
     'Member': 'bg-gray-100 text-gray-700',
-    'Robotics & Simulation': 'bg-pink-100 text-pink-700'
+    'HR': 'bg-pink-100 text-pink-700'
   };
   return defaultColors[role] || 'bg-gray-100 text-gray-700';
 };

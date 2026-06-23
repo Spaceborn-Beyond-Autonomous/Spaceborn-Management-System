@@ -11,8 +11,8 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, unique: true, required: true },
   phone: String,
-  role: { type: String, enum: ['CEO', 'Manager', 'Team Lead', 'Member', 'HR'], default: 'Member' },
-  department: { type: String, default: 'Engineering' },
+  role: { type: String, enum: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member', 'HR'], default: 'Member' },
+  department: { type: String, default: 'Core Systems' },
   team: String,
   manager: String,
   joinDate: String,
@@ -42,13 +42,14 @@ async function seed() {
 
     // Users data with PLAIN passwords (will be hashed on insert)
     const users = [
-      { employeeId: 'CEO001', password: 'admin123', firstName: 'John', lastName: 'Doe', email: 'john.doe@spaceborn.com', phone: '+1 555 000 0001', role: 'CEO', department: 'Executive', team: 'Board', manager: 'Board', joinDate: '2020-01-01' },
-      { employeeId: 'MGR001', password: 'manager123', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@spaceborn.com', phone: '+1 555 000 0002', role: 'Manager', department: 'Operations', team: 'Management', manager: 'John Doe', joinDate: '2021-03-15' },
-      { employeeId: 'LD001', password: 'lead123', firstName: 'Mike', lastName: 'Johnson', email: 'mike.johnson@spaceborn.com', phone: '+1 555 000 0003', role: 'Team Lead', department: 'Engineering', team: 'Team A', manager: 'Jane Smith', joinDate: '2022-01-10' },
-      { employeeId: 'EMP001', password: 'member123', firstName: 'Ravi', lastName: 'Das', email: 'ravi.das@spaceborn.com', phone: '+91 98765 43213', role: 'Member', department: 'Engineering', team: 'Team A', manager: 'Mike Johnson', joinDate: '2024-01-05' },
-      { employeeId: 'EMP002', password: 'member123', firstName: 'Priya', lastName: 'Sharma', email: 'priya.sharma@spaceborn.com', phone: '+91 98765 43210', role: 'Member', department: 'Engineering', team: 'Team A', manager: 'Mike Johnson', joinDate: '2023-01-15' },
-      { employeeId: 'EMP003', password: 'member123', firstName: 'Nisha', lastName: 'Kumar', email: 'nisha.kumar@spaceborn.com', phone: '+91 98765 43214', role: 'Member', department: 'Engineering', team: 'Team A', manager: 'Mike Johnson', joinDate: '2023-08-12' },
-      { employeeId: 'HR001', password: 'hr123', firstName: 'Neha', lastName: 'Gupta', email: 'neha.gupta@spaceborn.com', phone: '+91 98765 43215', role: 'HR', department: 'HR', team: 'HR Team', manager: 'Jane Smith', joinDate: '2022-06-01' },
+      { employeeId: 'CEO001', password: 'admin123', firstName: 'John', lastName: 'Doe', email: 'john.doe@spaceborn.com', phone: '+1 555 000 0001', role: 'CEO', department: 'Founding Team', team: 'Board', manager: 'Board', joinDate: '2020-01-01' },
+      { employeeId: 'COO001', password: 'coo123', firstName: 'Aarav', lastName: 'Mehta', email: 'aarav.mehta@spaceborn.com', phone: '+1 555 000 0008', role: 'COO', department: 'Platform and DevOps', team: 'Management', manager: 'John Doe', joinDate: '2021-01-10' },
+      { employeeId: 'MGR001', password: 'manager123', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@spaceborn.com', phone: '+1 555 000 0002', role: 'Manager', department: 'Platform and DevOps', team: 'Management', manager: 'John Doe', joinDate: '2021-03-15' },
+      { employeeId: 'LD001', password: 'lead123', firstName: 'Mike', lastName: 'Johnson', email: 'mike.johnson@spaceborn.com', phone: '+1 555 000 0003', role: 'Team Lead', department: 'Core Systems', team: 'Team A', manager: 'Jane Smith', joinDate: '2022-01-10' },
+      { employeeId: 'EMP001', password: 'member123', firstName: 'Ravi', lastName: 'Das', email: 'ravi.das@spaceborn.com', phone: '+91 98765 43213', role: 'Member', department: 'Core Systems', team: 'Team A', manager: 'Mike Johnson', joinDate: '2024-01-05' },
+      { employeeId: 'EMP002', password: 'member123', firstName: 'Priya', lastName: 'Sharma', email: 'priya.sharma@spaceborn.com', phone: '+91 98765 43210', role: 'Member', department: 'Core Systems', team: 'Team A', manager: 'Mike Johnson', joinDate: '2023-01-15' },
+      { employeeId: 'EMP003', password: 'member123', firstName: 'Nisha', lastName: 'Kumar', email: 'nisha.kumar@spaceborn.com', phone: '+91 98765 43214', role: 'Member', department: 'Core Systems', team: 'Team A', manager: 'Mike Johnson', joinDate: '2023-08-12' },
+      { employeeId: 'HR001', password: 'hr123', firstName: 'Neha', lastName: 'Gupta', email: 'neha.gupta@spaceborn.com', phone: '+91 98765 43215', role: 'HR', department: 'Robotics & Simulation', team: 'HR Team', manager: 'Jane Smith', joinDate: '2022-06-01' },
     ];
 
     // Insert users (passwords will be hashed automatically)

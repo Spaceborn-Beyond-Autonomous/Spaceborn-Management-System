@@ -1,6 +1,11 @@
 // src/components/Dashboard/Member/MemberDashboard.js
 import React, { useState, useEffect } from 'react';
 import authService from '../../../services/authService';
+import taskService from '../../../services/taskService';
+import {
+  getTaskId,
+  normalizeTaskList,
+} from '../../../utils/taskMapper';
 
 const MemberDashboard = () => {
   const [memberData, setMemberData] = useState({
@@ -8,7 +13,9 @@ const MemberDashboard = () => {
     role: '',
     title: '',
     description: '',
+    // ensure this is always an array (backend might return unexpected payload)
     myTasks: [],
+
     sprintOverview: {
       overallProgress: 0,
       tasksOnTime: 0,
@@ -63,20 +70,15 @@ const MemberDashboard = () => {
         }));
       }
 
-      // Fetch my tasks
-      const tasksResponse = await fetch(`${API_BASE_URL}/member/tasks`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (tasksResponse.ok) {
-        const tasks = await tasksResponse.json();
+      // Fetch my tasks via backend task routes
+      try {
+        const tasks = normalizeTaskList(await taskService.getMyAssignedTasks());
         setMemberData(prev => ({
           ...prev,
-          myTasks: tasks
+          myTasks: tasks,
         }));
+      } catch (taskErr) {
+        console.error('Error fetching member tasks:', taskErr);
       }
 
       // Fetch sprint overview
@@ -133,32 +135,32 @@ const MemberDashboard = () => {
       role: currentUser?.role || 'Member',
       title: `${currentUser?.department || 'Core Systems'} · Joined ${new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`,
       description: 'Frontend developer passionate about building clean, accessible interfaces. Currently focused on the authentication and dashboard modules.',
-      myTasks: [
-        { 
+      myTasks: normalizeTaskList([
+        {
           id: 1,
-          name: 'Build login UI', 
-          status: 'In progress', 
-          progress: 74, 
-          dueDate: 'May 28, 2026',
-          priority: 'high'
+          title: 'Build login UI',
+          status: 'In progress',
+          progress: 74,
+          dueDate: '2026-05-28',
+          priority: 'high',
         },
-        { 
+        {
           id: 2,
-          name: 'API Integration', 
-          status: 'Not started', 
-          progress: 0, 
-          dueDate: 'Jun 5, 2026',
-          priority: 'medium'
+          title: 'API Integration',
+          status: 'Pending',
+          progress: 0,
+          dueDate: '2026-06-05',
+          priority: 'medium',
         },
-        { 
+        {
           id: 3,
-          name: 'Code Review', 
-          status: 'Completed', 
-          progress: 100, 
-          dueDate: 'May 25, 2026',
-          priority: 'low'
-        }
-      ],
+          title: 'Code Review',
+          status: 'Completed',
+          progress: 100,
+          dueDate: '2026-05-25',
+          priority: 'low',
+        },
+      ]),
       sprintOverview: {
         overallProgress: 68,
         tasksOnTime: 85,
@@ -174,27 +176,13 @@ const MemberDashboard = () => {
   // Update task progress
   const updateTaskProgress = async (taskId, newProgress) => {
     try {
-      const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/member/tasks/${taskId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ progress: newProgress }),
-      });
-      
-      if (response.ok) {
-        // Update local state
-        setMemberData(prev => ({
-          ...prev,
-          myTasks: prev.myTasks.map(task => 
-            task.id === taskId ? { ...task, progress: newProgress } : task
-          )
-        }));
-      }
+      await taskService.updateTaskProgress(taskId, newProgress);
+      setMemberData(prev => ({
+        ...prev,
+        myTasks: prev.myTasks.map(task =>
+          getTaskId(task) === taskId ? { ...task, progress: newProgress } : task
+        ),
+      }));
     } catch (error) {
       console.error('Error updating task:', error);
     }
@@ -278,15 +266,17 @@ const MemberDashboard = () => {
           ) : (
             <div className="space-y-4">
               {memberData.myTasks.map((task) => (
-                <div key={task.id} className={`flex items-center justify-between p-4 rounded-lg ${getPriorityColor(task.priority)}`}>
+                <div key={getTaskId(task)} className={`flex items-center justify-between p-4 rounded-lg ${getPriorityColor(task.priority)}`}>
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
-                      <p className="font-medium text-gray-900">{task.name}</p>
+                      <p className="font-medium text-gray-900">{task.title}</p>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
                         {task.status}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">Due {task.dueDate}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Due {task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                    </p>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="w-32">
@@ -294,17 +284,17 @@ const MemberDashboard = () => {
                         <span className="text-gray-600">{task.progress}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-cyan-500 rounded-full h-2 transition-all duration-300"
                           style={{ width: `${task.progress}%` }}
                         ></div>
                       </div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => {
                         const newProgress = prompt('Enter new progress (0-100):', task.progress);
                         if (newProgress !== null && !isNaN(newProgress) && newProgress >= 0 && newProgress <= 100) {
-                          updateTaskProgress(task.id, parseInt(newProgress));
+                          updateTaskProgress(getTaskId(task), parseInt(newProgress));
                         }
                       }}
                       className="px-3 py-1 bg-cyan-600 text-white text-sm rounded-lg hover:bg-cyan-700 transition"

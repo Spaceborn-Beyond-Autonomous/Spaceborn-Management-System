@@ -56,7 +56,9 @@ const Resources = ({ userRole = 'Member' }) => {
       });
       
       if (response.ok) {
-        const requests = await response.json();
+        const payload = await response.json();
+        // Backend returns: { success, count, data }
+        const requests = Array.isArray(payload) ? payload : (payload?.data ?? []);
         setMyRequests(requests);
         
         // Update stats
@@ -205,13 +207,38 @@ const Resources = ({ userRole = 'Member' }) => {
 
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       
+      const requesterId =
+        currentUser?.id ||
+        currentUser?._id ||
+        currentUser?.userId;
+
+      const requesterName =
+        currentUser?.name ||
+        currentUser?.fullName ||
+        currentUser?.userName ||
+        currentUser?.employeeName;
+
+      const requesterRole =
+        currentUser?.role ||
+        currentUser?.requesterRole;
+
+      if (!requesterId || !requesterName || !requesterRole) {
+        alert('Cannot submit request: missing current user details. Please re-login.');
+        return;
+      }
+
       const requestData = {
-        ...formData,
-        requestor: currentUser.name,
-        requestorId: currentUser.id,
-        date: new Date().toISOString(),
-        status: 'pending',
-        initials: currentUser.name.split(' ').map(n => n[0]).join('')
+        // Match backend ResourceRequest schema.
+        resourceName: formData.resourceType,
+        resourceType: formData.resourceType,
+        quantity: formData.quantity,
+        reason: formData.reason,
+        priority: formData.priority,
+        approvalLevel: 'TeamLead',
+        requester: requesterId,
+        requesterName,
+        requesterRole,
+        department: currentUser?.department || ''
       };
       
       const response = await fetch(`${API_BASE_URL}/resources/requests`, {
@@ -224,7 +251,8 @@ const Resources = ({ userRole = 'Member' }) => {
       });
       
       if (response.ok) {
-        const newRequest = await response.json();
+        const payload = await response.json();
+        const newRequest = payload?.data ?? payload;
         setMyRequests([newRequest, ...myRequests]);
         setStats(prev => ({
           ...prev,
@@ -491,26 +519,26 @@ const Resources = ({ userRole = 'Member' }) => {
             </div>
           ) : (
             myRequests.map((request) => (
-              <div key={request.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+              <div key={request._id ?? request.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
                       <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                        {request.initials || request.requestor?.charAt(0) || 'U'}
+                        {request.initials || request.requesterName?.charAt?.(0) || (typeof request.requestor === 'string' ? request.requestor.charAt(0) : request.requestor?.name?.charAt?.(0)) || 'U'}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{request.name}</h3>
-                        <p className="text-sm text-gray-500">{request.type || 'Resource'}</p>
+                        <h3 className="font-semibold text-gray-900">{request.name || request.resourceName}</h3>
+                        <p className="text-sm text-gray-500">{request.type || request.resourceType || 'Resource'}</p>
                       </div>
                       <span className={`ml-auto px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
-                        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                        {(request.status || 'unknown').charAt(0).toUpperCase() + (request.status || 'unknown').slice(1) }
                       </span>
                     </div>
                     
                     <p className="text-gray-600 text-sm mt-2">{request.reason}</p>
                     
                     <div className="flex flex-wrap items-center gap-3 mt-3">
-                      <span className="text-xs text-gray-400">Requested: {formatDate(request.date)}</span>
+                      <span className="text-xs text-gray-400">Requested: {formatDate(request.date || request.requestedAt || request.createdAt)}</span>
                       {request.duration && (
                         <span className="text-xs text-gray-400">Duration: {request.duration}</span>
                       )}

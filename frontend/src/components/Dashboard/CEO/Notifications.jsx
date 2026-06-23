@@ -13,7 +13,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState(null);
 
-  const tabs = ['All', 'Task', 'Resource', 'Account', 'Meeting', 'Project', 'Summary', 'System'];
+  const tabs = ['All', 'Task', 'Resource', 'Leave', 'Meeting', 'Report', 'Project', 'Summary', 'System'];
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -49,8 +49,14 @@ const Notifications = ({ userRole = 'Manager' }) => {
       
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data.notifications || data);
-        setUnreadCount(data.unreadCount || (data.filter ? data.filter(n => !n.read).length : 0));
+        const notificationsData = Array.isArray(data.notifications)
+  ? data.notifications
+  : Array.isArray(data)
+  ? data
+  : [];
+
+setNotifications(notificationsData);
+        setUnreadCount(data.unreadCount ?? notificationsData.filter(n => !n.read).length);
       } else {
         throw new Error('Failed to fetch notifications');
       }
@@ -113,7 +119,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
       { 
         id: 3, 
         title: 'New Team Member',
-        message: 'New member Arjun Singh added to Engineering',
+        message: 'New member Arjun Singh added to Core Systems',
         description: 'A new team member has joined your department',
         time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
         category: 'Account',
@@ -163,12 +169,12 @@ const Notifications = ({ userRole = 'Manager' }) => {
         actionUrl: '/tasks/5',
         actionLabel: 'View Task',
         details: {
-          taskName: 'DB Schema Design',
+          taskName: 'DB Schema Hardware & Integration',
           assignedTo: 'Nisha Kumar',
           dueDate: '2026-06-06',
           status: 'Overdue',
           priority: 'High',
-          description: 'Design the database schema for the new auth module'
+          description: 'Hardware & Integration the database schema for the new auth module'
         }
       },
       { 
@@ -368,6 +374,8 @@ const Notifications = ({ userRole = 'Manager' }) => {
       Resource: 'bg-purple-100 text-purple-700',
       Account: 'bg-green-100 text-green-700',
       Meeting: 'bg-yellow-100 text-yellow-700',
+      Leave: 'bg-rose-100 text-rose-700',
+      Report: 'bg-cyan-100 text-cyan-700',
       Project: 'bg-red-100 text-red-700',
       Summary: 'bg-gray-100 text-gray-700',
       System: 'bg-indigo-100 text-indigo-700'
@@ -406,6 +414,40 @@ const Notifications = ({ userRole = 'Manager' }) => {
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
+
+  // Auto refresh: poll unread count and refetch when it increases
+  useEffect(() => {
+    let intervalId = null;
+
+    const pollUnread = async () => {
+      try {
+        const token = authService.getToken();
+        if (!token) return;
+
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_BASE_URL}/notifications/unread-count`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) return;
+        const data = await response.json();
+        const latestCount = data?.count ?? 0;
+
+        setUnreadCount((prev) => {
+          if (latestCount > prev) fetchNotifications();
+          return latestCount;
+        });
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    intervalId = setInterval(pollUnread, 5000);
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [fetchNotifications]);
+
 
   if (isLoading && notifications.length === 0) {
     return (
@@ -679,6 +721,8 @@ const Notifications = ({ userRole = 'Manager' }) => {
                   {selectedNotification.category === 'Resource' && '🖥️'}
                   {selectedNotification.category === 'Account' && '👤'}
                   {selectedNotification.category === 'Meeting' && '📅'}
+                  {selectedNotification.category === 'Leave' && '🗓️'}
+                  {selectedNotification.category === 'Report' && '📄'}
                   {selectedNotification.category === 'Project' && '🚀'}
                   {selectedNotification.category === 'Summary' && '📊'}
                   {selectedNotification.category === 'System' && '⚙️'}

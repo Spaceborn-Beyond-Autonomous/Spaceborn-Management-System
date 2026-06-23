@@ -154,7 +154,7 @@ const Login = ({ onLogin }) => {
   const handleMockLogin = () => {
     // Mock member database
     const members = {
-      'CEO001': { password: 'ceo123', role: 'CEO', name: 'John Doe', department: 'Founding Team', email: 'john.doe@spaceborn.com' },
+      'CEO001': { password: 'ceo123', role: 'CEO', name: 'John Doe', department: 'Platform and DevOps', email: 'john.doe@spaceborn.com' },
       'MGR001': { password: 'mgr123', role: 'Manager', name: 'Jane Smith', department: 'Platform and DevOps', email: 'jane.smith@spaceborn.com' },
       'LD001': { password: 'lead123', role: 'Team Lead', name: 'Mike Johnson', department: 'Core Systems', email: 'mike.johnson@spaceborn.com' },
       'EMP001': { password: 'member123', role: 'Member', name: 'Ravi Das', department: 'Core Systems', email: 'ravi.das@spaceborn.com' }

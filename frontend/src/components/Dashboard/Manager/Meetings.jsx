@@ -20,7 +20,7 @@ const Meetings = ({ userRole = 'Manager' }) => {
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [showScheduleForm, setShowScheduleForm] = useState(false);
 
-  const departments = ['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'All'];
+  const departments = ['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception', 'All'];
 
   useEffect(() => {
     fetchMeetings();
@@ -97,7 +97,7 @@ const Meetings = ({ userRole = 'Manager' }) => {
       },
       { 
         id: 2, 
-        title: 'Design System Review', 
+        title: 'Hardware & Integration System Review', 
         department: 'Hardware & Integration', 
         createdBy: 'John Doe',
         createdById: 2,

@@ -18,7 +18,7 @@ const ManagerSidebar = ({ activeMenu, setActiveMenu }) => {
       {/* Role Tag */}
       <div className="px-4 py-3 border-b border-gray-100">
         <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">Manager View</span>
-        <p className="text-xs text-gray-500 mt-2">Engineering Department</p>
+        <p className="text-xs text-gray-500 mt-2">Core Systems Department</p>
       </div>
 
       {/* Navigation */}
@@ -87,7 +87,7 @@ const ManagerSidebar = ({ activeMenu, setActiveMenu }) => {
           <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center text-white font-semibold">JD</div>
           <div className="flex-1">
             <p className="text-sm font-medium text-gray-900">John Doe</p>
-            <p className="text-xs text-gray-500">Engineering Manager</p>
+            <p className="text-xs text-gray-500">Core Systems Manager</p>
           </div>
         </div>
       </div>

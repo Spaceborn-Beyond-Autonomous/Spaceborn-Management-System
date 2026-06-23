@@ -1,7 +1,20 @@
-// src/components/Dashboard/Manager/TaskManagement.js
+// src/components/Dashboard/Manager/TaskManagement.jsx
 import React, { useState, useEffect } from 'react';
 import authService from '../../../services/authService';
 import employeeService from '../../../services/employeeService';
+import taskService from '../../../services/taskService';
+import userService from '../../../services/userService';
+import {
+  calculateTaskStats,
+  deriveStatusFromProgress,
+  filterTasks,
+  formatPriorityLabel,
+  getInitialsFromName,
+  getTaskId,
+  isTaskOverdue,
+  normalizeTask,
+  normalizeTaskList,
+} from '../../../utils/taskMapper';
 
 const TaskManagement = ({ userRole = 'Manager' }) => {
   const [tasks, setTasks] = useState([]);
@@ -28,7 +41,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
     description: '',
     department: '',
     assignedTo: '',
-    priority: 'Medium',
+    priority: 'medium',
     dueDate: '',
     estimatedHours: 0
   });
@@ -43,119 +56,67 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
     fetchTasks();
   }, []);
 
-  useEffect(() => {
-    if (!loading) {
-      filterTasks();
-    }
-  }, [selectedDepartment, selectedStatus, selectedPriority, searchQuery]);
-
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      // Get current logged in user
-      const currentUser = authService.getCurrentUser();
-      const managerDepartment = currentUser?.department || 'Core Systems';
-      
-      // Mock tasks data as shown in the image
-      const allTasks = [
-        { 
-          id: 1, 
-          name: 'Ravi Das', 
-          initials: 'RD', 
-          task: 'Build login UI', 
-          department: 'Core Systems', 
-          progress: 74, 
-          status: 'In progress', 
-          priority: 'High', 
-          dueDate: '2026-06-10',
-          role: 'Member'
-        },
-        { 
-          id: 2, 
-          name: 'Nisha Kumar', 
-          initials: 'NK', 
-          task: 'Write unit tests', 
-          department: 'Core Systems', 
-          progress: 0, 
-          status: 'Pending', 
-          priority: 'Medium', 
-          dueDate: '2026-06-15',
-          role: 'Member'
-        },
-        { 
-          id: 3, 
-          name: 'Suresh M', 
-          initials: 'SM', 
-          task: 'DB schema design', 
-          department: 'Core Systems', 
-          progress: 40, 
-          status: 'Overdue', 
-          priority: 'High', 
-          dueDate: '2026-06-05',
-          role: 'Member'
-        },
-        { 
-          id: 4, 
-          name: 'Pooja B', 
-          initials: 'PB', 
-          task: 'Brand style guide', 
-          department: 'Hardware & Integration', 
-          progress: 55, 
-          status: 'In progress', 
-          priority: 'Medium', 
-          dueDate: '2026-06-20',
-          role: 'Member'
-        },
-        { 
-          id: 5, 
-          name: 'Anita M', 
-          initials: 'AM', 
-          task: 'Email campaign', 
-          department: 'AI/LLM & Perception', 
-          progress: 20, 
-          status: 'Pending', 
-          priority: 'Low', 
-          dueDate: '2026-06-25',
-          role: 'Member'
+      const token = authService.getToken();
+      if (!token) {
+        if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+          loadMockTasks();
         }
-      ];
-      
-      // Filter tasks based on manager's department (for demo, show Engineering dept tasks prominently)
-      // In real scenario, filter by manager's department
-      setTasks(allTasks);
-      calculateStats(allTasks);
-      
+        setLoading(false);
+        return;
+      }
+
+      const rawTasks = await taskService.getAllTasks();
+
+      const normalized = normalizeTaskList(rawTasks);
+      setTasks(normalized);
+      setStats(calculateTaskStats(normalized));
     } catch (error) {
       console.error('Error fetching tasks:', error);
+      if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+        loadMockTasks();
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const filterTasks = () => {
-    // This will be handled in the render with filteredTasks
+  const loadMockTasks = () => {
+    const mock = normalizeTaskList([
+      {
+        id: 1,
+        title: 'Build login UI',
+        assignedToName: 'Ravi Das',
+        department: 'Core Systems',
+        progress: 74,
+        status: 'In progress',
+        priority: 'high',
+        dueDate: '2026-06-10',
+      },
+      {
+        id: 2,
+        title: 'Write unit tests',
+        assignedToName: 'Nisha Kumar',
+        department: 'Core Systems',
+        progress: 0,
+        status: 'Pending',
+        priority: 'medium',
+        dueDate: '2026-06-15',
+      },
+    ]);
+    setTasks(mock);
+    setStats(calculateTaskStats(mock));
   };
 
   const getFilteredTasks = () => {
-    let filtered = [...tasks];
-    
-    if (selectedDepartment !== 'All departments') {
-      filtered = filtered.filter(t => t.department === selectedDepartment);
-    }
-    if (selectedStatus !== 'All') {
-      filtered = filtered.filter(t => t.status === selectedStatus);
-    }
-    if (selectedPriority !== 'All') {
-      filtered = filtered.filter(t => t.priority === selectedPriority);
-    }
-    if (searchQuery) {
-      filtered = filtered.filter(t => 
-        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.task.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    return filtered;
+    return filterTasks(tasks, {
+      search: searchQuery,
+      department: selectedDepartment,
+      status: selectedStatus,
+      priority: selectedPriority,
+    });
   };
 
   const fetchDepartments = async () => {
@@ -164,103 +125,100 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
       setDepartments(depts);
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
     }
   };
 
   const fetchEmployees = async () => {
     try {
-      const employeesList = await employeeService.getAllEmployees();
-      const currentUser = authService.getCurrentUser();
-      if (currentUser && currentUser.department) {
-        const filtered = employeesList.filter(emp => emp.department === currentUser.department);
-        setEmployees(filtered);
-      } else {
-        setEmployees(employeesList);
-      }
+      const employeesList = await userService.getAssignableUsers();
+      setEmployees(employeesList);
     } catch (error) {
       console.error('Error fetching employees:', error);
-      setEmployees([
-        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems' },
-        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems' },
-        { id: 6, name: 'Nisha Kumar', role: 'Member', department: 'Core Systems' },
-      ]);
+      if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+        setEmployees([
+          { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems' },
+          { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems' },
+          { id: 6, name: 'Nisha Kumar', role: 'Member', department: 'Core Systems' },
+        ]);
+      } else {
+        setEmployees([]);
+      }
     }
-  };
-
-  const calculateStats = (tasksData) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const overdueCount = tasksData.filter(t => {
-      if (t.status === 'Completed') return false;
-      if (!t.dueDate) return false;
-      const dueDate = new Date(t.dueDate);
-      return dueDate < today;
-    }).length;
-
-    setStats({
-      total: tasksData.length,
-      inProgress: tasksData.filter(t => t.status === 'In progress').length,
-      pending: tasksData.filter(t => t.status === 'Pending').length,
-      completed: tasksData.filter(t => t.status === 'Completed').length,
-      overdue: overdueCount
-    });
   };
 
   const handleUpdateProgress = async () => {
     if (!selectedTask) return;
-    
-    const newStatus = updateProgress === 100 ? 'Completed' : (updateProgress > 0 ? 'In progress' : 'Pending');
-    
-    const updatedTasks = tasks.map(task => 
-      task.id === selectedTask.id 
-        ? { ...task, progress: updateProgress, status: newStatus }
-        : task
-    );
-    
-    setTasks(updatedTasks);
-    calculateStats(updatedTasks);
-    setShowUpdateModal(false);
-    setSelectedTask(null);
-    setUpdateProgress(0);
-    setUpdateNotes('');
-    alert('Task progress updated successfully!');
+
+    const taskId = getTaskId(selectedTask);
+    const newStatus = deriveStatusFromProgress(updateProgress);
+
+    try {
+      await taskService.updateTaskProgress(taskId, updateProgress);
+      if (newStatus !== selectedTask.status) {
+        await taskService.updateTaskStatus(taskId, newStatus);
+      }
+
+      const updatedTasks = tasks.map(task =>
+        getTaskId(task) === taskId
+          ? { ...normalizeTask(task), progress: updateProgress, status: newStatus }
+          : task
+      );
+
+      setTasks(updatedTasks);
+      setStats(calculateTaskStats(updatedTasks));
+      setShowUpdateModal(false);
+      setSelectedTask(null);
+      setUpdateProgress(0);
+      setUpdateNotes('');
+    } catch (error) {
+      console.error('Error updating task progress:', error);
+      alert('Failed to update task progress');
+    }
   };
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
-    
-    const employee = employees.find(emp => emp.id === parseInt(newTask.assignedTo));
-    const currentUser = authService.getCurrentUser();
-    
-    const newTaskObj = {
-      id: tasks.length + 1,
-      name: employee?.name || 'Unknown',
-      initials: employee?.name?.split(' ').map(n => n[0]).join('') || 'U',
-      task: newTask.title,
-      department: newTask.department,
-      progress: 0,
-      status: 'Pending',
-      priority: newTask.priority,
-      dueDate: newTask.dueDate,
-      role: 'Member'
-    };
-    
-    const updatedTasks = [newTaskObj, ...tasks];
-    setTasks(updatedTasks);
-    calculateStats(updatedTasks);
-    setShowCreateModal(false);
-    setNewTask({
-      title: '',
-      description: '',
-      department: '',
-      assignedTo: '',
-      priority: 'Medium',
-      dueDate: '',
-      estimatedHours: 0
-    });
-    alert('Task created successfully!');
+
+    try {
+      const employee = employees.find(
+        emp => String(emp.id ?? emp._id) === String(newTask.assignedTo)
+      );
+      const currentUser = authService.getCurrentUser();
+
+      const created = await taskService.createTask({
+        title: newTask.title,
+        description: newTask.description,
+        assignedTo: employee?.id ?? employee?._id ?? newTask.assignedTo,
+        assignedToName: employee?.name,
+        assignedToInitials: getInitialsFromName(employee?.name),
+        department: newTask.department || employee?.department,
+        priority: (newTask.priority || 'medium').toLowerCase(),
+        dueDate: newTask.dueDate,
+        estimatedHours: Number(newTask.estimatedHours) || 0,
+        status: 'Pending',
+        progress: 0,
+        createdBy: currentUser?.id,
+      });
+
+      const normalized = normalizeTask(created);
+      const updatedTasks = [normalized, ...tasks];
+      setTasks(updatedTasks);
+      setStats(calculateTaskStats(updatedTasks));
+      setShowCreateModal(false);
+      setNewTask({
+        title: '',
+        description: '',
+        department: '',
+        assignedTo: '',
+        priority: 'medium',
+        dueDate: '',
+        estimatedHours: 0,
+      });
+    } catch (error) {
+      console.error('Error creating task:', error);
+      alert('Failed to create task');
+    }
   };
 
   const getStatusColor = (status) => {
@@ -274,29 +232,18 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
   };
 
   const getPriorityColor = (priority) => {
-    switch(priority) {
-      case 'High': return 'bg-red-100 text-red-700';
-      case 'Medium': return 'bg-yellow-100 text-yellow-700';
-      case 'Low': return 'bg-green-100 text-green-700';
+    const p = (priority || '').toString().toLowerCase();
+    switch (p) {
+      case 'high': return 'bg-red-100 text-red-700';
+      case 'medium': return 'bg-yellow-100 text-yellow-700';
+      case 'low': return 'bg-green-100 text-green-700';
       default: return 'bg-gray-100 text-gray-700';
     }
-  };
-
-  const getInitials = (name) => {
-    return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Not set';
     return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const isOverdue = (dueDate, status) => {
-    if (status === 'Completed') return false;
-    if (!dueDate) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return new Date(dueDate) < today;
   };
 
   const filteredTasks = getFilteredTasks();
@@ -420,22 +367,21 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredTasks.map((task) => {
-                const overdue = isOverdue(task.dueDate, task.status);
+                const overdue = isTaskOverdue(task);
                 return (
-                  <tr key={task.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={getTaskId(task)} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                          {getInitials(task.name)}
+                          {task.assignedToInitials || getInitialsFromName(task.assignedToName)}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">{task.name}</p>
-                          <p className="text-xs text-gray-400">{task.role}</p>
+                          <p className="font-medium text-gray-900 text-sm">{task.assignedToName || 'Unassigned'}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm text-gray-900 font-medium">{task.task}</p>
+                      <p className="text-sm text-gray-900 font-medium">{task.title}</p>
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
@@ -444,7 +390,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
+                        {formatPriorityLabel(task.priority)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -516,7 +462,7 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
               <button onClick={() => setShowUpdateModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
             </div>
             
-            <p className="text-sm text-gray-600 mb-4 pb-2 border-b">Task: <span className="font-medium">{selectedTask.task}</span></p>
+            <p className="text-sm text-gray-600 mb-4 pb-2 border-b">Task: <span className="font-medium">{selectedTask.title}</span></p>
             
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Progress: {updateProgress}%</label>
@@ -619,11 +565,18 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
                   <select
                     required
                     value={newTask.assignedTo}
-                    onChange={(e) => setNewTask({...newTask, assignedTo: e.target.value})}
+                    onChange={(e) => {
+                      const employee = employees.find(emp => String(emp.id ?? emp._id) === e.target.value);
+                      setNewTask({
+                        ...newTask,
+                        assignedTo: e.target.value,
+                        department: employee?.department || newTask.department,
+                      });
+                    }}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   >
                     <option value="">Select Employee</option>
-                    {employees.map(emp => <option key={emp.id} value={emp.id}>{emp.name}</option>)}
+                    {employees.map(emp => <option key={emp.id ?? emp._id} value={emp.id ?? emp._id}>{emp.name} ({emp.department || emp.role})</option>)}
                   </select>
                 </div>
                 <div>
@@ -633,9 +586,9 @@ const TaskManagement = ({ userRole = 'Manager' }) => {
                     onChange={(e) => setNewTask({...newTask, priority: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   >
-                    <option>High</option>
-                    <option>Medium</option>
-                    <option>Low</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
                   </select>
                 </div>
                 <div>

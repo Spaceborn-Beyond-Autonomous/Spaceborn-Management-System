@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import reportService from '../../../services/reportService';
 import leaveService from '../../../services/leaveService';
+import { DEPARTMENTS } from '../../../utils/departments';
 
 const TeamReports = ({ userRole, department, user }) => {
   const [reports, setReports] = useState([]);
@@ -38,8 +39,7 @@ const TeamReports = ({ userRole, department, user }) => {
 
       // Extract unique departments for filter (CEO only)
       if (userRole === 'CEO') {
-        const depts = [...new Set(reportsData.map(r => r.department).filter(Boolean))];
-        setDepartments(depts);
+        setDepartments(DEPARTMENTS);
       }
     } catch (error) {
       console.error('Error fetching data:', error);

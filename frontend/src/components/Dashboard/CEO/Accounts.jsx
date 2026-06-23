@@ -1,11 +1,56 @@
 // src/components/Dashboard/CEO/Accounts.jsx
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Mail, Lock, Briefcase, Phone, Calendar, Building2, AlertCircle, CheckCircle, Eye, EyeOff, X, Copy, Download, Search, Filter, Trash2, Edit, Users } from 'lucide-react';
+import { UserPlus, Mail, Lock, Briefcase, Phone, Calendar, Building2, AlertCircle, CheckCircle, Eye, EyeOff, X, Copy, Download, Search, Filter, Trash2, Edit, Users, Save } from 'lucide-react';
 import authService from '../../../services/authService';
 import employeeService from '../../../services/employeeService';
+import { randomPassword, updateEmployeeById, resetEmployeePassword, deactivateEmployee, activateEmployee } from './employeeClient';
 import * as XLSX from 'xlsx';
 
 const Accounts = ({ userRole = 'CEO' }) => {
+  // View/Edit modal state
+  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
+  const [employeeModalLoading, setEmployeeModalLoading] = useState(false);
+  const [employeeModalError, setEmployeeModalError] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [employeeForm, setEmployeeForm] = useState({
+    fullName: '',
+    email: '',
+    role: 'Member',
+    department: '',
+    designation: '',
+    phone: '',
+    joinDate: new Date().toISOString().split('T')[0],
+    status: 'Active'
+  });
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
+  const [resetPasswordResult, setResetPasswordResult] = useState(null);
+  const [terminateLoading, setTerminateLoading] = useState(false);
+
+  const openEmployeeModal = (account) => {
+    // This table currently does not provide backend _id, so we treat `id` as the backend id when present.
+    setEmployeeModalError(null);
+    setSelectedEmployee(account);
+    setEmployeeForm({
+      fullName: account?.name || '',
+      email: account?.email || '',
+      role: account?.role || 'Member',
+      department: account?.department || '',
+      designation: account?.designation || '',
+      phone: account?.phone || '',
+      joinDate: account?.joinDate ? String(account.joinDate).slice(0,10) : new Date().toISOString().split('T')[0],
+      status: account?.status || 'Active'
+    });
+    setResetPasswordResult(null);
+    setEmployeeModalOpen(true);
+  };
+
+  const closeEmployeeModal = () => {
+    setEmployeeModalOpen(false);
+    setSelectedEmployee(null);
+    setEmployeeModalError(null);
+    setResetPasswordResult(null);
+  };
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -31,16 +76,16 @@ const Accounts = ({ userRole = 'CEO' }) => {
   const [stats, setStats] = useState({
   totalCreated: 0,
   thisMonth: 0,
-  byRole: { CEO: 0, Manager: 0, 'Team Lead': 0, Member: 0, HR: 0 }
+  byRole: { CEO: 0, COO: 0, Manager: 0, 'Team Lead': 0, Member: 0, HR: 0 }
 });
 
   // Available roles based on user role
   const getAvailableRoles = () => {
     if (userRole === 'CEO') {
-      return ['CEO', 'Manager', 'Team Lead', 'Member', 'Robotics & Simulation'];
+      return ['CEO', 'COO', 'Manager', 'Team Lead', 'Member', 'HR'];
     }
-    if (userRole === 'Manager') {
-      return ['Team Lead', 'Member'];
+    if (userRole === 'COO' || userRole === 'Manager') {
+      return ['COO', 'Manager', 'Team Lead', 'Member', 'HR'];
     }
     return ['Member'];
   };
@@ -51,10 +96,11 @@ const Accounts = ({ userRole = 'CEO' }) => {
   const generateEmployeeId = () => {
     const rolePrefix = {
       'CEO': 'CEO',
+      'COO': 'COO',
       'Manager': 'MGR',
       'Team Lead': 'LD',
       'Member': 'EMP',
-      'Robotics & Simulation': 'Robotics & Simulation'
+      'HR': 'HR'
     };
     
     const prefix = rolePrefix[formData.role] || 'EMP';
@@ -183,13 +229,14 @@ const Accounts = ({ userRole = 'CEO' }) => {
 
   const loadMockAllAccounts = () => {
     const mockAccounts = [
-      { id: 1, name: 'John Doe', initials: 'JD', role: 'CEO', department: 'Founding Team', date: '2020-01-15', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', password: 'Pass@123', phone: '+1 (555) 000-0001', designation: 'Chief Executive Officer', status: 'Active', joinDate: '2020-01-15', createdAt: '2020-01-15T00:00:00Z' },
-      { id: 2, name: 'Jane Smith', initials: 'JS', role: 'Manager', department: 'Platform and DevOps', date: '2020-03-20', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', password: 'Pass@456', phone: '+1 (555) 000-0002', designation: 'Operations Manager', status: 'Active', joinDate: '2020-03-20', createdAt: '2020-03-20T00:00:00Z' },
-      { id: 3, name: 'Mike Johnson', initials: 'MJ', role: 'Team Lead', department: 'Core Systems', date: '2021-02-10', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', password: 'Pass@789', phone: '+1 (555) 000-0003', designation: 'Engineering Lead', status: 'Active', joinDate: '2021-02-10', createdAt: '2021-02-10T00:00:00Z' },
-      { id: 4, name: 'Ravi Das', initials: 'RD', role: 'Member', department: 'Core Systems', date: '2022-06-01', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', password: 'Pass@101', phone: '+1 (555) 000-0004', designation: 'Frontend Developer', status: 'Active', joinDate: '2022-06-01', createdAt: '2022-06-01T00:00:00Z' },
-      { id: 5, name: 'Priya Sharma', initials: 'PS', role: 'Member', department: 'Core Systems', date: '2022-08-15', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', password: 'Pass@202', phone: '+1 (555) 000-0005', designation: 'Backend Developer', status: 'Active', joinDate: '2022-08-15', createdAt: '2022-08-15T00:00:00Z' },
-      { id: 6, name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: 'AI/LLM & Perception', date: '2023-01-10', email: 'sita.krishnan@spaceborn.com', employeeId: 'LD002', password: 'Pass@303', phone: '+1 (555) 000-0006', designation: 'Marketing Lead', status: 'Active', joinDate: '2023-01-10', createdAt: '2023-01-10T00:00:00Z' },
-      { id: 7, name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: 'Hardware & Integration', date: '2023-03-15', email: 'anil.mehta@spaceborn.com', employeeId: 'LD003', password: 'Pass@404', phone: '+1 (555) 000-0007', designation: 'Design Lead', status: 'Active', joinDate: '2023-03-15', createdAt: '2023-03-15T00:00:00Z' }
+      { id: 1, name: 'John Doe', initials: 'JD', role: 'CEO', department: 'Platform and DevOps', date: '2020-01-15', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', password: 'Pass@123', phone: '+1 (555) 000-0001', designation: 'Chief Executive Officer', status: 'Active', joinDate: '2020-01-15', createdAt: '2020-01-15T00:00:00Z' },
+      { id: 2, name: 'Aarav Mehta', initials: 'AM', role: 'COO', department: 'Platform and DevOps', date: '2021-01-10', email: 'aarav.mehta@spaceborn.com', employeeId: 'COO001', password: 'Pass@234', phone: '+1 (555) 000-0008', designation: 'Chief Operating Officer', status: 'Active', joinDate: '2021-01-10', createdAt: '2021-01-10T00:00:00Z' },
+      { id: 3, name: 'Jane Smith', initials: 'JS', role: 'Manager', department: 'Platform and DevOps', date: '2020-03-20', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', password: 'Pass@456', phone: '+1 (555) 000-0002', designation: 'Platform and DevOps Manager', status: 'Active', joinDate: '2020-03-20', createdAt: '2020-03-20T00:00:00Z' },
+      { id: 4, name: 'Mike Johnson', initials: 'MJ', role: 'Team Lead', department: 'Core Systems', date: '2021-02-10', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', password: 'Pass@789', phone: '+1 (555) 000-0003', designation: 'Core Systems Lead', status: 'Active', joinDate: '2021-02-10', createdAt: '2021-02-10T00:00:00Z' },
+      { id: 5, name: 'Ravi Das', initials: 'RD', role: 'Member', department: 'Core Systems', date: '2022-06-01', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', password: 'Pass@101', phone: '+1 (555) 000-0004', designation: 'Frontend Developer', status: 'Active', joinDate: '2022-06-01', createdAt: '2022-06-01T00:00:00Z' },
+      { id: 6, name: 'Priya Sharma', initials: 'PS', role: 'Member', department: 'Core Systems', date: '2022-08-15', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', password: 'Pass@202', phone: '+1 (555) 000-0005', designation: 'Backend Developer', status: 'Active', joinDate: '2022-08-15', createdAt: '2022-08-15T00:00:00Z' },
+      { id: 7, name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: 'AI/LLM & Perception', date: '2023-01-10', email: 'sita.krishnan@spaceborn.com', employeeId: 'LD002', password: 'Pass@303', phone: '+1 (555) 000-0006', designation: 'AI/LLM & Perception Lead', status: 'Active', joinDate: '2023-01-10', createdAt: '2023-01-10T00:00:00Z' },
+      { id: 8, name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: 'Hardware & Integration', date: '2023-03-15', email: 'anil.mehta@spaceborn.com', employeeId: 'LD003', password: 'Pass@404', phone: '+1 (555) 000-0007', designation: 'Hardware & Integration Lead', status: 'Active', joinDate: '2023-03-15', createdAt: '2023-03-15T00:00:00Z' }
     ];
     setAllAccounts(mockAccounts);
     setRecentlyCreated(mockAccounts.slice(-4).reverse());
@@ -213,10 +260,11 @@ const Accounts = ({ userRole = 'CEO' }) => {
   const fetchDepartments = async () => {
     try {
       const depts = await employeeService.getAllDepartments();
-      setDepartments(depts);
+      // Ensure no invalid departments show up in dropdowns
+      setDepartments(depts.filter(d => d !== 'Founding team'));
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation', 'Founding Team']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
     }
   };
 
@@ -231,7 +279,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
       
       if (response.ok) {
         const data = await response.json();
-        setStats(data);
+        setStats(data.data || data);
       } else if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockStats();
       }
@@ -250,10 +298,11 @@ const Accounts = ({ userRole = 'CEO' }) => {
       thisMonth: 2,
       byRole: {
         'CEO': 1,
+        'COO': 1,
         'Manager': 1,
         'Team Lead': 3,
         'Member': 2,
-        'Robotics & Simulation': 0
+        'HR': 0
       }
     });
   };
@@ -471,9 +520,213 @@ const Accounts = ({ userRole = 'CEO' }) => {
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-6 text-sm text-blue-700 flex items-center gap-2">
         <AlertCircle className="w-4 h-4" />
         {userRole === 'CEO' 
-          ? 'CEO - can create: Managers, Team Leads, Members, HR' 
-          : 'Manager - can create: Team Leads, Members'}
+          ? 'CEO - can create: COO, Managers, Team Leads, Members, HR'
+          : `${userRole} - can create: COO, Managers, Team Leads, Members, HR`}
       </div>
+
+      {/* Employee View/Edit Modal */}
+      {employeeModalOpen && selectedEmployee && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full mx-4 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Employee Details</h3>
+                <p className="text-sm text-gray-500">{selectedEmployee.employeeId || selectedEmployee.id}</p>
+              </div>
+              <button onClick={closeEmployeeModal} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {(employeeModalError || resetPasswordResult?.message || resetPasswordResult?.success === false) && (
+              <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                {employeeModalError || resetPasswordResult?.message}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">FULL NAME</label>
+                <input
+                  type="text"
+                  value={employeeForm.fullName}
+                  onChange={(e) => setEmployeeForm((s) => ({ ...s, fullName: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">EMAIL</label>
+                <input
+                  type="email"
+                  value={employeeForm.email}
+                  onChange={(e) => setEmployeeForm((s) => ({ ...s, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ROLE</label>
+                <input
+                  type="text"
+                  value={employeeForm.role}
+                  onChange={(e) => setEmployeeForm((s) => ({ ...s, role: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">DEPARTMENT</label>
+                <input
+                  type="text"
+                  value={employeeForm.department}
+                  onChange={(e) => setEmployeeForm((s) => ({ ...s, department: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">DESIGNATION</label>
+                <input
+                  type="text"
+                  value={employeeForm.designation}
+                  onChange={(e) => setEmployeeForm((s) => ({ ...s, designation: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">PHONE</label>
+                <input
+                  type="tel"
+                  value={employeeForm.phone}
+                  onChange={(e) => setEmployeeForm((s) => ({ ...s, phone: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">JOIN DATE</label>
+                <input
+                  type="date"
+                  value={employeeForm.joinDate}
+                  onChange={(e) => setEmployeeForm((s) => ({ ...s, joinDate: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">STATUS</label>
+                <select
+                  value={employeeForm.status}
+                  onChange={(e) => setEmployeeForm((s) => ({ ...s, status: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-3 justify-end">
+              <button
+                onClick={async () => {
+                  try {
+                    setEmployeeModalLoading(true);
+                    setEmployeeModalError(null);
+                    const token = authService.getToken();
+                    const id = selectedEmployee.employeeId || selectedEmployee.id;
+                    await updateEmployeeById(token, id, {
+                      name: employeeForm.fullName,
+                      email: employeeForm.email,
+                      role: employeeForm.role,
+                      department: employeeForm.department,
+                      designation: employeeForm.designation,
+                      phone: employeeForm.phone,
+                      joinDate: employeeForm.joinDate,
+                      status: employeeForm.status
+                    });
+                    await fetchAllAccounts();
+                    closeEmployeeModal();
+                  } catch (e) {
+                    setEmployeeModalError(e.message);
+                  } finally {
+                    setEmployeeModalLoading(false);
+                  }
+                }}
+                disabled={employeeModalLoading}
+                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {employeeModalLoading ? 'Saving...' : 'Save'}
+              </button>
+
+              <button
+                onClick={async () => {
+                  try {
+                    setResetPasswordLoading(true);
+                    setResetPasswordResult(null);
+                    const token = authService.getToken();
+                    const id = selectedEmployee.employeeId || selectedEmployee.id;
+                    const newPassword = randomPassword();
+                    const res = await resetEmployeePassword(token, id, newPassword);
+                    setResetPasswordResult({ ...res, newPassword });
+                  } catch (e) {
+                    setEmployeeModalError(e.message);
+                  } finally {
+                    setResetPasswordLoading(false);
+                  }
+                }}
+                disabled={resetPasswordLoading}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {resetPasswordLoading ? 'Resetting...' : 'Reset Password'}
+              </button>
+
+              <button
+                onClick={async () => {
+                  try {
+                    setTerminateLoading(true);
+                    setEmployeeModalError(null);
+                    const token = authService.getToken();
+                    const id = selectedEmployee.employeeId || selectedEmployee.id;
+                    if (employeeForm.status === 'Inactive') {
+                      await activateEmployee(token, id);
+                    } else {
+                      await deactivateEmployee(token, id);
+                    }
+                    await fetchAllAccounts();
+                    closeEmployeeModal();
+                  } catch (e) {
+                    setEmployeeModalError(e.message);
+                  } finally {
+                    setTerminateLoading(false);
+                  }
+                }}
+                disabled={terminateLoading}
+                className="px-4 py-2 border border-red-300 rounded-lg text-red-700 hover:bg-red-50 disabled:opacity-50"
+              >
+                {terminateLoading ? 'Processing...' : employeeForm.status === 'Inactive' ? 'Activate' : 'Terminate'}
+              </button>
+            </div>
+
+            {resetPasswordResult && (
+              <div className="mt-4 p-3 bg-yellow-50 rounded-lg text-sm text-yellow-800">
+                <div className="font-semibold">New Password Generated</div>
+                <div className="mt-2 flex items-center gap-3">
+                  <code className="font-mono bg-white px-2 py-1 rounded border">{resetPasswordResult.newPassword}</code>
+                  <button
+                    onClick={() => copyToClipboard(resetPasswordResult.newPassword, 'Password')}
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Credentials Modal */}
       {showCredentials && generatedCredentials && (
@@ -649,7 +902,14 @@ const Accounts = ({ userRole = 'CEO' }) => {
                       <td className="px-6 py-4 text-gray-600">{account.department}</td>
                       <td className="px-6 py-4"><span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">{account.status || 'Active'}</span></td>
                       <td className="px-6 py-4 text-gray-600">{account.joinDate ? new Date(account.joinDate).toLocaleDateString() : '-'}</td>
-                      <td className="px-6 py-4"><button className="text-blue-600 text-sm hover:text-blue-800">View</button></td>
+                      <td className="px-6 py-4">
+                        <button
+                          className="text-blue-600 text-sm hover:text-blue-800"
+                          onClick={() => openEmployeeModal(account)}
+                        >
+                          View
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -664,7 +924,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
 {stats.byRole ? (
   <div className="mt-6 bg-white rounded-xl border border-gray-200 p-4">
     <h3 className="text-sm font-semibold text-gray-700 mb-3">Role Distribution</h3>
-    <div className="grid grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       {Object.keys(stats.byRole).map((role) => (
         <div key={role} className="text-center p-2 bg-gray-50 rounded-lg">
           <p className="text-lg font-bold text-gray-900">{stats.byRole[role]}</p>

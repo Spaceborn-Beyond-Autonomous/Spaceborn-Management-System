@@ -32,7 +32,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
   // Available options
   const roles = ['Member', 'Lead', 'Manager', 'CEO'];
   const statuses = ['Active', 'Inactive', 'On Leave'];
-  const departmentsList = ['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation'];
+  const departmentsList = ['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception'];
 
   // Fetch team members from API
   useEffect(() => {
@@ -110,7 +110,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
     } catch (error) {
       console.error('Error fetching departments:', error);
       if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
-        setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
+        setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
       }
     }
   };
@@ -189,7 +189,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
         name: 'Sita Krishnan', 
         email: 'sita.krishnan@spaceborn.com',
         department: 'AI/LLM & Perception', 
-        designation: 'Marketing Lead', 
+        designation: 'AI/LLM & Perception Lead', 
         role: 'Lead', 
         status: 'Active',
         phone: '+91 98765 43211',

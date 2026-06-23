@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
 
 const { protect, authorize } = require('../middleware/authMiddleware');
@@ -18,7 +19,23 @@ const {
   getLeaveBalance,
   updateLeaveBalance,
   searchEmployees,
+  uploadEmployeeDocument,
 } = require('../controllers/userController');
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowedMimeTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    cb(null, allowedMimeTypes.includes(file.mimetype));
+  }
+});
 
 router.use(protect);
 
@@ -30,6 +47,7 @@ router.get('/employee-id/:employeeId', authorize('CEO', 'COO', 'Manager', 'Team 
 router.get('/department/:department', authorize('CEO', 'COO', 'Manager', 'Team Lead'), getEmployeesByDepartment);
 router.get('/role/:role', authorize('CEO', 'COO', 'Manager'), getEmployeesByRole);
 router.get('/manager/:managerId', authorize('CEO', 'COO', 'Manager', 'Team Lead'), getEmployeesByManager);
+router.post('/:id/documents', authorize('CEO', 'COO', 'Manager'), upload.single('document'), uploadEmployeeDocument);
 router.get('/:id/leave-balance', getLeaveBalance);
 router.patch('/:id/leave-balance', authorize('CEO', 'COO', 'Manager'), updateLeaveBalance);
 router.get('/:id', authorize('CEO', 'COO', 'Manager', 'Team Lead'), getEmployeeById);

@@ -1,7 +1,7 @@
-// src/components/Login/LoginSystem.js
 import React, { useState, useEffect } from 'react';
 import logo from '../../assets/spaceborn-logo.png';
 import ForgotPassword from './ForgotPassword';
+import { normalizeDepartmentFields } from '../../utils/departments';
 
 const LoginSystem = ({ onLoginSuccess }) => {
   const [employeeId, setEmployeeId] = useState('');
@@ -15,7 +15,6 @@ const LoginSystem = ({ onLoginSuccess }) => {
   const [lockoutTime, setLockoutTime] = useState(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  // Load remembered Employee ID
   useEffect(() => {
     const rememberedId = localStorage.getItem('rememberedEmployeeId');
     if (rememberedId) {
@@ -24,7 +23,6 @@ const LoginSystem = ({ onLoginSuccess }) => {
     }
   }, []);
 
-  // Check if account is locked
   const isAccountLocked = () => {
     if (isLocked && lockoutTime && Date.now() < lockoutTime) {
       const remainingMinutes = Math.ceil((lockoutTime - Date.now()) / 60000);
@@ -33,7 +31,29 @@ const LoginSystem = ({ onLoginSuccess }) => {
     return { locked: false };
   };
 
-  // Call backend API for login
+  // Auto-mark attendance on login
+  const markAttendance = async (user, token) => {
+    try {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      await fetch(`${API_BASE_URL}/attendance/auto-mark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: String(user.id),
+          userName: user.name,
+          employeeId: user.employeeId,
+          department: user.department,
+          role: user.role
+        })
+      });
+    } catch (e) {
+      console.log('Attendance mark skipped:', e.message);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -51,9 +71,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
       
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           employeeId: employeeId.toUpperCase(), 
           password: password 
@@ -78,14 +96,12 @@ const LoginSystem = ({ onLoginSuccess }) => {
         return;
       }
 
-      // Login successful!
       setLoginAttempts(0);
       setIsLocked(false);
       
-      const user = data.data.user;
+      const user = normalizeDepartmentFields(data.data.user);
       const token = data.data.token;
 
-      // Store session
       localStorage.setItem('authToken', token);
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('userSession', JSON.stringify({
@@ -102,6 +118,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
       }
 
       onLoginSuccess(user);
+      markAttendance(user, token);
       
     } catch (error) {
       console.error('Login error:', error);
@@ -111,11 +128,9 @@ const LoginSystem = ({ onLoginSuccess }) => {
     setIsLoading(false);
   };
 
-  // Quick login using backend
   const handleQuickLogin = async (empId, pwd) => {
     setEmployeeId(empId);
     setPassword(pwd);
-    
     setIsLoading(true);
     
     try {
@@ -123,9 +138,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
       
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           employeeId: empId.toUpperCase(), 
           password: pwd 
@@ -140,7 +153,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
         return;
       }
 
-      const user = data.data.user;
+      const user = normalizeDepartmentFields(data.data.user);
       const token = data.data.token;
 
       localStorage.setItem('authToken', token);
@@ -153,6 +166,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
 
       localStorage.setItem('rememberedEmployeeId', empId);
       onLoginSuccess(user);
+      markAttendance(user, token);
       
     } catch (error) {
       console.error('Quick login error:', error);
@@ -177,7 +191,6 @@ const LoginSystem = ({ onLoginSuccess }) => {
 
   const lockStatus = isAccountLocked();
 
-  // Show Forgot Password component if requested
   if (showForgotPassword) {
     return <ForgotPassword onBackToLogin={handleBackToLogin} />;
   }
@@ -185,13 +198,11 @@ const LoginSystem = ({ onLoginSuccess }) => {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <img src={logo} alt="Spaceborn" className="h-24 w-auto mx-auto mb-4" />
-          <p className="text-gray-500">Workforce & Operations Management System</p>
+          <p className="text-gray-500">Workforce & Platform and DevOps Management System</p>
         </div>
 
-        {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <div className="text-center mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Employee Login</h2>
@@ -212,9 +223,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Employee ID
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Employee ID</label>
               <input
                 type="text"
                 value={employeeId}
@@ -228,9 +237,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -291,101 +298,49 @@ const LoginSystem = ({ onLoginSuccess }) => {
             </button>
           </form>
 
-          {/* Info Section */}
           <div className="mt-6 pt-6 border-t border-gray-100">
             <div className="text-center text-sm text-gray-500">
               <p>⏰ Working Hours: 8:00 AM - 12:00 AM</p>
               <p className="mt-1">📍 Mandatory login within shift timing</p>
-              <p className="mt-2 text-xs text-gray-400">
-                Employee IDs are assigned and controlled by your Manager
-              </p>
-              <p className="mt-1 text-xs text-gray-400">
-                🔒 5 failed attempts = 15 minutes lockout
-              </p>
+              <p className="mt-2 text-xs text-gray-400">Employee IDs are assigned and controlled by your Manager</p>
+              <p className="mt-1 text-xs text-gray-400">🔒 5 failed attempts = 15 minutes lockout</p>
             </div>
           </div>
         </div>
 
-        {/* Demo Accounts Section - Uses Backend API */}
         <div className="mt-6">
-          <p className="text-center text-xs text-gray-400 mb-3">
-            Demo Employee IDs (Click to quick login via backend)
-          </p>
+          <p className="text-center text-xs text-gray-400 mb-3">Demo Employee IDs (Click to quick login via backend)</p>
           <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => handleQuickLogin('CEO001', 'admin123')}
-              className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
-            >
+            <button onClick={() => handleQuickLogin('CEO001', 'admin123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
               <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold">JD</div>
-              <div>
-                <div className="text-xs font-medium text-black">John Doe</div>
-                <div className="text-xs text-gray-400">CEO001 · CEO</div>
-              </div>
+              <div><div className="text-xs font-medium text-black">John Doe</div><div className="text-xs text-gray-400">CEO001 · CEO</div></div>
             </button>
-            <button
-              onClick={() => handleQuickLogin('COO001', 'admin123')}
-              className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
-            >
-              <div className="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-xs font-bold">AK</div>
-              <div>
-                <div className="text-xs font-medium text-black">Alex Kim</div>
-                <div className="text-xs text-gray-400">COO001 · COO</div>
-              </div>
-            </button>
-            <button
-              onClick={() => handleQuickLogin('MGR001', 'manager123')}
-              className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
-            >
+            <button onClick={() => handleQuickLogin('MGR001', 'manager123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
               <div className="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center text-xs font-bold">JS</div>
-              <div>
-                <div className="text-xs font-medium text-black">Jane Smith</div>
-                <div className="text-xs text-gray-400">MGR001 · Manager</div>
-              </div>
+              <div><div className="text-xs font-medium text-black">Jane Smith</div><div className="text-xs text-gray-400">MGR001 · Manager</div></div>
             </button>
-            <button
-              onClick={() => handleQuickLogin('LD001', 'lead123')}
-              className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
-            >
+            <button onClick={() => handleQuickLogin('COO001', 'coo123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
+              <div className="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center text-xs font-bold">AM</div>
+              <div><div className="text-xs font-medium text-black">Aarav Mehta</div><div className="text-xs text-gray-400">COO001 - COO</div></div>
+            </button>
+            <button onClick={() => handleQuickLogin('LD001', 'lead123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
               <div className="w-8 h-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold">MJ</div>
-              <div>
-                <div className="text-xs font-medium text-black">Mike Johnson</div>
-                <div className="text-xs text-gray-400">LD001 · Team Lead</div>
-              </div>
+              <div><div className="text-xs font-medium text-black">Mike Johnson</div><div className="text-xs text-gray-400">LD001 · Team Lead</div></div>
             </button>
-            <button
-              onClick={() => handleQuickLogin('EMP001', 'member123')}
-              className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
-            >
+            <button onClick={() => handleQuickLogin('EMP001', 'member123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
               <div className="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-bold">RD</div>
-              <div>
-                <div className="text-xs font-medium text-black">Ravi Das</div>
-                <div className="text-xs text-gray-400">EMP001 · Member</div>
-              </div>
+              <div><div className="text-xs font-medium text-black">Ravi Das</div><div className="text-xs text-gray-400">EMP001 · Member</div></div>
             </button>
-            <button
-              onClick={() => handleQuickLogin('EMP002', 'member123')}
-              className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
-            >
+            <button onClick={() => handleQuickLogin('EMP002', 'member123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
               <div className="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-bold">PS</div>
-              <div>
-                <div className="text-xs font-medium text-black">Priya Sharma</div>
-                <div className="text-xs text-gray-400">EMP002 · Member</div>
-              </div>
+              <div><div className="text-xs font-medium text-black">Priya Sharma</div><div className="text-xs text-gray-400">EMP002 · Member</div></div>
             </button>
-            <button
-              onClick={() => handleQuickLogin('HR001', 'hr123')}
-              className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left"
-            >
+            <button onClick={() => handleQuickLogin('HR001', 'hr123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
               <div className="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-bold">NG</div>
-              <div>
-                <div className="text-xs font-medium text-black">Neha Gupta</div>
-                <div className="text-xs text-gray-400">HR001 · HR</div>
-              </div>
+              <div><div className="text-xs font-medium text-black">Neha Gupta</div><div className="text-xs text-gray-400">HR001 · HR</div></div>
             </button>
           </div>
-          <p className="text-center text-xs text-gray-400 mt-3">
-            ⚠️ 5 failed attempts will lock account for 15 minutes
-          </p>
+          <p className="text-center text-xs text-gray-400 mt-3">⚠️ 5 failed attempts will lock account for 15 minutes</p>
         </div>
       </div>
     </div>

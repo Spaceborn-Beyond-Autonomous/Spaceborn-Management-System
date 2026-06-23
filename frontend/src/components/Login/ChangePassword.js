@@ -8,13 +8,13 @@ class AuthService {
     
     // Mock user database for development
     this.mockUsers = {
-      'CEO001': { password: 'admin123', name: 'John Doe', role: 'CEO', department: 'Founding Team', employeeId: 'CEO001' },
+      'CEO001': { password: 'admin123', name: 'John Doe', role: 'CEO', department: 'Platform and DevOps', employeeId: 'CEO001' },
       'MGR001': { password: 'manager123', name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', employeeId: 'MGR001' },
       'LD001': { password: 'lead123', name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', employeeId: 'LD001' },
       'EMP001': { password: 'member123', name: 'Ravi Das', role: 'Member', department: 'Core Systems', employeeId: 'EMP001' },
       'EMP002': { password: 'member123', name: 'Priya Sharma', role: 'Member', department: 'Core Systems', employeeId: 'EMP002' },
       'EMP003': { password: 'member123', name: 'Nisha Kumar', role: 'Member', department: 'Core Systems', employeeId: 'EMP003' },
-      'HR001': { password: 'hr123', name: 'Neha Gupta', role: 'Robotics & Simulation', department: 'Robotics & Simulation', employeeId: 'HR001' }
+      'HR001': { password: 'hr123', name: 'Neha Gupta', role: 'HR', department: 'Robotics & Simulation', employeeId: 'HR001' }
     };
     
     // Bind methods
@@ -255,8 +255,8 @@ class AuthService {
     
     // Check if user has permission (CEO or Manager)
     const currentUser = this.getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager')) {
-      return { success: false, error: 'Only CEO and Managers can reset passwords' };
+    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager' && currentUser.role !== 'COO')) {
+      return { success: false, error: 'Only CEO, COO and Managers can reset passwords' };
     }
     
     // Mock mode for development

@@ -10,7 +10,7 @@ exports.getHourBreaks = async (req, res) => {
     let query = {};
     
     if (userId) query.userId = parseInt(userId);
-    if (role === 'Manager' && department) query.department = department;
+    if ((role === 'Manager' || role === 'COO') && department) query.department = department;
     
     const breaks = await HourBreak.find(query).sort({ createdAt: -1 });
     res.status(200).json(formatResponse(true, 'Breaks fetched', breaks));

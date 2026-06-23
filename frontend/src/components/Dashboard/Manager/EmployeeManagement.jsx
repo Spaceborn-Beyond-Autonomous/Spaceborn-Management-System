@@ -1,16 +1,14 @@
 // src/components/Dashboard/Manager/EmployeeManagement.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { DEPARTMENTS, normalizeDepartment } from '../../../utils/departments';
 import { 
   employeeMasterData, 
-  getEmployeeById, 
-  updateEmployeeDocument,
   addEmployee,
-  updateEmployee,
   deleteEmployee,
   resetEmployeePassword,
   getEmployeeStats
 } from '../../../data/employeeData';
-import googleDriveService from '../../../services/googleDriveService';
+import employeeService from '../../../services/employeeService';
 import { useGoogleLogin } from '@react-oauth/google';
 
 const EmployeeManagement = ({ 
@@ -60,7 +58,6 @@ const EmployeeManagement = ({
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setDriveToken(tokenResponse);
-      googleDriveService.setAccessToken(tokenResponse.access_token);
     },
     scope: 'https://www.googleapis.com/auth/drive.file',
   });
@@ -69,7 +66,7 @@ const EmployeeManagement = ({
   const allEmployees = employees.length > 0 ? employees : Object.values(employeeMasterData);
   
   // Get unique departments
-  const departments = [...new Set(allEmployees.map(emp => emp.department))];
+  const departments = DEPARTMENTS;
   
   // Get stats
   const stats = getEmployeeStats();
@@ -82,7 +79,7 @@ const EmployeeManagement = ({
       emp.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.employeeId?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesDepartment = departmentFilter === 'all' || emp.department === departmentFilter;
+    const matchesDepartment = departmentFilter === 'all' || normalizeDepartment(emp.department) === departmentFilter;
     const matchesStatus = statusFilter === 'all' || emp.employmentStatus === statusFilter;
     
     return matchesSearch && matchesDepartment && matchesStatus;
@@ -194,24 +191,14 @@ const EmployeeManagement = ({
     }, 200);
 
     try {
-      const result = await googleDriveService.uploadFile(
-        file, 
-        selectedEmployee.id, 
-        selectedEmployee.department, 
+      const updatedEmployee = await employeeService.uploadEmployeeDocument(
+        selectedEmployee.id || selectedEmployee._id,
+        file,
         documentType,
-        selectedEmployee.name
+        driveToken.access_token
       );
       
       setUploadProgress(100);
-      
-      // Update employee data with new file info
-      const updatedEmployee = await updateEmployeeDocument(
-        selectedEmployee.id,
-        documentType,
-        result.fileId,
-        file.name
-      );
-      
       setSelectedEmployee(updatedEmployee);
       setShowDocumentUpload(false);
       setUploadProgress(null);
@@ -238,7 +225,6 @@ const EmployeeManagement = ({
   const getRoleBadge = (role) => {
     const badges = {
       CEO: 'bg-purple-100 text-purple-700',
-      COO: 'bg-gray-800 text-white',
       Manager: 'bg-blue-100 text-blue-700',
       'Team Lead': 'bg-green-100 text-green-700',
       Member: 'bg-gray-100 text-gray-700'
@@ -283,7 +269,6 @@ const EmployeeManagement = ({
         <div className="flex items-center space-x-4 text-sm">
           <span className="text-gray-500">Employees by Role:</span>
           <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded">CEO (1)</span>
-          <span className="px-2 py-1 bg-gray-800 text-white rounded">COO (1)</span>
           <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded">Manager (1)</span>
           <span className="px-2 py-1 bg-green-100 text-green-700 rounded">Lead (2)</span>
           <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">Member (5)</span>
@@ -950,30 +935,15 @@ const EmployeeManagement = ({
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="">Select Department</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Design">Design</option>
-                    <option value="Sales">Sales</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Operations">Operations</option>
+                    <option value="Core Systems">Core Systems</option>
+                    <option value="Hardware & Integration">Hardware & Integration</option>
+                    <option value="Robotics & Simulation">Robotics & Simulation</option>
+                    <option value="AI/LLM & Perception">AI/LLM & Perception</option>
+                    <option value="Platform and DevOps">Platform and DevOps</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
-                  <select
-                    value={newEmployee.role}
-                    onChange={(e) => setNewEmployee({...newEmployee, role: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                  >
-                    <option value="Member">Member</option>
-                    <option value="Team Lead">Team Lead</option>
-                    <option value="Manager">Manager</option>
-                    <option value="COO">COO</option>
-                    <option value="CEO">CEO</option>
-                    <option value="HR">HR</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Designation/Role</label>
                   <input
                     type="text"
                     value={newEmployee.designation}

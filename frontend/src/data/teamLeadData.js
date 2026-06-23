@@ -2,7 +2,7 @@ export const teamLeadData = {
   user: {
     name: 'John Doe',
     role: 'Team Lead',
-    team: 'Frontend Engineering'
+    team: 'Frontend Core Systems'
   },
   
   sprintMetrics: {

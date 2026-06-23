@@ -22,7 +22,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
   });
 
   // Available departments
-  const departments = ['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'All'];
+  const departments = ['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception', 'All'];
 // Safe array helper
 const safeMeetings = scheduledMeetings || [];
   // Fetch meetings from API
@@ -99,7 +99,7 @@ const safeMeetings = scheduledMeetings || [];
       },
       { 
         id: 2, 
-        title: 'Design System Review', 
+        title: 'Hardware & Integration System Review', 
         department: 'Hardware & Integration', 
         createdBy: 'John Doe',
         createdById: 2,
@@ -129,7 +129,7 @@ const safeMeetings = scheduledMeetings || [];
       },
       { 
         id: 4, 
-        title: 'Marketing Campaign Kickoff', 
+        title: 'AI/LLM & Perception Campaign Kickoff', 
         department: 'AI/LLM & Perception', 
         createdBy: 'Sita Krishnan',
         createdById: 4,
@@ -139,7 +139,7 @@ const safeMeetings = scheduledMeetings || [];
         description: 'Kickoff the new marketing campaign',
         meetingLink: 'https://meet.google.com/jkl-mno-pqr',
         status: 'upcoming',
-        attendees: ['Sita Krishnan', 'Marketing Team'],
+        attendees: ['Sita Krishnan', 'AI/LLM & Perception Team'],
         createdAt: '2026-05-30T11:00:00Z'
       }
     ];

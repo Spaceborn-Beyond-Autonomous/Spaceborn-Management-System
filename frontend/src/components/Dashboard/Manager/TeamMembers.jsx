@@ -212,7 +212,7 @@ const TeamMembers = ({ userRole = 'Team Lead' }) => {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Team Members</h1>
-        <p className="text-gray-500 mt-1">Engineering department team members</p>
+        <p className="text-gray-500 mt-1">Core Systems department team members</p>
       </div>
 
       {/* Stats Cards */}

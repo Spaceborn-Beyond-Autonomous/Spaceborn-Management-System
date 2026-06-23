@@ -18,7 +18,7 @@ const isOverdue = (task) => {
 router.get('/', protect, authorize('CEO', 'COO', 'Manager'), async (req, res) => {
   try {
     const { severity, status } = req.query;
-    const departmentFilter = req.user.role === 'Manager' ? { department: req.user.department } : {};
+    const departmentFilter = (req.user.role === 'Manager' || req.user.role === 'COO') ? { department: req.user.department } : {};
     const [tasks, requests] = await Promise.all([
       Task.find(departmentFilter).lean(),
       ResourceRequest.find(departmentFilter).lean()
@@ -57,7 +57,7 @@ router.get('/', protect, authorize('CEO', 'COO', 'Manager'), async (req, res) =>
         mitigation: 'Prioritize high-impact resource requests and clear stale approvals.',
         trend: 'stable',
         status: 'monitoring',
-        owner: req.user.role === 'Manager' ? req.user.department : 'Operations',
+        owner: (req.user.role === 'Manager' || req.user.role === 'COO') ? req.user.department : 'Platform and DevOps',
         mitigationStatus: 'planned',
         createdAt: new Date().toISOString().split('T')[0],
         updatedAt: new Date().toISOString().split('T')[0],

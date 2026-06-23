@@ -158,7 +158,7 @@ const AutomationDashboard = ({ user, userRole = 'Manager' }) => {
     // Mock reminders
     setReminders([
       { id: 1, title: 'Submit Weekly Report', type: 'report', dueDate: '2026-06-14', status: 'pending', assignedTo: 'Team Members' },
-      { id: 2, title: 'Team Meeting at 3 PM', type: 'meeting', dueDate: '2026-06-12', status: 'pending', assignedTo: 'Engineering Team' }
+      { id: 2, title: 'Team Meeting at 3 PM', type: 'meeting', dueDate: '2026-06-12', status: 'pending', assignedTo: 'Core Systems Team' }
     ]);
 
     // Mock warnings for department

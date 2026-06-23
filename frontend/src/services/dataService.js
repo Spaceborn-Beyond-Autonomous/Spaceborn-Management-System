@@ -525,6 +525,7 @@ class DataService {
         result = await api.getCEODashboard();
         break;
       case 'Manager':
+      case 'COO':
         result = await api.getManagerDashboard();
         break;
       case 'Team Lead':

@@ -131,11 +131,11 @@ const AIInsights = ({ userRole = 'CEO' }) => {
           total: 20
         },
         aiInsights: {
-          summary: 'Design system updates completed ahead of schedule. Excellent collaboration with engineering team. Component library adoption is progressing well.',
+          summary: 'Hardware & Integration system updates completed ahead of schedule. Excellent collaboration with engineering team. Component library adoption is progressing well.',
           productivityScore: 90,
           codeQuality: 85,
           velocity: 88,
-          strengths: ['UI design', 'Design systems', 'Cross-team collaboration'],
+          strengths: ['UI design', 'Hardware & Integration systems', 'Cross-team collaboration'],
           improvements: ['User research documentation', 'Prototyping speed'],
           recommendations: [
             'Lead design workshops for frontend team',
@@ -151,7 +151,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
       {
         id: 'member_5',
         name: 'Anil Mehta',
-        role: 'Design Head — Lead',
+        role: 'Hardware & Integration Head — Lead',
         department: 'Hardware & Integration',
         avatar: 'AM',
         status: 'at_risk',
@@ -177,7 +177,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
           recentTasks: [
             { id: 't12', title: 'Beta design iteration', status: 'overdue', dueDate: '2026-06-09' },
             { id: 't13', title: 'Client feedback review', status: 'in_progress', dueDate: '2026-06-12' },
-            { id: 't14', title: 'Design system governance', status: 'completed', completedAt: '2026-06-08' }
+            { id: 't14', title: 'Hardware & Integration system governance', status: 'completed', completedAt: '2026-06-08' }
           ]
         }
       }
@@ -211,7 +211,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
       },
       {
         id: 'meeting_2',
-        title: 'Design System Review',
+        title: 'Hardware & Integration System Review',
         department: 'Hardware & Integration',
         date: '2026-06-06',
         time: '2:00 PM',
@@ -227,7 +227,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
           'Train engineering team on new design system',
           'Create adoption metrics dashboard'
         ],
-        attendees: ['Anil Mehta', 'Pooja B', 'Engineering Lead', 'Product Designers'],
+        attendees: ['Anil Mehta', 'Pooja B', 'Core Systems Lead', 'Product Designers'],
         keyMetrics: {
           componentsDesigned: 24,
           reviewCycleTime: 3,
@@ -249,7 +249,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
       },
       {
         id: 'meeting_4',
-        title: 'Marketing Campaign Kickoff',
+        title: 'AI/LLM & Perception Campaign Kickoff',
         department: 'AI/LLM & Perception',
         date: '2026-06-07',
         time: '3:30 PM',
@@ -265,7 +265,7 @@ const AIInsights = ({ userRole = 'CEO' }) => {
           'Set up analytics tracking',
           'Coordinate with sales team for leads handoff'
         ],
-        attendees: ['Marketing Lead', 'Content Team', 'Sales Director'],
+        attendees: ['AI/LLM & Perception Lead', 'Content Team', 'Sales Director'],
         keyMetrics: {
           budget: 50000,
           expectedReach: 500000,
@@ -278,12 +278,12 @@ const AIInsights = ({ userRole = 'CEO' }) => {
       {
         id: 'lead_1',
         name: 'Priya Sharma',
-        role: 'Engineering Lead',
+        role: 'Core Systems Lead',
         department: 'Core Systems',
         date: '2026-06-11',
         status: 'on_track',
         summary: 'Team completed 8 tasks today, bringing the Alpha project to 82% completion — ahead of the projected milestone. Ravi Das resolved two critical frontend bugs that were blocking QA sign-off. Nisha Kumar completed the database schema migration for the new auth module. No blockers reported. Sprint velocity is trending above average at 94%. The team is well-positioned to hit the Beta handoff by end of next week.',
-        expandedSummary: 'Engineering team continues to demonstrate strong performance. Code quality metrics improved by 8% this week. The frontend optimization efforts are paying off with 15% faster page load times. Backend API response times are within SLA. The team has proactively identified potential bottlenecks in the deployment pipeline and proposed solutions. Resource utilization is optimal with no overtime reported. Priya recommends maintaining current pace and has flagged one dependency on the Design team for final UI assets.',
+        expandedSummary: 'Core Systems team continues to demonstrate strong performance. Code quality metrics improved by 8% this week. The frontend optimization efforts are paying off with 15% faster page load times. Backend API response times are within SLA. The team has proactively identified potential bottlenecks in the deployment pipeline and proposed solutions. Resource utilization is optimal with no overtime reported. Priya recommends maintaining current pace and has flagged one dependency on the Hardware & Integration team for final UI assets.',
         metrics: {
           tasksDone: 8,
           activeBlockers: 0,
@@ -299,12 +299,12 @@ const AIInsights = ({ userRole = 'CEO' }) => {
       {
         id: 'lead_2',
         name: 'Anil Mehta',
-        role: 'Design Lead',
+        role: 'Hardware & Integration Lead',
         department: 'Hardware & Integration',
         date: '2026-06-11',
         status: 'at_risk',
-        summary: 'The Design team made progress on Gamma project assets but Beta design iteration remains behind schedule at 45%. The primary cause is a resource bottleneck — Pooja B has been pulled across two simultaneous projects and is nearing capacity. Anil has formally flagged this in the daily summary and is requesting either a temporary resource reallocation or a deadline extension for the Beta design phase.',
-        expandedSummary: 'The design team is facing capacity challenges this sprint. Pooja B is handling both Gamma project deliverables and Beta design iteration simultaneously, leading to reduced throughput on both fronts. The client feedback rounds for Beta are pending review, which is blocking finalization of design assets. Internal resources have been consolidated but external handoffs remain blocked until resource can be allocated. Anil has initiated conversations with project management to explore options. Design system governance tasks are on hold pending resolution of resource allocation. The team\'s creative output quality remains high despite constraints, but burnout risk is increasing.',
+        summary: 'The Hardware & Integration team made progress on Gamma project assets but Beta design iteration remains behind schedule at 45%. The primary cause is a resource bottleneck — Pooja B has been pulled across two simultaneous projects and is nearing capacity. Anil has formally flagged this in the daily summary and is requesting either a temporary resource reallocation or a deadline extension for the Beta design phase.',
+        expandedSummary: 'The design team is facing capacity challenges this sprint. Pooja B is handling both Gamma project deliverables and Beta design iteration simultaneously, leading to reduced throughput on both fronts. The client feedback rounds for Beta are pending review, which is blocking finalization of design assets. Internal resources have been consolidated but external handoffs remain blocked until resource can be allocated. Anil has initiated conversations with project management to explore options. Hardware & Integration system governance tasks are on hold pending resolution of resource allocation. The team\'s creative output quality remains high despite constraints, but burnout risk is increasing.',
         metrics: {
           tasksDone: 5,
           activeBlockers: 2,

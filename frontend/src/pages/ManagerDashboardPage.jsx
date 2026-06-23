@@ -62,7 +62,7 @@ const ManagerDashboardPage = ({ user: propUser }) => {
 
   const verifyManagerAccess = async (currentUser) => {
     // If already has manager role, quick check
-    if (currentUser.role === 'Manager') {
+    if (currentUser.role === 'Manager' || currentUser.role === 'COO') {
       return true;
     }
     
@@ -82,7 +82,7 @@ const ManagerDashboardPage = ({ user: propUser }) => {
     }
     
     // Fallback to local check
-    return currentUser.role === 'Manager';
+    return currentUser.role === 'Manager' || currentUser.role === 'COO';
   };
 
   const loadMenuItems = async (currentUser) => {

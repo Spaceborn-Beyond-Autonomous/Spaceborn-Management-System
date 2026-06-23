@@ -4,10 +4,7 @@ const cors = require('cors');
 const app = express();
 
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://spaceborn-management-system.vercel.app'
-  ],
+  origin: 'http://localhost:3000',
   credentials: true
 }));
 
@@ -24,6 +21,7 @@ app.get('/', (req, res) => {
 // Centralize API mounting here so whichever entrypoint starts the server,
 // dashboard routes are always available.
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/config', require('./routes/configRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/employees', require('./routes/employeeRoutes'));
 app.use('/api', require('./routes/teamMembersRoutes'));

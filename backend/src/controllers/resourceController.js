@@ -2,6 +2,10 @@
 console.log('RESOURCE CONTROLLER FILE EXECUTING');
 const ResourceRequest = require('../models/ResourceRequest');
 const User = require('../models/User');
+const {
+  notifyResourceRequested,
+  notifyResourceDecision
+} = require('../utils/notificationDispatcher');
 
 const normalizeRoleForRequest = (role = 'Member') => {
   if (role === 'Team Lead') return 'TeamLead';
@@ -62,6 +66,8 @@ exports.createRequest = async (req, res) => {
       approvalLevel: req.body.approvalLevel || 'TeamLead'
     });
 
+    await notifyResourceRequested(request);
+
     res.status(201).json({
       success: true,
       message: 'Resource request created successfully',
@@ -118,7 +124,7 @@ exports.getPendingRequests = async (req, res) => {
       filter.requesterRole = 'Member';
     }
 
-    if (req.user.role === 'Manager') {
+    if (req.user.role === 'Manager' || req.user.role === 'COO') {
       filter.requesterRole = {
         $in: ['Member', 'TeamLead']
       };
@@ -181,7 +187,7 @@ exports.getRequests = async (req, res) => {
     if (department) filter.department = department;
     if (requester === 'me') filter.requester = req.user._id;
 
-    if (req.user.role === 'Manager' && !department) {
+    if ((req.user.role === 'Manager' || req.user.role === 'COO') && !department) {
       filter.department = req.user.department;
     }
 
@@ -231,6 +237,8 @@ exports.approveRequest = async (req, res) => {
 
     await request.save();
 
+    await notifyResourceDecision(request, 'approved');
+
     res.status(200).json({
       success: true,
       message: 'Request approved successfully',
@@ -277,6 +285,8 @@ exports.rejectRequest = async (req, res) => {
     request.rejectedAt = new Date();
 
     await request.save();
+
+    await notifyResourceDecision(request, 'rejected');
 
     res.status(200).json({
       success: true,

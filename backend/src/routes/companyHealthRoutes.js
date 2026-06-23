@@ -6,6 +6,7 @@ const Task = require('../models/Task');
 const Leave = require('../models/Leave');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
+
 router.get('/', protect, authorize('CEO'), async (req, res) => {
   try {
     const [users, tasks, leaves] = await Promise.all([

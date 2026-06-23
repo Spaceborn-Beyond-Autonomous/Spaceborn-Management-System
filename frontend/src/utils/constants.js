@@ -1,5 +1,6 @@
 // src/utils/constants.js
 // Dynamic constants that can be fetched from API
+import { DEPARTMENTS, normalizeDepartments } from './departments';
 
 export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -19,7 +20,7 @@ export const getRoles = async () => {
     MANAGER: 'Manager',
     TEAM_LEAD: 'Team Lead',
     MEMBER: 'Member',
-    HR: 'Robotics & Simulation'
+    HR: 'HR'
   };
 };
 
@@ -51,12 +52,12 @@ export const getDepartments = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/departments`);
     if (response.ok) {
-      return await response.json();
+      return normalizeDepartments(await response.json());
     }
   } catch (error) {
     console.log('Using default departments');
   }
-  return [];
+  return DEPARTMENTS;
 };
 
 // Session constants (configurable via API)

@@ -4,7 +4,7 @@ const projectSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     description: { type: String, default: '' },
-    department: { type: String, default: 'Engineering' },
+    department: { type: String, default: 'Core Systems' },
     lead: { type: String, default: '' },
     dueDate: { type: String, default: '' },
     priority: {

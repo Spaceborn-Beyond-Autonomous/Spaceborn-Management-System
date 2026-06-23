@@ -1,9 +1,12 @@
 // src/components/Dashboard/Manager/TeamReports.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import reportService from '../../../services/reportService';
 import roadmapService from '../../../services/roadmapService';
 
 const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
+  const isExecutiveViewer = userRole === 'COO';
+  const roadmapAudienceText = isExecutiveViewer ? 'COO View' : 'Manager View';
+  const issuedByText = isExecutiveViewer ? 'team leads' : 'your team lead';
   const [reports, setReports] = useState([]);
   const [sharedRoadmaps, setSharedRoadmaps] = useState([]);
   const [activeTab, setActiveTab] = useState('daily');
@@ -11,7 +14,6 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
   const [dateFilter, setDateFilter] = useState('');
   const [teamMembers, setTeamMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState('all');
-  const [filterDepartment, setFilterDepartment] = useState(department || 'all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRoadmap, setSelectedRoadmap] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -27,7 +29,7 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
 
   useEffect(() => {
     fetchAllData();
-  }, [department]);
+  }, [department, userRole]);
 
   const showToastMessage = (message, type = 'success') => {
     setToast({ message, type });
@@ -37,19 +39,21 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // Fetch reports for the department
-      const reportsData = await reportService.getReportsByDepartment(department);
+      // Fetch reports for the department, or all reports for COO.
+      const reportsData = isExecutiveViewer
+        ? await reportService.getAllReports()
+        : await reportService.getReportsByDepartment(department);
       setReports(reportsData);
       
       // Get team members
       const members = [...new Set(reportsData.map(r => r.userName))];
       setTeamMembers(members);
       
-      // Fetch shared roadmaps for the department
-      await fetchSharedRoadmaps();
+      // Fetch issued roadmaps for the department, or all issued roadmaps for COO.
+      const roadmapsData = await fetchSharedRoadmaps();
       
       // Calculate stats
-      calculateStats(reportsData, sharedRoadmaps);
+      calculateStats(reportsData, roadmapsData);
       
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -63,25 +67,18 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
 
   const fetchSharedRoadmaps = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/roadmaps/shared?department=${department}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
+      const filters = { status: 'shared' };
+      if (!isExecutiveViewer && department) filters.department = department;
+      const data = await roadmapService.getAllRoadmaps(filters);
+
+      if (data.length > 0) {
         setSharedRoadmaps(data);
-      } else {
-        loadMockRoadmaps();
+        return data;
       }
+      return loadMockRoadmaps();
     } catch (error) {
       console.error('Error fetching roadmaps:', error);
-      loadMockRoadmaps();
+      return loadMockRoadmaps();
     }
   };
 
@@ -121,7 +118,7 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
         id: 3,
         userId: 'emp_003',
         userName: 'Priya Sharma',
-        userRole: 'Engineering Lead',
+        userRole: 'Core Systems Lead',
         department: department || 'Core Systems',
         employeeId: 'ENG003',
         date: '2026-06-10',
@@ -140,16 +137,18 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
         department: department || 'Hardware & Integration',
         employeeId: 'DES001',
         date: '2026-06-10',
-        completedTasks: '- Dashboard mockups\n- Design system updates\n- Icon set creation',
+        completedTasks: '- Dashboard mockups\n- Hardware & Integration system updates\n- Icon set creation',
         ongoingWork: 'Mobile app designs',
-        issuesFaced: 'Design tool compatibility',
+        issuesFaced: 'Hardware & Integration tool compatibility',
         nextDayPlan: 'Complete user flow diagrams',
         submittedAt: '2026-06-10T16:45:00Z',
         reviewed: false
       }
     ];
     
-    const deptFiltered = mockReports.filter(r => r.department === department);
+    const deptFiltered = isExecutiveViewer || !department
+      ? mockReports
+      : mockReports.filter(r => r.department === department);
     setReports(deptFiltered);
     
     const members = [...new Set(deptFiltered.map(r => r.userName))];
@@ -170,7 +169,7 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
         sharedBy: {
           id: 'lead_001',
           name: 'Priya Sharma',
-          role: 'Engineering Lead',
+          role: 'Core Systems Lead',
           email: 'priya.sharma@spaceborn.com',
           avatar: 'PS'
         },
@@ -201,16 +200,19 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
     ];
     
     // Filter roadmaps by department
-    const deptFiltered = mockRoadmaps.filter(r => r.department === department);
+    const deptFiltered = isExecutiveViewer || !department
+      ? mockRoadmaps
+      : mockRoadmaps.filter(r => r.department === department);
     setSharedRoadmaps(deptFiltered);
     calculateStats(reports, deptFiltered);
+    return deptFiltered;
   };
 
   const calculateStats = (reportsData, roadmapsData) => {
     const totalReportsCount = reportsData.length;
-    const teamMembersCount = teamMembers.length;
+    const teamMembersCount = [...new Set(reportsData.map(r => r.userName))].length;
     const completionRateValue = teamMembersCount > 0 ? ((totalReportsCount / (teamMembersCount * 30)) * 100).toFixed(1) : 0;
-    const activeRoadmapsCount = roadmapsData.filter(r => r.status === 'active').length;
+    const activeRoadmapsCount = roadmapsData.filter(r => ['active', 'shared'].includes(r.status)).length;
     const avgProgressValue = roadmapsData.reduce((sum, r) => sum + (r.overallProgress || 0), 0) / roadmapsData.length || 0;
     
     setStats({
@@ -249,9 +251,9 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
     if (searchTerm) {
       filtered = filtered.filter(r => 
         r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.sharedBy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (r.sharedBy?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (r.department || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (r.description || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     
@@ -259,7 +261,7 @@ const ManagerTeamReports = ({ userRole = 'Manager', department, user }) => {
   };
 
   const downloadRoadmap = (roadmap) => {
-    const content = `MVP ROADMAP REPORT - MANAGER VIEW
+    const content = `MVP ROADMAP REPORT - ${roadmapAudienceText.toUpperCase()}
 ===================================
 
 BASIC INFORMATION
@@ -268,8 +270,8 @@ Title: ${roadmap.title}
 Version: ${roadmap.version}
 Status: ${roadmap.status.toUpperCase()}
 Department: ${roadmap.department}
-Lead: ${roadmap.sharedBy.name} (${roadmap.sharedBy.role})
-Shared On: ${new Date(roadmap.sharedAt).toLocaleString()}
+Lead: ${roadmap.sharedBy?.name || 'Team Lead'} (${roadmap.sharedBy?.role || 'Team Lead'})
+Issued On: ${new Date(roadmap.sharedAt).toLocaleString()}
 
 DESCRIPTION
 -----------
@@ -341,6 +343,20 @@ Report Generated: ${new Date().toLocaleString()}
       low: 'bg-green-100 text-green-700'
     };
     return badges[priority] || badges.medium;
+  };
+
+  const formatAttachmentSize = (attachment) => {
+    if (attachment.displaySize) return attachment.displaySize;
+    if (typeof attachment.size === 'number') return `${(attachment.size / (1024 * 1024)).toFixed(2)} MB`;
+    return attachment.size || 'Unknown size';
+  };
+
+  const downloadAttachment = async (roadmap, attachment) => {
+    const success = await roadmapService.downloadAttachment(roadmap.id || roadmap._id, attachment.id, attachment.name);
+    showToastMessage(
+      success ? `${attachment.name} downloaded successfully` : `Could not download ${attachment.name}`,
+      success ? 'success' : 'error'
+    );
   };
 
   const filteredGroupedReports = getFilteredReports();
@@ -486,7 +502,7 @@ Report Generated: ${new Date().toLocaleString()}
         </div>
       </div>
 
-      {/* Daily Reports Tab - Manager View */}
+      {/* Daily Reports Tab */}
       {activeTab === 'daily' && (
         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
           <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
@@ -621,7 +637,7 @@ Report Generated: ${new Date().toLocaleString()}
         </div>
       )}
 
-      {/* MVP Roadmaps Tab - Manager View */}
+      {/* MVP Roadmaps Tab */}
       {activeTab === 'mvp' && (
         <div className="space-y-6">
           {/* Search Bar */}
@@ -645,8 +661,8 @@ Report Generated: ${new Date().toLocaleString()}
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">📭</span>
               </div>
-              <p className="text-gray-500 text-lg">No shared roadmaps available</p>
-              <p className="text-sm text-gray-400 mt-1">Roadmaps shared by your team lead will appear here</p>
+              <p className="text-gray-500 text-lg">No issued roadmaps available</p>
+              <p className="text-sm text-gray-400 mt-1">Roadmaps issued by {issuedByText} will appear here</p>
             </div>
           ) : (
             filteredRoadmaps.map(roadmap => (
@@ -688,23 +704,23 @@ Report Generated: ${new Date().toLocaleString()}
                     </div>
                   </div>
 
-                  {/* Shared Info Bar */}
+                  {/* Issued Info Bar */}
                   <div className="mb-4 p-3 bg-purple-50 rounded-lg flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center space-x-4 flex-wrap gap-3">
                       <div className="flex items-center space-x-2">
                         <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                          {roadmap.sharedBy.avatar}
+                          {roadmap.sharedBy?.avatar || 'TL'}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{roadmap.sharedBy.name}</p>
-                          <p className="text-xs text-gray-500">{roadmap.sharedBy.role}</p>
+                          <p className="text-sm font-medium text-gray-900">{roadmap.sharedBy?.name || 'Team Lead'}</p>
+                          <p className="text-xs text-gray-500">{roadmap.sharedBy?.role || 'Team Lead'}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="text-sm text-gray-600">Shared: {new Date(roadmap.sharedAt).toLocaleDateString()}</span>
+                        <span className="text-sm text-gray-600">Issued: {new Date(roadmap.sharedAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -774,7 +790,7 @@ Report Generated: ${new Date().toLocaleString()}
                 <div className="flex items-center space-x-3 mt-1">
                   <p className="text-sm text-gray-500">Version {selectedRoadmap.version}</p>
                   <span className="text-gray-300">|</span>
-                  <p className="text-sm text-gray-500">Shared by {selectedRoadmap.sharedBy.name}</p>
+                  <p className="text-sm text-gray-500">Issued by {selectedRoadmap.sharedBy?.name || 'Team Lead'}</p>
                   <span className="text-gray-300">|</span>
                   <p className="text-sm text-gray-500">{new Date(selectedRoadmap.sharedAt).toLocaleDateString()}</p>
                 </div>
@@ -894,6 +910,31 @@ Report Generated: ${new Date().toLocaleString()}
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Attachments */}
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3">Attachments</h3>
+                {selectedRoadmap.attachments?.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedRoadmap.attachments.map(attachment => (
+                      <div key={attachment.id} className="flex items-center justify-between gap-3 border border-gray-200 rounded-xl p-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{attachment.name}</p>
+                          <p className="text-xs text-gray-500">{formatAttachmentSize(attachment)}</p>
+                        </div>
+                        <button
+                          onClick={() => downloadAttachment(selectedRoadmap, attachment)}
+                          className="shrink-0 px-3 py-1.5 text-sm text-purple-600 hover:bg-purple-50 rounded-lg"
+                        >
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No files attached.</p>
+                )}
               </div>
 
               {/* Weekly Updates */}

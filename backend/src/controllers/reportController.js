@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const Report = require('../models/Report');
 const { formatResponse } = require('../utils/helpers');
+const { notifyReportSubmitted } = require('../utils/notificationDispatcher');
 
 // @desc    Submit new report
 // @route   POST /api/reports
@@ -30,6 +31,7 @@ exports.submitReport = async (req, res) => {
       existingReport.updatedAt = new Date();
       
       await existingReport.save();
+      await notifyReportSubmitted(existingReport);
       return res.status(200).json(formatResponse(true, 'Report updated successfully', existingReport));
     }
 
@@ -48,6 +50,8 @@ exports.submitReport = async (req, res) => {
       status: 'submitted',
       submittedAt: new Date()
     });
+
+    await notifyReportSubmitted(report);
 
     res.status(201).json(formatResponse(true, 'Report submitted successfully', report));
   } catch (error) {

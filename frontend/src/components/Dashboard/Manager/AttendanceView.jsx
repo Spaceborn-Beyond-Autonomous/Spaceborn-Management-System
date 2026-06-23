@@ -30,11 +30,8 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
   const [viewMode, setViewMode] = useState('grid');
   const [departments, setDepartments] = useState([]);
   const [refreshInterval, setRefreshInterval] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    setCurrentUser(user);
     fetchAllData();
     const interval = setInterval(() => {
       fetchLiveStatus();
@@ -73,57 +70,43 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
     const filters = { date: selectedDate };
     if (selectedDepartment !== 'all') filters.department = selectedDepartment;
     
-    const records = await attendanceService.getAllAttendance(filters);
-    // Filter records for manager's department only
-    const user = authService.getCurrentUser();
-    if (user && user.department) {
-      const filteredRecords = records.filter(record => record.department === user.department);
-      setAttendanceRecords(filteredRecords);
-    } else {
-      setAttendanceRecords(records);
-    }
+    const records = await attendanceService.getAttendanceRoster(filters);
+    setAttendanceRecords(records);
   };
 
   const fetchAttendanceStats = async () => {
-    const statsData = await attendanceService.getAttendanceStats(selectedDate);
-    // Filter stats for manager's department
-    const user = authService.getCurrentUser();
-    if (user && user.department) {
-      setStats({
-        totalEmployees: statsData.totalEmployees || 0,
-        present: statsData.present || 0,
-        absent: statsData.absent || 0,
-        late: statsData.late || 0,
-        onLeave: statsData.onLeave || 0,
-        workingFromHome: statsData.workingFromHome || 0
+    try {
+      // Use roster endpoint to derive counts so UI matches your roster logic (approved leave + absent for non-login)
+      const roster = await attendanceService.getAttendanceRoster({
+        date: selectedDate,
+        department: selectedDepartment !== 'all' ? selectedDepartment : 'all'
       });
-    } else {
+
+      const computed = {
+        totalEmployees: roster.length,
+        present: roster.filter(r => r.status === 'present').length,
+        absent: roster.filter(r => r.status === 'absent').length,
+        late: roster.filter(r => r.status === 'late').length,
+        onLeave: roster.filter(r => r.status === 'on-leave').length,
+        workingFromHome: roster.filter(r => r.status === 'working-from-home').length
+      };
+
+      setStats(computed);
+    } catch (e) {
+      // Fallback to old stats endpoint
+      const statsData = await attendanceService.getAttendanceStats(selectedDate);
       setStats(statsData);
     }
   };
 
   const fetchDepartmentStats = async () => {
     const deptStats = await attendanceService.getAttendanceByDepartment(selectedDate);
-    // Filter for manager's department only
-    const user = authService.getCurrentUser();
-    if (user && user.department) {
-      const filtered = deptStats.filter(dept => dept.department === user.department);
-      setDepartmentStats(filtered);
-    } else {
-      setDepartmentStats(deptStats);
-    }
+    setDepartmentStats(deptStats);
   };
 
   const fetchLiveStatus = async () => {
     const live = await attendanceService.getLiveAttendance();
-    // Filter for manager's department only
-    const user = authService.getCurrentUser();
-    if (user && user.department) {
-      const filteredLive = live.filter(emp => emp.department === user.department);
-      setLiveStatus(filteredLive);
-    } else {
-      setLiveStatus(live);
-    }
+    setLiveStatus(live);
   };
 
   const fetchDepartments = async () => {
@@ -139,41 +122,15 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
     }
   };
 
   const loadMockData = () => {
-    const user = authService.getCurrentUser();
-    const managerDepartment = user?.department || 'Core Systems';
-    
-    const mockAttendance = [
-      { id: 1, name: 'Mike Johnson', role: 'Team Lead', department: managerDepartment, checkIn: '08:45 AM', checkOut: '05:30 PM', status: 'present', hoursWorked: 8.75 },
-      { id: 2, name: 'Ravi Das', role: 'Member', department: managerDepartment, checkIn: '', checkOut: '', status: 'absent', hoursWorked: 0 },
-      { id: 3, name: 'Priya Sharma', role: 'Member', department: managerDepartment, checkIn: '09:30 AM', checkOut: '', status: 'working-from-home', hoursWorked: 4.5 },
-      { id: 4, name: 'Nisha Kumar', role: 'Member', department: managerDepartment, checkIn: '', checkOut: '', status: 'on-leave', hoursWorked: 0 },
-      { id: 5, name: 'Suresh M', role: 'Member', department: managerDepartment, checkIn: '09:15 AM', checkOut: '06:00 PM', status: 'late', hoursWorked: 8.75 },
-      { id: 6, name: 'Alex Chen', role: 'Member', department: managerDepartment, checkIn: '08:30 AM', checkOut: '05:15 PM', status: 'present', hoursWorked: 8.75 }
-    ];
-    
-    setAttendanceRecords(mockAttendance);
-    setStats({
-      present: 2,
-      absent: 1,
-      late: 1,
-      onLeave: 1,
-      workingFromHome: 1,
-      totalEmployees: 6
-    });
-    setDepartmentStats([
-      { department: managerDepartment, present: 2, absent: 1, late: 1, onLeave: 1, workingFromHome: 1, total: 6 }
-    ]);
-    setLiveStatus([
-      { id: 1, name: 'Mike Johnson', status: 'active', lastActive: '2 minutes ago', currentTask: 'Code review', department: managerDepartment },
-      { id: 2, name: 'Priya Sharma', status: 'active', lastActive: '5 minutes ago', currentTask: 'Working on UI components', department: managerDepartment },
-      { id: 3, name: 'Alex Chen', status: 'active', lastActive: '1 minute ago', currentTask: 'Bug fixing', department: managerDepartment },
-      { id: 4, name: 'Suresh M', status: 'idle', lastActive: '30 minutes ago', currentTask: 'Break', department: managerDepartment }
-    ]);
+    setAttendanceRecords(attendanceService.getMockAttendance());
+    setStats(attendanceService.getMockStats());
+    setDepartmentStats(attendanceService.getMockDepartmentStats());
+    setLiveStatus(attendanceService.getMockLiveStatus());
   };
 
   const handleMarkAttendance = async (e) => {
@@ -226,16 +183,13 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
     );
   }
 
-  const user = authService.getCurrentUser();
-  const departmentName = user?.department || 'your';
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Team Attendance</h1>
-          <p className="text-gray-500 mt-1">Real-time attendance tracking for {departmentName} department</p>
+          <h1 className="text-2xl font-bold text-gray-900">Attendance Management</h1>
+          <p className="text-gray-500 mt-1">Real-time attendance tracking for all employees</p>
         </div>
         <div className="flex items-center space-x-3">
           <input
@@ -260,7 +214,7 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
           <div className="text-2xl font-bold text-gray-900">{stats.totalEmployees}</div>
-          <div className="text-xs text-gray-500">Team Members</div>
+          <div className="text-xs text-gray-500">Total Employees</div>
         </div>
         <div className="bg-green-50 rounded-xl p-4 border border-green-200 text-center">
           <div className="text-2xl font-bold text-green-600">{stats.present}</div>
@@ -302,24 +256,28 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
           onClick={() => setViewMode('department')}
           className={`px-4 py-2 text-sm font-medium ${viewMode === 'department' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
         >
-          Summary View
+          Department View
         </button>
       </div>
 
-      {/* Filters - Department filter removed for managers since they only see their department */}
+      {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Showing data for:</span>
-            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-              {user?.department || 'Your'} Department
-            </span>
-          </div>
-          <button
-            onClick={() => fetchAllData()}
-            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm"
+        <div className="flex flex-wrap gap-4">
+          <select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Refresh Data
+            <option value="all">All Departments</option>
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => setSelectedDepartment('all')}
+            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            Clear Filter
           </button>
         </div>
       </div>
@@ -327,13 +285,13 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
       {/* Real-time Live Status */}
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="font-semibold text-gray-900">Live Status - Team Activity</h2>
-          <p className="text-sm text-gray-500 mt-1">Real-time team member activity tracking</p>
+          <h2 className="font-semibold text-gray-900">Live Status</h2>
+          <p className="text-sm text-gray-500 mt-1">Real-time employee activity tracking</p>
         </div>
         <div className="p-4">
           {liveStatus.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              No team members currently active
+              No employees currently active
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -379,7 +337,7 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{record.name}</p>
-                    <p className="text-xs text-gray-500">{record.role}</p>
+                    <p className="text-xs text-gray-500">{record.role} - {record.department}</p>
                     <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(record.status)}`}>
                       {getStatusLabel(record.status)}
                     </span>
@@ -419,6 +377,7 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Check In</th>
@@ -438,6 +397,7 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
                         <span className="font-medium text-gray-900">{record.name}</span>
                       </div>
                     </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{record.department}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{record.role}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(record.status)}`}>
@@ -469,8 +429,8 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
           {departmentStats.map((dept) => (
             <div key={dept.department} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="font-semibold text-gray-900">{dept.department} Department</h3>
-                <p className="text-sm text-gray-500">Total Team Members: {dept.total}</p>
+                <h3 className="font-semibold text-gray-900">{dept.department}</h3>
+                <p className="text-sm text-gray-500">Total Employees: {dept.total}</p>
               </div>
               <div className="p-4">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -512,7 +472,7 @@ const AttendanceView = ({ userRole = 'Manager' }) => {
             
             <div className="mb-4">
               <p className="text-sm text-gray-600">Employee: <span className="font-medium">{selectedEmployee.name}</span></p>
-              <p className="text-sm text-gray-600">Role: {selectedEmployee.role}</p>
+              <p className="text-sm text-gray-600">Department: {selectedEmployee.department}</p>
             </div>
             
             <form onSubmit={handleMarkAttendance} className="space-y-4">

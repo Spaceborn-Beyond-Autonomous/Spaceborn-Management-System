@@ -1,10 +1,9 @@
 // src/components/Dashboard/Lead/MVPRoadmap.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import authService from '../../../services/authService';
+import roadmapService from '../../../services/roadmapService';
 
 const MVPRoadmap = ({ userRole = 'Lead' }) => {
   const [roadmaps, setRoadmaps] = useState([]);
-  const [selectedRoadmap, setSelectedRoadmap] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -54,12 +53,17 @@ const MVPRoadmap = ({ userRole = 'Lead' }) => {
   const fetchRoadmaps = async () => {
     setIsLoading(true);
     try {
-      const token = authService.getToken();
-      if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+      const data = await roadmapService.getAllRoadmaps();
+      if (data.length > 0) {
+        setRoadmaps(data);
+      } else if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockData();
       }
     } catch (error) {
       console.error('Error fetching roadmaps:', error);
+      if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+        loadMockData();
+      }
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +80,7 @@ const MVPRoadmap = ({ userRole = 'Lead' }) => {
         targetDate: '2026-12-20',
         lastUpdated: '2026-06-10T10:00:00Z',
         status: 'active',
-        sharedWith: ['CEO', 'Manager'],
+        sharedWith: ['CEO', 'COO', 'Manager'],
         sharedAt: '2026-06-10T10:00:00Z',
         overallProgress: 45,
         progressHistory: [
@@ -103,7 +107,7 @@ const MVPRoadmap = ({ userRole = 'Lead' }) => {
         attachments: [
           { id: 1, name: 'MVP_Requirements.pdf', url: '/files/mvp-requirements.pdf', size: '2.4 MB', type: 'application/pdf' }
         ],
-        blockers: ['API documentation delay', 'Design resources unavailable'],
+        blockers: ['API documentation delay', 'Hardware & Integration resources unavailable'],
         createdBy: 'Priya Sharma',
         createdAt: '2026-01-10T09:00:00Z'
       }
@@ -128,9 +132,11 @@ const MVPRoadmap = ({ userRole = 'Lead' }) => {
       const newAttachment = {
         id: Date.now() + Math.random(),
         name: file.name,
-        size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+        size: file.size,
+        displaySize: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
         type: file.type,
-        uploadedAt: new Date().toISOString()
+        uploadedAt: new Date().toISOString(),
+        file
       };
       
       setFormData({
@@ -192,28 +198,45 @@ const MVPRoadmap = ({ userRole = 'Lead' }) => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.title || !formData.startDate || !formData.targetDate) {
       showToastMessage('Please fill in all required fields', 'error');
       return;
     }
 
-    const newRoadmap = {
-      id: Date.now(),
-      ...formData,
-      lastUpdated: new Date().toISOString(),
-      createdBy: 'Priya Sharma',
-      createdAt: new Date().toISOString(),
-      sharedWith: [],
-      status: 'draft',
-      overallProgress: 0,
-      progressHistory: [],
-      blockers: []
-    };
+    try {
+      const pendingAttachments = formData.attachments;
+      const roadmapPayload = {
+        ...formData,
+        attachments: [],
+        status: 'draft',
+        overallProgress: 0,
+        progressHistory: [],
+        blockers: []
+      };
 
-    setRoadmaps([newRoadmap, ...roadmaps]);
-    resetForm();
-    showToastMessage('Roadmap created successfully', 'success');
+      let createdRoadmap = await roadmapService.createRoadmap(roadmapPayload);
+      const uploadedAttachments = [];
+
+      for (const attachment of pendingAttachments) {
+        if (attachment.file) {
+          const uploaded = await roadmapService.uploadAttachment(createdRoadmap.id || createdRoadmap._id, attachment.file);
+          uploadedAttachments.push(uploaded);
+        }
+      }
+
+      createdRoadmap = {
+        ...createdRoadmap,
+        attachments: uploadedAttachments,
+        lastUpdated: createdRoadmap.lastUpdated || new Date().toISOString()
+      };
+
+      setRoadmaps([createdRoadmap, ...roadmaps]);
+      resetForm();
+      showToastMessage('Roadmap created successfully', 'success');
+    } catch (error) {
+      showToastMessage(error.message || 'Failed to create roadmap', 'error');
+    }
   };
 
   const resetForm = () => {
@@ -286,7 +309,7 @@ const MVPRoadmap = ({ userRole = 'Lead' }) => {
     }
   };
 
-  const saveProgressUpdate = () => {
+  const saveProgressUpdate = async () => {
     const updatedRoadmaps = roadmaps.map(r => {
       if (r.id === updatingRoadmap.id) {
         // Update milestone progress
@@ -336,9 +359,15 @@ const MVPRoadmap = ({ userRole = 'Lead' }) => {
       return r;
     });
 
-    setRoadmaps(updatedRoadmaps);
-    setShowProgressModal(false);
-    showToastMessage('Progress updated successfully', 'success');
+    try {
+      const updatedRoadmap = updatedRoadmaps.find(r => r.id === updatingRoadmap.id);
+      const savedRoadmap = await roadmapService.updateRoadmap(updatedRoadmap.id || updatedRoadmap._id, updatedRoadmap);
+      setRoadmaps(updatedRoadmaps.map(r => r.id === updatingRoadmap.id ? savedRoadmap : r));
+      setShowProgressModal(false);
+      showToastMessage('Progress updated successfully', 'success');
+    } catch (error) {
+      showToastMessage(error.message || 'Failed to update progress', 'error');
+    }
   };
 
   const handleShare = (roadmap) => {
@@ -346,15 +375,17 @@ const MVPRoadmap = ({ userRole = 'Lead' }) => {
     setShowShareModal(true);
   };
 
-  const sendToCEOAndManager = () => {
-    const updatedRoadmaps = roadmaps.map(r => 
-      r.id === sharingRoadmap.id 
-        ? { ...r, sharedWith: ['CEO', 'Manager'], sharedAt: new Date().toISOString(), status: 'shared' }
-        : r
-    );
-    setRoadmaps(updatedRoadmaps);
-    setShowShareModal(false);
-    showToastMessage(`Roadmap shared with CEO and Manager`, 'success');
+  const issueRoadmapToLeadership = async () => {
+    try {
+      const sharedRoadmap = await roadmapService.shareRoadmap(sharingRoadmap.id || sharingRoadmap._id);
+      setRoadmaps(roadmaps.map(r =>
+        r.id === sharingRoadmap.id ? sharedRoadmap : r
+      ));
+      setShowShareModal(false);
+      showToastMessage('MVP roadmap issued to Manager, CEO, and COO', 'success');
+    } catch (error) {
+      showToastMessage(error.message || 'Failed to issue roadmap', 'error');
+    }
   };
 
   const downloadRoadmap = (roadmap) => {
@@ -390,7 +421,7 @@ PROGRESS HISTORY
 ${roadmap.progressHistory?.map(h => `- ${new Date(h.date).toLocaleDateString()}: ${h.progress}% - ${h.notes || 'No notes'}`).join('\n') || 'No history'}
 
 ATTACHMENTS
-${roadmap.attachments?.map(a => `- ${a.name} (${a.size})`).join('\n') || 'None'}
+${roadmap.attachments?.map(a => `- ${a.name} (${formatAttachmentSize(a)})`).join('\n') || 'None'}
     `;
     
     const blob = new Blob([content], { type: 'text/plain' });
@@ -422,6 +453,12 @@ ${roadmap.attachments?.map(a => `- ${a.name} (${a.size})`).join('\n') || 'None'}
       low: 'bg-green-100 text-green-700'
     };
     return badges[priority] || badges.medium;
+  };
+
+  const formatAttachmentSize = (attachment) => {
+    if (attachment.displaySize) return attachment.displaySize;
+    if (typeof attachment.size === 'number') return `${(attachment.size / (1024 * 1024)).toFixed(2)} MB`;
+    return attachment.size || 'Unknown size';
   };
 
   if (isLoading) {
@@ -591,7 +628,7 @@ ${roadmap.attachments?.map(a => `- ${a.name} (${a.size})`).join('\n') || 'None'}
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-900">{attachment.name}</p>
-                            <p className="text-xs text-gray-500">{attachment.size}</p>
+                            <p className="text-xs text-gray-500">{formatAttachmentSize(attachment)}</p>
                           </div>
                         </div>
                         <button onClick={() => removeAttachment(attachment.id)} className="text-red-500 hover:text-red-700">×</button>
@@ -769,7 +806,7 @@ ${roadmap.attachments?.map(a => `- ${a.name} (${a.size})`).join('\n') || 'None'}
                           <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                           </svg>
-                          <span className="text-xs text-green-600">Shared</span>
+                          <span className="text-xs text-green-600">Issued</span>
                         </div>
                       )}
                     </div>
@@ -863,7 +900,7 @@ ${roadmap.attachments?.map(a => `- ${a.name} (${a.size})`).join('\n') || 'None'}
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
-                        <span>Share</span>
+                        <span>Issue</span>
                       </button>
                     )}
                   </div>
@@ -1012,18 +1049,18 @@ ${roadmap.attachments?.map(a => `- ${a.name} (${a.size})`).join('\n') || 'None'}
         </div>
       )}
 
-      {/* Share Modal */}
+      {/* Issue Modal */}
       {showShareModal && sharingRoadmap && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full animate-slide-up">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Share Roadmap</h3>
+                <h3 className="text-xl font-bold text-gray-900">Issue Roadmap</h3>
                 <button onClick={() => setShowShareModal(false)} className="text-gray-400 hover:text-gray-600">×</button>
               </div>
               
               <p className="text-gray-600 mb-4">
-                Share "{sharingRoadmap.title}" with CEO and Manager?
+                Issue "{sharingRoadmap.title}" to Manager, CEO, and COO?
               </p>
               
               <div className="bg-purple-50 rounded-lg p-4 mb-6">
@@ -1034,8 +1071,8 @@ ${roadmap.attachments?.map(a => `- ${a.name} (${a.size})`).join('\n') || 'None'}
                     </svg>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">CEO & Manager</p>
-                    <p className="text-xs text-gray-500">They will receive access to view this roadmap</p>
+                    <p className="font-medium text-gray-900">Manager, CEO & COO</p>
+                    <p className="text-xs text-gray-500">They will receive view-only access to this issued MVP roadmap</p>
                   </div>
                 </div>
               </div>
@@ -1048,10 +1085,10 @@ ${roadmap.attachments?.map(a => `- ${a.name} (${a.size})`).join('\n') || 'None'}
                   Cancel
                 </button>
                 <button
-                  onClick={sendToCEOAndManager}
+                  onClick={issueRoadmapToLeadership}
                   className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                 >
-                  Share Now
+                  Issue Now
                 </button>
               </div>
             </div>

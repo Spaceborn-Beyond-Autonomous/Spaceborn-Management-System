@@ -21,7 +21,7 @@ import TeamsAndRoles from './components/Dashboard/CEO/TeamsAndRoles';
 import Accounts from './components/Dashboard/CEO/Accounts';
 import Meetings from './components/Dashboard/CEO/Meetings';
 import AIInsights from './components/Dashboard/CEO/AIInsights';
-import Notifications from './components/Dashboard/CEO/Notifications';
+import Notifications from './components/Dashboard/CEO/Notifications.jsx';
 import ActivityMonitor from './components/Dashboard/CEO/ActivityMonitor';
 import ResourceAllocation from './components/Dashboard/CEO/ResourceAllocation';
 import AttendanceView from './components/Dashboard/CEO/AttendanceView';
@@ -33,11 +33,10 @@ import ManagerDashboard from './components/Dashboard/Manager/ManagerDashboard';
 import ManagerTaskManagement from './components/Dashboard/Manager/TaskManagement.jsx';
 import ManagerProjects from './components/Dashboard/Manager/Projects';
 import ManagerTeamsAndRoles from './components/Dashboard/Manager/TeamsAndRoles';
-import ManagerResourceAllocation from './components/Dashboard/Manager/ResourceAllocation';
 import ManagerAccounts from './components/Dashboard/Manager/Accounts';
 import ManagerMeetings from './components/Dashboard/Manager/Meetings';
 import ManagerAIInsights from './components/Dashboard/Manager/AIInsights';
-import ManagerNotifications from './components/Dashboard/Manager/Notifications';
+import ManagerNotifications from './components/Dashboard/Manager/Notifications.jsx';
 import ManagerActivityMonitor from './components/Dashboard/Manager/ActivityMonitor';
 import EmployeeManagement from './components/Dashboard/Manager/EmployeeManagement';
 import ManagerTeamReports from './components/Dashboard/Manager/TeamReports';
@@ -54,7 +53,7 @@ import COOResourceAllocation from './components/Dashboard/COO/ResourceAllocation
 import COOAccounts from './components/Dashboard/COO/Accounts';
 import COOMeetings from './components/Dashboard/COO/Meetings';
 import COOAIInsights from './components/Dashboard/COO/AIInsights';
-import COONotifications from './components/Dashboard/COO/Notifications';
+import COONotifications from './components/Dashboard/COO/Notifications.jsx';
 import COOActivityMonitor from './components/Dashboard/COO/ActivityMonitor';
 import COOEmployeeManagement from './components/Dashboard/COO/EmployeeManagement';
 import COOTeamReports from './components/Dashboard/COO/TeamReports';
@@ -69,7 +68,7 @@ import TeamLeadTeamsAndRoles from './components/Dashboard/TeamLead/TeamsAndRoles
 
 import TeamLeadResources from './components/Dashboard/TeamLead/Resources';
 import TeamLeadMeetings from './components/Dashboard/TeamLead/Meetings';
-import TeamLeadNotifications from './components/Dashboard/TeamLead/Notifications';
+import TeamLeadNotifications from './components/Dashboard/TeamLead/Notifications.jsx';
 import MVPRoadmap from './components/Dashboard/TeamLead/MVPRoadmap';
 
 // Member Imports
@@ -77,7 +76,7 @@ import MemberDashboard from './components/Dashboard/Member/MemberDashboard';
 import MemberTaskManagement from './components/Dashboard/Member/TaskManagement';
 import MemberResources from './components/Dashboard/Member/Resources';
 import MemberMeetings from './components/Dashboard/Member/Meetings';
-import MemberNotifications from './components/Dashboard/Member/Notifications';
+import MemberNotifications from './components/Dashboard/Member/Notifications.jsx';
 import MemberProfileView from './components/Dashboard/Member/MemberProfileView';
 
 function App() {
@@ -101,7 +100,7 @@ function App() {
     } catch (error) {
       console.error('Error fetching employees:', error);
       setEmployees([
-        { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', phone: '+1 (555) 000-0001', joinDate: '2020-01-15', status: 'Active', manager: 'N/A' },
+        { id: 1, name: 'John Doe', role: 'CEO', department: 'Platform and DevOps', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', phone: '+1 (555) 000-0001', joinDate: '2020-01-15', status: 'Active', manager: 'N/A' },
         { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', phone: '+1 (555) 000-0002', joinDate: '2020-03-20', status: 'Active', manager: 'John Doe' },
         { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', phone: '+1 (555) 000-0003', joinDate: '2021-02-10', status: 'Active', manager: 'Jane Smith' },
         { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', phone: '+1 (555) 000-0004', joinDate: '2022-06-01', status: 'Active', manager: 'Mike Johnson' },
@@ -504,7 +503,6 @@ function App() {
     const TaskManagementComponent = isCOO ? COOTaskManagement : ManagerTaskManagement;
     const ProjectsComponent = isCOO ? COOProjects : ManagerProjects;
     const TeamsAndRolesComponent = isCOO ? COOTeamsAndRoles : ManagerTeamsAndRoles;
-    const ResourceAllocationComponent = isCOO ? COOResourceAllocation : ManagerResourceAllocation;
     const AccountsComponent = isCOO ? COOAccounts : ManagerAccounts;
     const EmployeeManagementComponent = isCOO ? COOEmployeeManagement : EmployeeManagement;
     const TeamReportsComponent = isCOO ? COOTeamReports : ManagerTeamReports;
@@ -560,10 +558,12 @@ function App() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                       <span className="text-sm font-medium">Teams & Roles</span>
                     </button>
-                    <button onClick={() => setManagerActiveMenu('ResourceAllocation')} className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg ${managerActiveMenu === 'ResourceAllocation' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
-                      <span className="text-sm font-medium">Resource Allocation</span>
-                    </button>
+                    {isCOO && (
+                      <button onClick={() => setManagerActiveMenu('ResourceAllocation')} className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg ${managerActiveMenu === 'ResourceAllocation' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                        <span className="text-sm font-medium">Resource Allocation</span>
+                      </button>
+                    )}
                     <button onClick={() => setManagerActiveMenu('Accounts')} className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg ${managerActiveMenu === 'Accounts' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                       <span className="text-sm font-medium">Accounts</span>
@@ -671,7 +671,7 @@ function App() {
                 {managerActiveMenu === 'TaskManagement' && <TaskManagementComponent userRole={managerFeatureRole} />}
                 {managerActiveMenu === 'Projects' && <ProjectsComponent userRole={managerFeatureRole} />}
                 {managerActiveMenu === 'TeamsAndRoles' && <TeamsAndRolesComponent userRole={managerFeatureRole} />}
-                {managerActiveMenu === 'ResourceAllocation' && <ResourceAllocationComponent userRole={managerFeatureRole} />}
+                {isCOO && managerActiveMenu === 'ResourceAllocation' && <COOResourceAllocation userRole={managerFeatureRole} />}
                 {managerActiveMenu === 'Accounts' && <AccountsComponent userRole={managerDisplayRole} />}
                 {managerActiveMenu === 'EmployeeManagement' && (
                   <EmployeeManagementComponent 

@@ -41,7 +41,7 @@ const ActivityMonitor = ({ userRole = 'Manager' }) => {
       setDepartments(depts);
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
     }
   };
 
@@ -61,9 +61,9 @@ const ActivityMonitor = ({ userRole = 'Manager' }) => {
       { id: 7, type: 'progress', name: 'Nisha Kumar', initials: 'NK', role: 'Member', department: managerDepartment, action: 'updated task progress', details: 'Build login UI - 75% complete', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
       { id: 8, type: 'report', name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: managerDepartment, action: 'submitted weekly report', details: 'Team performance and project updates', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
       { id: 9, type: 'task', name: 'Alex Chen', initials: 'AC', role: 'Member', department: managerDepartment, action: 'completed task', details: 'Fix navigation bug in header', timestamp: new Date(Date.now() - 5 * 86400000).toISOString() },
-      { id: 10, type: 'leave', name: 'Jane Smith', initials: 'JS', role: 'Manager', department: 'Founding Team', action: 'approved leave request', details: 'Team Member - Casual Leave (1 day)', timestamp: new Date(Date.now() - 5 * 86400000).toISOString() },
+      { id: 10, type: 'leave', name: 'Jane Smith', initials: 'JS', role: 'Manager', department: 'Platform and DevOps', action: 'approved leave request', details: 'Team Member - Casual Leave (1 day)', timestamp: new Date(Date.now() - 5 * 86400000).toISOString() },
       { id: 11, type: 'task', name: 'Ravi Das', initials: 'RD', role: 'Member', department: managerDepartment, action: 'started new task', details: 'Implement authentication module', timestamp: new Date(Date.now() - 6 * 86400000).toISOString() },
-      { id: 12, type: 'meeting', name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: managerDepartment, action: 'created meeting', details: 'Design Review - Friday 2 PM', timestamp: new Date(Date.now() - 4 * 86400000).toISOString() }
+      { id: 12, type: 'meeting', name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: managerDepartment, action: 'created meeting', details: 'Hardware & Integration Review - Friday 2 PM', timestamp: new Date(Date.now() - 4 * 86400000).toISOString() }
     ];
   };
 

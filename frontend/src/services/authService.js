@@ -1,4 +1,5 @@
 // src/services/authService.js
+import { normalizeDepartmentFields } from '../utils/departments';
 
 class AuthService {
   constructor() {
@@ -25,7 +26,7 @@ class AuthService {
         password: 'admin123',
         name: 'John Doe',
         role: 'CEO',
-        department: 'Founding Team',
+        department: 'Platform and DevOps',
         email: 'john.doe@spaceborn.com',
         phone: '+1 555 000 0001',
         joinDate: '2020-01-01',
@@ -42,6 +43,19 @@ class AuthService {
         email: 'jane.smith@spaceborn.com',
         phone: '+1 555 000 0002',
         joinDate: '2021-03-15',
+        status: 'Active',
+        manager: 'John Doe'
+      },
+      'COO001': {
+        id: 8,
+        employeeId: 'COO001',
+        password: 'coo123',
+        name: 'Aarav Mehta',
+        role: 'COO',
+        department: 'Platform and DevOps',
+        email: 'aarav.mehta@spaceborn.com',
+        phone: '+1 555 000 0008',
+        joinDate: '2021-01-10',
         status: 'Active',
         manager: 'John Doe'
       },
@@ -102,7 +116,7 @@ class AuthService {
         employeeId: 'HR001',
         password: 'hr123',
         name: 'Neha Gupta',
-        role: 'Robotics & Simulation',
+        role: 'HR',
         department: 'Robotics & Simulation',
         email: 'neha.gupta@spaceborn.com',
         phone: '+91 98765 43215',
@@ -155,7 +169,7 @@ class AuthService {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
-        return JSON.parse(userStr);
+        return normalizeDepartmentFields(JSON.parse(userStr));
       } catch (error) {
         console.error('Error parsing user data:', error);
         this.clearSession();
@@ -173,9 +187,10 @@ class AuthService {
       localStorage.setItem('authToken', token);
     }
     if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
+      const normalizedUser = normalizeDepartmentFields(user);
+      localStorage.setItem('user', JSON.stringify(normalizedUser));
       localStorage.setItem('userSession', JSON.stringify({
-        ...user,
+        ...normalizedUser,
         isAuthenticated: true,
         timestamp: Date.now(),
         sessionDuration,
@@ -326,11 +341,12 @@ class AuthService {
         localStorage.removeItem('rememberedEmployeeId');
       }
 
-      this.setSession(data.user, data.token, rememberMe);
+      const normalizedUser = normalizeDepartmentFields(data.user);
+      this.setSession(normalizedUser, data.token, rememberMe);
 
       return { 
         success: true, 
-        user: data.user,
+        user: normalizedUser,
         message: 'Login successful'
       };
     } catch (error) {
@@ -535,8 +551,8 @@ class AuthService {
     }
     
     const currentUser = this.getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager')) {
-      return { success: false, error: 'Only CEO and Managers can reset passwords' };
+    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager' && currentUser.role !== 'COO')) {
+      return { success: false, error: 'Only CEO, COO and Managers can reset passwords' };
     }
     
     if (this.USE_MOCK) {
@@ -660,7 +676,7 @@ class AuthService {
   // Get pending reset requests (Manager/CEO only)
   async getPendingResetRequests() {
     const currentUser = this.getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager')) {
+    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager' && currentUser.role !== 'COO')) {
       return [];
     }
     
@@ -670,7 +686,7 @@ class AuthService {
       let requests = [...this.mockResetRequests];
       
       // Managers only see their department's requests
-      if (currentUser.role === 'Manager') {
+      if (currentUser.role === 'Manager' || currentUser.role === 'COO') {
         requests = requests.filter(r => r.department === currentUser.department);
       }
       
@@ -679,6 +695,7 @@ class AuthService {
     }
     
     try {
+      const token = this.getToken();
       const response = await fetch(`${this.API_BASE_URL}/auth/password-resets/pending`, {
         headers: this.getAuthHeaders(),
       });
@@ -694,7 +711,7 @@ class AuthService {
   // Approve reset request and generate new password (Manager/CEO only)
   async approveResetRequest(requestId, comments = '') {
     const currentUser = this.getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager')) {
+    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager' && currentUser.role !== 'COO')) {
       return { success: false, error: 'Unauthorized' };
     }
     
@@ -739,6 +756,7 @@ class AuthService {
     }
     
     try {
+      const token = this.getToken();
       const response = await fetch(`${this.API_BASE_URL}/auth/password-resets/${requestId}/approve`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
@@ -761,7 +779,7 @@ class AuthService {
   // Reject reset request (Manager/CEO only)
   async rejectResetRequest(requestId, reason = '') {
     const currentUser = this.getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager')) {
+    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager' && currentUser.role !== 'COO')) {
       return { success: false, error: 'Unauthorized' };
     }
     
@@ -790,6 +808,7 @@ class AuthService {
     }
     
     try {
+      const token = this.getToken();
       const response = await fetch(`${this.API_BASE_URL}/auth/password-resets/${requestId}/reject`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
@@ -812,14 +831,14 @@ class AuthService {
   // Get reset request statistics (Manager/CEO only)
   async getResetRequestStats() {
     const currentUser = this.getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager')) {
+    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager' && currentUser.role !== 'COO')) {
       return { pending: 0, approvedToday: 0, totalMonth: 0 };
     }
     
     if (this.USE_MOCK) {
       let requests = [...this.mockResetRequests];
       
-      if (currentUser.role === 'Manager') {
+      if (currentUser.role === 'Manager' || currentUser.role === 'COO') {
         requests = requests.filter(r => r.department === currentUser.department);
       }
       
@@ -842,6 +861,7 @@ class AuthService {
     }
     
     try {
+      const token = this.getToken();
       const response = await fetch(`${this.API_BASE_URL}/auth/password-resets/stats`, {
         headers: this.getAuthHeaders(),
       });
@@ -977,7 +997,7 @@ class AuthService {
   updateUser(userData) {
     const currentUser = this.getUser();
     if (currentUser) {
-      const updatedUser = { ...currentUser, ...userData };
+      const updatedUser = normalizeDepartmentFields({ ...currentUser, ...userData });
       localStorage.setItem('user', JSON.stringify(updatedUser));
       const session = localStorage.getItem('userSession');
       if (session) {
@@ -1173,8 +1193,8 @@ class AuthService {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const currentUser = this.getCurrentUser();
-      if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager')) {
-        throw new Error('Only CEO and Managers can force logout users');
+      if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager' && currentUser.role !== 'COO')) {
+        throw new Error('Only CEO, COO and Managers can force logout users');
       }
       
       return {
@@ -1189,8 +1209,8 @@ class AuthService {
     }
     
     const currentUser = this.getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager')) {
-      throw new Error('Only CEO and Managers can force logout users');
+    if (!currentUser || (currentUser.role !== 'CEO' && currentUser.role !== 'Manager' && currentUser.role !== 'COO')) {
+      throw new Error('Only CEO, COO and Managers can force logout users');
     }
     
     try {
@@ -1297,5 +1317,4 @@ class AuthService {
   }
 }
 
-const authServiceInstance = new AuthService();
-export default authServiceInstance;
+export default new AuthService();

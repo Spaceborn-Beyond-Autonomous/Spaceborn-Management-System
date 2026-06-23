@@ -45,7 +45,7 @@ class WarningSimulatorService {
         employeeId: 'EMP003',
         employeeName: 'Priya Sharma',
         department: 'Core Systems',
-        role: 'Engineering Lead',
+        role: 'Core Systems Lead',
         type: 'meeting',
         level: 1,
         reason: 'Missed Q2 Sprint Planning meeting without prior notice',
@@ -77,7 +77,7 @@ class WarningSimulatorService {
         employeeId: 'EMP005',
         employeeName: 'Anil Mehta',
         department: 'Hardware & Integration',
-        role: 'Design Lead',
+        role: 'Hardware & Integration Lead',
         type: 'performance',
         level: 3,
         reason: 'Low productivity - 45% task completion rate this sprint',
@@ -138,9 +138,9 @@ class WarningSimulatorService {
             performance: this.warnings.filter(w => w.type === 'performance').length,
           },
           byDepartment: {
-            Engineering: this.warnings.filter(w => w.department === 'Core Systems').length,
-            Design: this.warnings.filter(w => w.department === 'Hardware & Integration').length,
-            Sales: this.warnings.filter(w => w.department === 'Robotics & Simulation').length,
+            'Core Systems': this.warnings.filter(w => w.department === 'Core Systems').length,
+            'Hardware & Integration': this.warnings.filter(w => w.department === 'Hardware & Integration').length,
+            'Robotics & Simulation': this.warnings.filter(w => w.department === 'Robotics & Simulation').length,
           }
         });
       }, 300);
@@ -219,9 +219,9 @@ class WarningSimulatorService {
     const employees = {
       'EMP001': { name: 'Ravi Das', department: 'Core Systems', role: 'Frontend Developer', email: 'ravi.das@spaceborn.com' },
       'EMP002': { name: 'Nisha Kumar', department: 'Core Systems', role: 'Backend Developer', email: 'nisha.kumar@spaceborn.com' },
-      'EMP003': { name: 'Priya Sharma', department: 'Core Systems', role: 'Engineering Lead', email: 'priya.sharma@spaceborn.com' },
+      'EMP003': { name: 'Priya Sharma', department: 'Core Systems', role: 'Core Systems Lead', email: 'priya.sharma@spaceborn.com' },
       'EMP004': { name: 'Pooja B', department: 'Hardware & Integration', role: 'UI Designer', email: 'pooja.b@spaceborn.com' },
-      'EMP005': { name: 'Anil Mehta', department: 'Hardware & Integration', role: 'Design Lead', email: 'anil.mehta@spaceborn.com' },
+      'EMP005': { name: 'Anil Mehta', department: 'Hardware & Integration', role: 'Hardware & Integration Lead', email: 'anil.mehta@spaceborn.com' },
     };
     return employees[id] || { name: 'Unknown', department: 'Unknown', role: 'Unknown', email: 'unknown@spaceborn.com' };
   }

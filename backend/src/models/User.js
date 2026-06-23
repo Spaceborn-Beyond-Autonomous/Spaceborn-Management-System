@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
   manager: String,
   managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   joinDate: { type: String },
+  documents: { type: mongoose.Schema.Types.Mixed, default: {} },
   isActive: { type: Boolean, default: true },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdByName: String

@@ -127,7 +127,7 @@ const CompanyHealth = ({ userRole = 'CEO' }) => {
       { name: 'Hardware & Integration', score: 85, trend: '+1%', status: 'good' },
       { name: 'AI/LLM & Perception', score: 91, trend: '+5%', status: 'excellent' },
       { name: 'Platform and DevOps', score: 76, trend: '-1%', status: 'warning' },
-      { name: 'Robotics & Simulation', score: 82, trend: '+3%', status: 'good' }
+      { name: 'HR', score: 82, trend: '+3%', status: 'good' }
     ]);
     setRiskLevel('Low Risk Level');
     setTrend('+5%');

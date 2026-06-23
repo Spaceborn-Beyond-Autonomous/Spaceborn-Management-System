@@ -40,45 +40,45 @@ const Sidebar = ({ activeMenu, setActiveMenu, onLogout, collapsed = false, onTog
       {
         section: 'OVERVIEW',
         items: [
-          { id: 'Dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, roles: ['CEO', 'Manager', 'Team Lead', 'Member'] }
+          { id: 'Dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member'] }
         ]
       },
       {
         section: 'MANAGEMENT',
         items: [
-          { id: 'TaskManagement', label: 'Task Management', icon: <CheckSquare className="w-5 h-5" />, roles: ['CEO', 'Manager', 'Team Lead', 'Member'] },
-          { id: 'Projects', label: 'Projects', icon: <FolderKanban className="w-5 h-5" />, roles: ['CEO', 'Manager'] },
-          { id: 'TeamsAndRoles', label: 'Teams & Roles', icon: <Users className="w-5 h-5" />, roles: ['CEO', 'Manager'] },
+          { id: 'TaskManagement', label: 'Task Management', icon: <CheckSquare className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member'] },
+          { id: 'Projects', label: 'Projects', icon: <FolderKanban className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager'] },
+          { id: 'TeamsAndRoles', label: 'Teams & Roles', icon: <Users className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager'] },
           { id: 'Accounts', label: 'Accounts', icon: <Coins className="w-5 h-5" />, roles: ['CEO'] },
-          { id: 'EmployeeManagement', label: 'Employee Database', icon: <Database className="w-5 h-5" />, roles: ['CEO', 'Manager'] }
+          { id: 'EmployeeManagement', label: 'Employee Database', icon: <Database className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager'] }
         ]
       },
       {
         section: 'REPORTS',
         items: [
-          { id: 'TeamReports', label: 'Team Reports', icon: <FileText className="w-5 h-5" />, roles: ['CEO', 'Manager'] },
-          { id: 'LeaveManagement', label: 'Leave Management', icon: <Calendar className="w-5 h-5" />, roles: ['CEO', 'Manager', 'Team Lead', 'Member'] }
+          { id: 'TeamReports', label: 'Team Reports', icon: <FileText className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager'] },
+          { id: 'LeaveManagement', label: 'Leave Management', icon: <Calendar className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member'] }
         ]
       },
       {
         section: 'RESOURCES',
         items: [
-          { id: 'ResourceAllocation', label: 'Resource Allocation', icon: <Target className="w-5 h-5" />, roles: ['CEO', 'Manager'] },
-          { id: 'Resources', label: 'Resources', icon: <Gift className="w-5 h-5" />, roles: ['CEO', 'Manager', 'Team Lead', 'Member'] }
+          { id: 'ResourceAllocation', label: 'Resource Allocation', icon: <Target className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager'] },
+          { id: 'Resources', label: 'Resources', icon: <Gift className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member'] }
         ]
       },
       {
         section: 'TOOLS',
         items: [
-          { id: 'Meetings', label: 'Meetings', icon: <Calendar className="w-5 h-5" />, roles: ['CEO', 'Manager', 'Team Lead', 'Member'] },
+          { id: 'Meetings', label: 'Meetings', icon: <Calendar className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member'] },
           { id: 'AIInsights', label: 'AI Insights', icon: <Bot className="w-5 h-5" />, roles: ['CEO'] },
-          { id: 'Notifications', label: 'Notifications', icon: <Bell className="w-5 h-5" />, roles: ['CEO', 'Manager', 'Team Lead', 'Member'] }
+          { id: 'Notifications', label: 'Notifications', icon: <Bell className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member'] }
         ]
       },
       {
         section: 'SYSTEM',
         items: [
-          { id: 'ActivityMonitor', label: 'Activity Monitor', icon: <Activity className="w-5 h-5" />, roles: ['CEO', 'Manager'] }
+          { id: 'ActivityMonitor', label: 'Activity Monitor', icon: <Activity className="w-5 h-5" />, roles: ['CEO', 'COO', 'Manager'] }
         ]
       }
     ];
@@ -101,6 +101,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, onLogout, collapsed = false, onTog
   const getRoleBadgeColor = (role) => {
     switch(role) {
       case 'CEO': return 'bg-purple-100 text-purple-700';
+      case 'COO': return 'bg-blue-100 text-blue-700';
       case 'Manager': return 'bg-blue-100 text-blue-700';
       case 'Team Lead': return 'bg-green-100 text-green-700';
       case 'Member': return 'bg-cyan-100 text-cyan-700';

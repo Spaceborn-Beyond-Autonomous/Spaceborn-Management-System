@@ -61,13 +61,21 @@ class TaskService {
         return null;
       }
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json')
+        ? await response.json()
+        : null;
       
       if (!response.ok) {
-        throw new Error(data.message || `Request failed with status ${response.status}`);
+        const message = data?.message || data?.error || `Request failed with status ${response.status}`;
+        throw new Error(message);
+      }
+
+      if (!data) {
+        throw new Error(`Expected JSON response from ${endpoint}. Check that the backend route exists under ${this.API_BASE_URL}.`);
       }
       
-      return data;
+      return data?.data ?? data;
     } catch (error) {
       console.error(`API Error (${endpoint}):`, error);
       throw error;
@@ -91,9 +99,10 @@ class TaskService {
     
     const url = `/tasks${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const data = await this.apiRequest(url);
+    const tasks = Array.isArray(data) ? data : (data?.tasks || []);
     
-    this.setCached(cacheKey, data);
-    return data;
+    this.setCached(cacheKey, tasks);
+    return tasks;
   }
 
   // Get task by ID
@@ -206,10 +215,74 @@ class TaskService {
 
   // Get my tasks (assigned to current user)
   async getMyTasks() {
-    const currentUser = authService.getCurrentUser();
-    if (!currentUser || !currentUser.id) return [];
-    
-    return this.getTasksByAssignee(currentUser.id);
+    try {
+      return await this.getMyAssignedTasks();
+    } catch (error) {
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser?.id) return [];
+      return this.getTasksByAssignee(currentUser.id);
+    }
+  }
+
+  // GET /tasks/my-tasks
+  async getMyAssignedTasks() {
+    const cacheKey = 'my_assigned_tasks';
+    const cached = this.getCached(cacheKey);
+    if (cached) return cached;
+
+    const data = await this.apiRequest('/tasks/my-tasks');
+    const tasks = Array.isArray(data) ? data : (data?.tasks || []);
+    this.setCached(cacheKey, tasks);
+    return tasks;
+  }
+
+  // GET /tasks/completed
+  async getCompletedTasks() {
+    const data = await this.apiRequest('/tasks/completed');
+    return Array.isArray(data) ? data : (data?.tasks || []);
+  }
+
+  // GET /tasks/daily-logs
+  async getDailyLogsList() {
+    const data = await this.apiRequest('/tasks/daily-logs');
+    return Array.isArray(data) ? data : (data?.logs || []);
+  }
+
+  // POST /tasks/daily-logs
+  async createDailyLogEntry(logData) {
+    const data = await this.apiRequest('/tasks/daily-logs', {
+      method: 'POST',
+      body: JSON.stringify(logData)
+    });
+    this.clearCache();
+    return data;
+  }
+
+  // GET /tasks/department-tasks?department=
+  async getDepartmentTasks(department) {
+    if (!department) return [];
+
+    const cacheKey = `department_tasks_${department}`;
+    const cached = this.getCached(cacheKey);
+    if (cached) return cached;
+
+    const data = await this.apiRequest(
+      `/tasks/department-tasks?department=${encodeURIComponent(department)}`
+    );
+    const tasks = Array.isArray(data) ? data : (data?.tasks || []);
+    this.setCached(cacheKey, tasks);
+    return tasks;
+  }
+
+  // Mark task complete through the generic update endpoint for compatibility
+  // with backend processes that do not expose /tasks/:id/complete.
+  async completeTaskById(id) {
+    if (!id) throw new Error('Task ID is required');
+
+    return this.updateTask(id, {
+      status: 'Completed',
+      progress: 100
+    });
   }
 
   // Get tasks by department
@@ -221,8 +294,9 @@ class TaskService {
     if (cached) return cached;
     
     const data = await this.apiRequest(`/tasks/department/${encodeURIComponent(department)}`);
-    this.setCached(cacheKey, data);
-    return data;
+    const tasks = Array.isArray(data) ? data : (data?.tasks || []);
+    this.setCached(cacheKey, tasks);
+    return tasks;
   }
 
   // Get tasks by status
@@ -320,6 +394,10 @@ class TaskService {
       const allTasks = await this.getAllTasks();
       return this.calculateStats(allTasks);
     }
+  }
+
+  async getTaskStatistics() {
+    return this.getTaskStats();
   }
 
   // Calculate statistics from tasks array
@@ -479,8 +557,9 @@ class TaskService {
     if (cached) return cached;
     
     const data = await this.apiRequest(`/tasks/search?q=${encodeURIComponent(searchTerm)}`);
-    this.setCached(cacheKey, data);
-    return data;
+    const tasks = Array.isArray(data) ? data : (data?.tasks || []);
+    this.setCached(cacheKey, tasks);
+    return tasks;
   }
 
   // Get tasks with advanced filters

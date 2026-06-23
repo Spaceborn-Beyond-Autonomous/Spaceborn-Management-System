@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import authService from '../../../services/authService';
 import GoogleDriveViewer from '../../Common/GoogleDriveViewer';
 
 const CEODashboard = ({ user, onLogout }) => {
@@ -17,7 +18,7 @@ const CEODashboard = ({ user, onLogout }) => {
   });
 
   // Mock data for display
-  const atRiskProjects = [{ name: 'Project Beta — Design', completion: 45 }];
+  const atRiskProjects = [{ name: 'Project Beta — Hardware & Integration', completion: 45 }];
   const delayedProjects = [{ name: 'Project Delta — Ops', completion: 30 }];
   const departmentProgress = [
     { name: 'Core Systems', members: 48, progress: 82 },
@@ -30,7 +31,7 @@ const CEODashboard = ({ user, onLogout }) => {
   ];
   const upcomingMeetings = [
     { date: '2026-06-05', title: 'Q2 Sprint Planning', dept: 'Core Systems', time: '10:00 AM' },
-    { date: '2026-06-06', title: 'Design System Review', dept: 'Hardware & Integration', time: '2:00 PM' },
+    { date: '2026-06-06', title: 'Hardware & Integration System Review', dept: 'Hardware & Integration', time: '2:00 PM' },
     { date: '2026-06-10', title: 'All-Hands Q2', dept: 'All', time: '9:00 AM' }
   ];
   const resourceRequests = [
@@ -48,11 +49,58 @@ const CEODashboard = ({ user, onLogout }) => {
   const recentActivity = [
     { action: 'Priya Sharma completed Alpha milestone', time: '2h ago' },
     { action: 'Beta project marked at risk', time: '6h ago' },
-    { action: 'New member joined Engineering team', time: '4h ago' },
+    { action: 'New member joined Core Systems team', time: '4h ago' },
     { action: 'Resource conflict resolved by Manager', time: '1d ago' },
-    { action: 'Design sprint review completed', time: '8h ago' },
-    { action: 'Marketing campaign exceeded targets', time: '1d ago' }
+    { action: 'Hardware & Integration sprint review completed', time: '8h ago' },
+    { action: 'AI/LLM & Perception campaign exceeded targets', time: '1d ago' }
   ];
+
+  const [dashboardData, setDashboardData] = useState(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const token = authService.getToken();
+
+      if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+        return;
+      }
+
+      try {
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_BASE_URL}/dashboard/ceo`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          throw new Error(`CEO dashboard request failed with ${response.status}`);
+        }
+
+        const data = await response.json();
+        setDashboardData(data);
+        setStats(prev => ({ ...prev, ...(data.stats || {}) }));
+      } catch (error) {
+        console.error('Error fetching CEO dashboard:', error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const liveAtRiskProjects = dashboardData?.atRiskProjects || atRiskProjects;
+  const liveDelayedProjects = dashboardData?.delayedProjects || delayedProjects;
+  const liveDepartmentProgress = dashboardData?.departmentProgress || departmentProgress;
+  const liveTopPerformers = dashboardData?.topPerformers || topPerformers;
+  const liveUpcomingMeetings = dashboardData?.upcomingMeetings || upcomingMeetings;
+  const liveResourceRequests = dashboardData?.resourceRequests || resourceRequests;
+  const liveActionItems = dashboardData?.actionItems || actionItems;
+  const liveRecentActivity = dashboardData?.recentActivity || recentActivity;
+  const teamHealth = dashboardData?.teamHealth || { active: 138, newThisMonth: 4, terminated: 2 };
+
+  const formatMeetingDate = (dateString) => {
+    if (!dateString) return 'TBD';
+    if (String(dateString).includes('-')) return String(dateString).split('-').slice(1, 3).join(' ');
+    return dateString;
+  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -94,7 +142,7 @@ const CEODashboard = ({ user, onLogout }) => {
         <div className="bg-white rounded-xl border p-5">
           <div className="text-sm font-medium text-gray-500 mb-1">ACTIVE PROJECTS</div>
           <div className="text-3xl font-bold text-gray-900">{stats.activeProjects}</div>
-          <div className="text-xs text-red-500 mt-1">{atRiskProjects.length} at risk · {delayedProjects.length} delayed</div>
+          <div className="text-xs text-red-500 mt-1">{liveAtRiskProjects.length} at risk · {liveDelayedProjects.length} delayed</div>
         </div>
         <div className="bg-white rounded-xl border p-5">
           <div className="text-sm font-medium text-gray-500 mb-1">TASKS THIS WEEK</div>
@@ -120,7 +168,7 @@ const CEODashboard = ({ user, onLogout }) => {
             <h3 className="font-semibold text-gray-900">Attention required</h3>
           </div>
           <div className="divide-y">
-            {atRiskProjects.map((project, i) => (
+            {liveAtRiskProjects.map((project, i) => (
               <div key={i} className="px-5 py-3 flex justify-between items-center">
                 <div>
                   <div className="font-medium text-gray-900">{project.name}</div>
@@ -129,7 +177,7 @@ const CEODashboard = ({ user, onLogout }) => {
                 <span className="text-xs font-medium text-red-700 bg-red-100 px-2 py-1 rounded">At risk</span>
               </div>
             ))}
-            {delayedProjects.map((project, i) => (
+            {liveDelayedProjects.map((project, i) => (
               <div key={i} className="px-5 py-3 flex justify-between items-center">
                 <div>
                   <div className="font-medium text-gray-900">{project.name}</div>
@@ -149,7 +197,7 @@ const CEODashboard = ({ user, onLogout }) => {
             <h3 className="font-semibold text-gray-900">Department progress — this sprint</h3>
           </div>
           <div className="p-5 space-y-4">
-            {departmentProgress.map((dept, i) => (
+            {liveDepartmentProgress.map((dept, i) => (
               <div key={i}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="font-medium text-gray-900">{dept.name}</span>
@@ -176,15 +224,15 @@ const CEODashboard = ({ user, onLogout }) => {
           <div className="p-5">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-2xl font-bold text-gray-900">138</div>
+                <div className="text-2xl font-bold text-gray-900">{teamHealth.active}</div>
                 <div className="text-xs text-gray-500">Active across {stats.departments} depts</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-green-600">4</div>
+                <div className="text-2xl font-bold text-green-600">{teamHealth.newThisMonth}</div>
                 <div className="text-xs text-gray-500">New this month onboarding</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-red-600">2</div>
+                <div className="text-2xl font-bold text-red-600">{teamHealth.terminated}</div>
                 <div className="text-xs text-gray-500">Terminated this quarter</div>
               </div>
             </div>
@@ -196,7 +244,7 @@ const CEODashboard = ({ user, onLogout }) => {
             <h3 className="font-semibold text-gray-900">Top performers</h3>
           </div>
           <div className="p-5 space-y-4">
-            {topPerformers.map((performer, i) => (
+            {liveTopPerformers.map((performer, i) => (
               <div key={i} className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-semibold">
@@ -221,9 +269,9 @@ const CEODashboard = ({ user, onLogout }) => {
             <h3 className="font-semibold text-gray-900 text-sm">Upcoming meetings</h3>
           </div>
           <div className="divide-y">
-            {upcomingMeetings.map((meeting, i) => (
+            {liveUpcomingMeetings.map((meeting, i) => (
               <div key={i} className="px-5 py-3">
-                <div className="text-xs text-gray-400">{meeting.date.split('-').slice(1, 3).join(' ')}</div>
+                <div className="text-xs text-gray-400">{formatMeetingDate(meeting.date)}</div>
                 <div className="text-sm font-medium text-gray-900">{meeting.title}</div>
                 <div className="text-xs text-gray-500">{meeting.dept} · {meeting.time}</div>
               </div>
@@ -236,7 +284,7 @@ const CEODashboard = ({ user, onLogout }) => {
             <h3 className="font-semibold text-gray-900 text-sm">Resource requests</h3>
           </div>
           <div className="divide-y">
-            {resourceRequests.map((request, i) => (
+            {liveResourceRequests.map((request, i) => (
               <div key={i} className="px-5 py-3">
                 <div className="text-xs text-gray-400">{request.date}</div>
                 <div className="text-sm font-medium text-gray-900">{request.item}</div>
@@ -258,7 +306,7 @@ const CEODashboard = ({ user, onLogout }) => {
             <h3 className="font-semibold text-gray-900 text-sm">Your action items</h3>
           </div>
           <div className="divide-y">
-            {actionItems.map((item, idx) => (
+            {liveActionItems.map((item, idx) => (
               <div key={idx} className="px-5 py-3">
                 <div className="text-sm font-medium text-gray-900">{item.title}</div>
                 <div className="flex justify-between items-center mt-1">
@@ -281,7 +329,7 @@ const CEODashboard = ({ user, onLogout }) => {
           <h3 className="font-semibold text-gray-900 text-sm">Recent activity</h3>
         </div>
         <div className="divide-y">
-          {recentActivity.map((activity, i) => (
+          {liveRecentActivity.map((activity, i) => (
             <div key={i} className="px-5 py-3 flex justify-between items-center">
               <span className="text-sm text-gray-700">{activity.action}</span>
               <span className="text-xs text-gray-400">{activity.time}</span>

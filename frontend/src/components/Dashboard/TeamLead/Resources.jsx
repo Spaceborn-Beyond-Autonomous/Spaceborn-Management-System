@@ -1,23 +1,8 @@
-// src/components/Dashboard/CEO/Resources.js
+// src/components/Dashboard/Member/Resources.jsx
 import React, { useState, useEffect } from 'react';
 import authService from '../../../services/authService';
 
-const Resources = ({ userRole = 'CEO' }) => {
-  const [requests, setRequests] = useState([]);
-  const [availableResources, setAvailableResources] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('requests'); // requests, available, my-requests
-  const [showRequestForm, setShowRequestForm] = useState(false);
-  const [stats, setStats] = useState({
-    totalResources: 0,
-    inUse: 0,
-    available: 0,
-    conflicts: 0,
-    pendingRequests: 0
-  });
-
-  // Form data for new resource request
+const Resources = ({ userRole = 'Member' }) => {
   const [formData, setFormData] = useState({
     resourceType: '',
     reason: '',
@@ -26,17 +11,32 @@ const Resources = ({ userRole = 'CEO' }) => {
     quantity: 1,
     specifications: ''
   });
+  
+  const [myRequests, setMyRequests] = useState([]);
+  const [availableResources, setAvailableResources] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('my-requests');
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [stats, setStats] = useState({
+    totalRequests: 0,
+    pendingRequests: 0,
+    approvedRequests: 0,
+    rejectedRequests: 0
+  });
 
-  // Fetch all data
+  // Fetch data on component mount
   useEffect(() => {
-    fetchResourceRequests();
+    fetchMyRequests();
     fetchAvailableResources();
   }, []);
 
-  // Fetch resource requests
-  const fetchResourceRequests = async () => {
+  // Fetch user's resource requests
+  const fetchMyRequests = async () => {
     try {
       const token = authService.getToken();
+      const currentUser = authService.getCurrentUser();
+      
       if (!token) {
         console.error('No authentication token found');
         if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
@@ -48,12 +48,7 @@ const Resources = ({ userRole = 'CEO' }) => {
 
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       
-      // Fetch all resource requests (for CEO/Manager) or user's requests (for Member)
-      const endpoint = (userRole === 'CEO' || userRole === 'Manager') 
-        ? `${API_BASE_URL}/resources/all-requests`
-        : `${API_BASE_URL}/resources/my-requests`;
-      
-      const response = await fetch(endpoint, {
+      const response = await fetch(`${API_BASE_URL}/resources/my-requests`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -61,20 +56,29 @@ const Resources = ({ userRole = 'CEO' }) => {
       });
       
       if (response.ok) {
-        const data = await response.json();
-        setRequests(data);
+        const payload = await response.json();
+        // Backend returns: { success, count, data }
+        const requests = Array.isArray(payload) ? payload : (payload?.data ?? []);
+        setMyRequests(requests);
         
-        // Update pending requests count
-        const pending = data.filter(r => r.status === 'pending').length;
-        setStats(prev => ({ ...prev, pendingRequests: pending }));
+        // Update stats
+        const pending = requests.filter(r => r.status === 'pending').length;
+        const approved = requests.filter(r => r.status === 'approved').length;
+        const rejected = requests.filter(r => r.status === 'rejected').length;
+        
+        setStats({
+          totalRequests: requests.length,
+          pendingRequests: pending,
+          approvedRequests: approved,
+          rejectedRequests: rejected
+        });
       } else {
-        throw new Error('Failed to fetch resource requests');
+        throw new Error('Failed to fetch requests');
       }
       
     } catch (error) {
-      console.error('Error fetching resource requests:', error);
-      setError('Failed to load resource requests');
-      
+      console.error('Error fetching my requests:', error);
+      setError('Failed to load your requests');
       if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockData();
       }
@@ -86,7 +90,6 @@ const Resources = ({ userRole = 'CEO' }) => {
     try {
       const token = authService.getToken();
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
       const response = await fetch(`${API_BASE_URL}/resources/available`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -97,18 +100,6 @@ const Resources = ({ userRole = 'CEO' }) => {
       if (response.ok) {
         const resources = await response.json();
         setAvailableResources(resources);
-        
-        // Update stats
-        const total = resources.reduce((sum, r) => sum + r.total, 0);
-        const inUse = resources.reduce((sum, r) => sum + (r.total - r.available), 0);
-        const available = resources.reduce((sum, r) => sum + r.available, 0);
-        
-        setStats(prev => ({
-          ...prev,
-          totalResources: total,
-          inUse: inUse,
-          available: available
-        }));
       }
       
     } catch (error) {
@@ -123,87 +114,86 @@ const Resources = ({ userRole = 'CEO' }) => {
 
   // Mock data for development
   const loadMockData = () => {
+    const currentUser = authService.getCurrentUser();
+    
     const mockRequests = [
       { 
-        id: 1, 
-        initials: 'RD', 
-        name: 'Ravi Das', 
-        item: 'GPU Server A', 
-        description: 'Machine learning model training', 
-        status: 'pending',
-        priority: 'high',
-        requestDate: '2026-06-05',
+        id: 1,
+        name: 'GPU Server A',
+        type: 'Hardware',
         quantity: 1,
-        duration: '2 weeks'
+        reason: 'Need for ML model training and testing',
+        duration: '2 weeks',
+        priority: 'high',
+        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), 
+        status: 'pending',
+        requestor: currentUser?.name || 'Ravi Das',
+        requestorId: currentUser?.id || 1,
+        initials: currentUser?.name?.split(' ').map(n => n[0]).join('') || 'RD'
       },
       { 
-        id: 2, 
-        initials: 'NK', 
-        name: 'Nisha Kumar', 
-        item: 'Testing device', 
-        description: 'Mobile app testing on real devices', 
-        status: 'pending',
+        id: 2,
+        name: 'AWS Credits',
+        type: 'Software',
+        quantity: 500,
+        reason: 'Cloud computing resources for staging environment',
+        duration: '1 month',
         priority: 'medium',
-        requestDate: '2026-06-06',
-        quantity: 3,
-        duration: '1 month'
-      },
-      { 
-        id: 3, 
-        initials: 'SM', 
-        name: 'Suresh M', 
-        item: 'Meeting Room C', 
-        description: 'Client presentation and demo', 
+        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), 
         status: 'approved',
-        priority: 'high',
-        requestDate: '2026-06-04',
-        quantity: 1,
-        duration: '2 hours',
+        requestor: currentUser?.name || 'Ravi Das',
+        requestorId: currentUser?.id || 1,
         approvedBy: 'Jane Smith',
-        approvedAt: '2026-06-05'
+        approvedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+        initials: currentUser?.name?.split(' ').map(n => n[0]).join('') || 'RD'
       },
       { 
-        id: 4, 
-        initials: 'PB', 
-        name: 'Pooja B', 
-        item: 'Software license', 
-        description: 'Adobe Creative Cloud for design work', 
-        status: 'rejected',
-        priority: 'low',
-        requestDate: '2026-06-03',
+        id: 3,
+        name: 'Figma License',
+        type: 'Software',
         quantity: 1,
+        reason: 'UI/UX design work for new features',
         duration: '1 year',
+        priority: 'low',
+        date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), 
+        status: 'rejected',
+        requestor: currentUser?.name || 'Ravi Das',
+        requestorId: currentUser?.id || 1,
         rejectedBy: 'Jane Smith',
-        rejectedAt: '2026-06-04',
-        rejectionReason: 'Budget constraints'
+        rejectedAt: new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString(),
+        rejectionReason: 'Budget constraints for Q2',
+        initials: currentUser?.name?.split(' ').map(n => n[0]).join('') || 'RD'
       }
     ];
     
-    setRequests(mockRequests);
-    setStats(prev => ({ ...prev, pendingRequests: mockRequests.filter(r => r.status === 'pending').length }));
+    setMyRequests(mockRequests);
+    
+    setStats({
+      totalRequests: mockRequests.length,
+      pendingRequests: mockRequests.filter(r => r.status === 'pending').length,
+      approvedRequests: mockRequests.filter(r => r.status === 'approved').length,
+      rejectedRequests: mockRequests.filter(r => r.status === 'rejected').length
+    });
   };
 
   const loadMockResources = () => {
     setAvailableResources([
-      { id: 1, name: 'AWS Credits', type: 'Software', available: 5000, total: 10000, unit: 'credits' },
-      { id: 2, name: 'MacBook Pro', type: 'Hardware', available: 5, total: 20, unit: 'units' },
-      { id: 3, name: 'GPU Server', type: 'Hardware', available: 2, total: 8, unit: 'servers' },
-      { id: 4, name: 'Figma Pro', type: 'Software', available: 8, total: 15, unit: 'licenses' },
-      { id: 5, name: 'Meeting Rooms', type: 'Facility', available: 3, total: 5, unit: 'rooms' }
+      { id: 1, name: 'AWS Credits', type: 'Software', available: 5000, total: 10000, unit: 'credits', description: 'Cloud computing credits for AWS services' },
+      { id: 2, name: 'MacBook Pro', type: 'Hardware', available: 3, total: 20, unit: 'units', description: 'MacBook Pro M3 for development' },
+      { id: 3, name: 'GPU Server', type: 'Hardware', available: 2, total: 8, unit: 'servers', description: 'High-performance GPU servers for ML' },
+      { id: 4, name: 'Figma Pro', type: 'Software', available: 10, total: 15, unit: 'licenses', description: 'Figma Pro design licenses' },
+      { id: 5, name: 'Meeting Room A', type: 'Facility', available: 1, total: 3, unit: 'rooms', description: 'Conference room for team meetings' }
     ]);
-    
-    setStats({
-      totalResources: 58,
-      inUse: 40,
-      available: 18,
-      conflicts: 3,
-      pendingRequests: 2
-    });
   };
 
   // Submit new resource request
-  const handleSubmitRequest = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.resourceType || !formData.reason || !formData.duration) {
+      alert('Please fill in all required fields');
+      return;
+    }
     
     try {
       const token = authService.getToken();
@@ -216,12 +206,38 @@ const Resources = ({ userRole = 'CEO' }) => {
 
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       
+      const requesterId =
+        currentUser?.id ||
+        currentUser?._id ||
+        currentUser?.userId;
+
+      const requesterName =
+        currentUser?.name ||
+        currentUser?.fullName ||
+        currentUser?.userName ||
+        currentUser?.employeeName;
+
+      const requesterRole =
+        currentUser?.role ||
+        currentUser?.requesterRole;
+
+      if (!requesterId || !requesterName || !requesterRole) {
+        alert('Cannot submit request: missing current user details. Please re-login.');
+        return;
+      }
+
       const requestData = {
-        ...formData,
-        name: currentUser.name,
-        initials: currentUser.name.split(' ').map(n => n[0]).join(''),
-        requestDate: new Date().toISOString().split('T')[0],
-        status: 'pending'
+        // Match backend ResourceRequest schema.
+        resourceName: formData.resourceType,
+        resourceType: formData.resourceType,
+        quantity: formData.quantity,
+        reason: formData.reason,
+        priority: formData.priority,
+        approvalLevel: 'TeamLead',
+        requester: requesterId,
+        requesterName,
+        requesterRole,
+        department: currentUser?.department || ''
       };
       
       const response = await fetch(`${API_BASE_URL}/resources/requests`, {
@@ -234,9 +250,14 @@ const Resources = ({ userRole = 'CEO' }) => {
       });
       
       if (response.ok) {
-        const newRequest = await response.json();
-        setRequests([newRequest, ...requests]);
-        setShowRequestForm(false);
+        const payload = await response.json();
+        const newRequest = payload?.data ?? payload;
+        setMyRequests([newRequest, ...myRequests]);
+        setStats(prev => ({
+          ...prev,
+          totalRequests: prev.totalRequests + 1,
+          pendingRequests: prev.pendingRequests + 1
+        }));
         setFormData({
           resourceType: '',
           reason: '',
@@ -245,30 +266,36 @@ const Resources = ({ userRole = 'CEO' }) => {
           quantity: 1,
           specifications: ''
         });
-        alert('Resource request submitted successfully!');
+        setShowRequestForm(false);
+        alert('Resource request submitted successfully! Your manager will review it.');
       } else {
         throw new Error('Failed to submit request');
       }
       
     } catch (error) {
       console.error('Error submitting request:', error);
-      
+      // Fallback for development
       if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         const currentUser = authService.getCurrentUser();
         const newRequest = {
-          id: requests.length + 1,
-          initials: currentUser.name.split(' ').map(n => n[0]).join(''),
-          name: currentUser.name,
-          item: formData.resourceType,
-          description: formData.reason,
-          status: 'pending',
-          priority: formData.priority,
-          requestDate: new Date().toISOString().split('T')[0],
+          id: myRequests.length + 1,
+          name: formData.resourceType,
+          type: 'Other',
           quantity: formData.quantity,
-          duration: formData.duration
+          reason: formData.reason,
+          duration: formData.duration,
+          priority: formData.priority,
+          date: new Date().toISOString(),
+          status: 'pending',
+          requestor: currentUser?.name || 'Current User',
+          initials: currentUser?.name?.split(' ').map(n => n[0]).join('') || 'CU'
         };
-        setRequests([newRequest, ...requests]);
-        setShowRequestForm(false);
+        setMyRequests([newRequest, ...myRequests]);
+        setStats(prev => ({
+          ...prev,
+          totalRequests: prev.totalRequests + 1,
+          pendingRequests: prev.pendingRequests + 1
+        }));
         setFormData({
           resourceType: '',
           reason: '',
@@ -277,6 +304,7 @@ const Resources = ({ userRole = 'CEO' }) => {
           quantity: 1,
           specifications: ''
         });
+        setShowRequestForm(false);
         alert('Resource request submitted! (Mock Mode)');
       } else {
         alert('Failed to submit request. Please try again.');
@@ -284,184 +312,114 @@ const Resources = ({ userRole = 'CEO' }) => {
     }
   };
 
-  // Approve request (for managers/CEO)
-  const approveRequest = async (requestId) => {
-    try {
-      const token = authService.getToken();
-      const currentUser = authService.getCurrentUser();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/resources/requests/${requestId}/approve`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ approvedBy: currentUser.name })
-      });
-      
-      if (response.ok) {
-        setRequests(requests.map(req =>
-          req.id === requestId ? { ...req, status: 'approved', approvedBy: currentUser.name, approvedAt: new Date().toISOString() } : req
-        ));
-        setStats(prev => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
-        alert('Request approved successfully');
-      }
-      
-    } catch (error) {
-      console.error('Error approving request:', error);
-      alert('Failed to approve request');
-    }
-  };
-
-  // Reject request (for managers/CEO)
-  const rejectRequest = async (requestId) => {
-    const rejectionReason = prompt('Please provide a reason for rejection:');
-    if (!rejectionReason) return;
-    
-    try {
-      const token = authService.getToken();
-      const currentUser = authService.getCurrentUser();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/resources/requests/${requestId}/reject`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ rejectedBy: currentUser.name, reason: rejectionReason }),
-      });
-      
-      if (response.ok) {
-        setRequests(requests.map(req =>
-          req.id === requestId ? { ...req, status: 'rejected', rejectedBy: currentUser.name, rejectedAt: new Date().toISOString(), rejectionReason } : req
-        ));
-        setStats(prev => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
-        alert('Request rejected');
-      }
-      
-    } catch (error) {
-      console.error('Error rejecting request:', error);
-      alert('Failed to reject request');
-    }
-  };
-
-  const getStatusBadge = (status) => {
+  const getStatusColor = (status) => {
     switch(status) {
-      case 'pending': 
-        return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">Pending</span>;
-      case 'approved': 
-        return <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">Approved</span>;
-      case 'rejected': 
-        return <span className="px-2 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full">Rejected</span>;
-      default: 
-        return <span className="text-gray-600 text-sm">{status}</span>;
+      case 'approved': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getPriorityColor = (priority) => {
+  const getPriorityBadge = (priority) => {
     switch(priority) {
-      case 'high': return 'border-l-4 border-l-red-500';
-      case 'medium': return 'border-l-4 border-l-yellow-500';
-      case 'low': return 'border-l-4 border-l-green-500';
-      default: return '';
+      case 'high': return <span className="px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded-full">⚠️ High</span>;
+      case 'medium': return <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded-full">🟡 Medium</span>;
+      case 'low': return <span className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">🟢 Low</span>;
+      default: return null;
     }
   };
 
-  const canApproveRequests = () => {
-    return userRole === 'CEO' || userRole === 'Manager';
-  };
-
-  const canRequestResources = () => {
-    return true; // All users can request resources
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays === 1) return 'Yesterday';
+    return `${diffDays} days ago`;
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600"></div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Resources</h1>
-          <p className="text-gray-500 mt-1">Manage and request resources</p>
+          <p className="text-gray-500 mt-1">Request and manage resources</p>
         </div>
-        {canRequestResources() && (
-          <button
-            onClick={() => setShowRequestForm(!showRequestForm)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span>{showRequestForm ? 'Cancel' : 'Request Resource'}</span>
-          </button>
-        )}
+        <button
+          onClick={() => setShowRequestForm(!showRequestForm)}
+          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>{showRequestForm ? 'Cancel' : 'Request Resource'}</span>
+        </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl p-6 border border-gray-200 text-center">
-          <div className="text-3xl font-bold text-gray-900">{stats.totalResources}</div>
-          <div className="text-sm text-gray-600">TOTAL RESOURCES</div>
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl p-4 border shadow-sm">
+          <div className="text-2xl font-bold text-gray-900">{stats.totalRequests}</div>
+          <div className="text-sm text-gray-600">Total Requests</div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-gray-200 text-center">
-          <div className="text-3xl font-bold text-blue-600">{stats.inUse}</div>
-          <div className="text-sm text-gray-600">IN USE</div>
+        <div className="bg-white rounded-xl p-4 border shadow-sm">
+          <div className="text-2xl font-bold text-yellow-600">{stats.pendingRequests}</div>
+          <div className="text-sm text-gray-600">Pending</div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-gray-200 text-center">
-          <div className="text-3xl font-bold text-green-600">{stats.available}</div>
-          <div className="text-sm text-gray-600">AVAILABLE</div>
+        <div className="bg-white rounded-xl p-4 border shadow-sm">
+          <div className="text-2xl font-bold text-green-600">{stats.approvedRequests}</div>
+          <div className="text-sm text-gray-600">Approved</div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-gray-200 text-center">
-          <div className="text-3xl font-bold text-red-600">{stats.conflicts || stats.pendingRequests}</div>
-          <div className="text-sm text-gray-600">{stats.conflicts ? 'CONFLICTS FLAGGED' : 'PENDING REQUESTS'}</div>
+        <div className="bg-white rounded-xl p-4 border shadow-sm">
+          <div className="text-2xl font-bold text-red-600">{stats.rejectedRequests}</div>
+          <div className="text-sm text-gray-600">Rejected</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
+      <div className="flex flex-wrap gap-2 border-b border-gray-200">
         <button
-          onClick={() => setActiveTab('requests')}
+          onClick={() => setActiveTab('my-requests')}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'requests' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'
+            activeTab === 'my-requests' ? 'text-purple-600 border-b-2 border-purple-600' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
-          Resource Requests ({requests.filter(r => r.status === 'pending').length})
+          My Requests ({myRequests.length})
         </button>
         <button
           onClick={() => setActiveTab('available')}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'available' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'
+            activeTab === 'available' ? 'text-purple-600 border-b-2 border-purple-600' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
-          Available Resources
+          Available Resources ({availableResources.length})
         </button>
-        {canApproveRequests() && (
-          <button
-            onClick={() => setActiveTab('all-requests')}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'all-requests' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            All Requests ({requests.length})
-          </button>
-        )}
       </div>
 
       {/* Request Form */}
       {showRequestForm && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-2">Request a Resource</h2>
-          <p className="text-sm text-gray-500 mb-6">Submit a request for resources you need</p>
+          <p className="text-sm text-gray-500 mb-6">Submit a request to your Manager for approval</p>
 
-          <form onSubmit={handleSubmitRequest} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">RESOURCE TYPE *</label>
@@ -471,7 +429,7 @@ const Resources = ({ userRole = 'CEO' }) => {
                   placeholder="e.g., GPU Server, AWS Credits, Software License"
                   value={formData.resourceType}
                   onChange={(e) => setFormData({...formData, resourceType: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -481,7 +439,7 @@ const Resources = ({ userRole = 'CEO' }) => {
                   min="1"
                   value={formData.quantity}
                   onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value)})}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
@@ -489,7 +447,7 @@ const Resources = ({ userRole = 'CEO' }) => {
                 <select
                   value={formData.priority}
                   onChange={(e) => setFormData({...formData, priority: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -504,18 +462,18 @@ const Resources = ({ userRole = 'CEO' }) => {
                   placeholder="Explain why you need this resource..."
                   value={formData.reason}
                   onChange={(e) => setFormData({...formData, reason: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">DURATION *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">REQUESTED DURATION *</label>
                 <input 
                   type="text" 
                   required
                   placeholder="e.g., 2 weeks, 3 days, Permanent"
                   value={formData.duration}
                   onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div className="md:col-span-2">
@@ -525,7 +483,7 @@ const Resources = ({ userRole = 'CEO' }) => {
                   placeholder="Any specific requirements or specifications..."
                   value={formData.specifications}
                   onChange={(e) => setFormData({...formData, specifications: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
@@ -539,7 +497,7 @@ const Resources = ({ userRole = 'CEO' }) => {
               </button>
               <button 
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
               >
                 Submit Request
               </button>
@@ -548,152 +506,112 @@ const Resources = ({ userRole = 'CEO' }) => {
         </div>
       )}
 
-      {/* Resource Requests Tab */}
-      {activeTab === 'requests' && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="font-semibold text-gray-900">Pending Resource Requests</h2>
-            <p className="text-sm text-gray-500 mt-1">Requests waiting for approval</p>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {requests.filter(r => r.status === 'pending').length === 0 ? (
-              <div className="px-6 py-8 text-center text-gray-500">
-                No pending requests
-              </div>
-            ) : (
-              requests.filter(r => r.status === 'pending').map((request) => (
-                <div key={request.id} className={`px-6 py-4 hover:bg-gray-50 transition ${getPriorityColor(request.priority)}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                        {request.initials}
+      {/* My Requests Tab */}
+      {activeTab === 'my-requests' && (
+        <div className="space-y-3">
+          {myRequests.length === 0 ? (
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+              <div className="text-6xl mb-4">📭</div>
+              <p className="text-gray-500 text-lg">No resource requests yet</p>
+              <p className="text-sm text-gray-400 mt-1">Click "Request Resource" to get started</p>
+            </div>
+          ) : (
+            myRequests.map((request) => (
+              <div key={request._id ?? request.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        {request.initials || request.requesterName?.charAt?.(0) || (typeof request.requestor === 'string' ? request.requestor.charAt(0) : request.requestor?.name?.charAt?.(0)) || 'U'}
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{request.name} — {request.item}</p>
-                        <p className="text-sm text-gray-500">{request.description}</p>
-                        <div className="flex items-center space-x-3 mt-1">
-                          <span className="text-xs text-gray-400">Quantity: {request.quantity}</span>
-                          <span className="text-xs text-gray-400">Duration: {request.duration}</span>
-                          <span className="text-xs text-gray-400">Requested: {request.requestDate}</span>
-                        </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{request.name || request.resourceName}</h3>
+                        <p className="text-sm text-gray-500">{request.type || request.resourceType || 'Resource'}</p>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        {getStatusBadge(request.status)}
-                        {canApproveRequests() && (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => approveRequest(request.id)}
-                              className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => rejectRequest(request.id)}
-                              className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                      <span className={`ml-auto px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}>
+                        {(request.status || 'unknown').charAt(0).toUpperCase() + (request.status || 'unknown').slice(1) }
+                      </span>
                     </div>
+                    
+                    <p className="text-gray-600 text-sm mt-2">{request.reason}</p>
+                    
+                    <div className="flex flex-wrap items-center gap-3 mt-3">
+                      <span className="text-xs text-gray-400">Requested: {formatDate(request.date || request.requestedAt || request.createdAt)}</span>
+                      {request.duration && (
+                        <span className="text-xs text-gray-400">Duration: {request.duration}</span>
+                      )}
+                      {request.quantity > 1 && (
+                        <span className="text-xs text-gray-400">Quantity: {request.quantity}</span>
+                      )}
+                      {getPriorityBadge(request.priority)}
+                    </div>
+                    
+                    {request.status === 'approved' && request.approvedBy && (
+                      <p className="text-xs text-green-600 mt-2">✓ Approved by {request.approvedBy}</p>
+                    )}
+                    
+                    {request.status === 'rejected' && request.rejectionReason && (
+                      <div className="mt-2 p-2 bg-red-50 rounded-lg">
+                        <p className="text-xs text-red-600">
+                          <span className="font-medium">Rejection Reason:</span> {request.rejectionReason}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          )}
         </div>
       )}
 
       {/* Available Resources Tab */}
       {activeTab === 'available' && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="font-semibold text-gray-900">Available Resources</h2>
-            <p className="text-sm text-gray-500 mt-1">Resources currently available for use</p>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {availableResources.length === 0 ? (
-              <div className="px-6 py-8 text-center text-gray-500">
-                No resources available
-              </div>
-            ) : (
-              availableResources.map((resource) => (
-                <div key={resource.id} className="px-6 py-4 hover:bg-gray-50 transition">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">{resource.name}</p>
-                      <p className="text-sm text-gray-500">{resource.type}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Available: {resource.available} / {resource.total} {resource.unit}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setFormData({
-                          ...formData,
-                          resourceType: resource.name,
-                          quantity: 1
-                        });
-                        setShowRequestForm(true);
-                        setActiveTab('requests');
-                      }}
-                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
-                    >
-                      Request
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* All Requests Tab (CEO/Manager only) */}
-      {activeTab === 'all-requests' && canApproveRequests() && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="font-semibold text-gray-900">All Resource Requests</h2>
-            <p className="text-sm text-gray-500 mt-1">Complete history of all resource requests</p>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {requests.length === 0 ? (
-              <div className="px-6 py-8 text-center text-gray-500">
-                No requests found
-              </div>
-            ) : (
-              requests.map((request) => (
-                <div key={request.id} className={`px-6 py-4 hover:bg-gray-50 transition ${getPriorityColor(request.priority)}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                        {request.initials}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{request.name} — {request.item}</p>
-                        <p className="text-sm text-gray-500">{request.description}</p>
-                        <div className="flex items-center space-x-3 mt-1">
-                          <span className="text-xs text-gray-400">Quantity: {request.quantity}</span>
-                          <span className="text-xs text-gray-400">Duration: {request.duration}</span>
-                          <span className="text-xs text-gray-400">Requested: {request.requestDate}</span>
-                        </div>
-                        {request.status === 'approved' && request.approvedBy && (
-                          <p className="text-xs text-green-600 mt-1">Approved by {request.approvedBy}</p>
-                        )}
-                        {request.status === 'rejected' && request.rejectionReason && (
-                          <p className="text-xs text-red-600 mt-1">Rejected: {request.rejectionReason}</p>
-                        )}
-                      </div>
-                      <div>
-                        {getStatusBadge(request.status)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {availableResources.length === 0 ? (
+            <div className="col-span-full bg-white rounded-xl border border-gray-200 p-12 text-center">
+              <div className="text-6xl mb-4">🖥️</div>
+              <p className="text-gray-500 text-lg">No resources available</p>
+              <p className="text-sm text-gray-400 mt-1">Check back later for resource availability</p>
+            </div>
+          ) : (
+            availableResources.map(resource => (
+              <div key={resource.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">{resource.name}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{resource.type}</p>
+                    {resource.description && (
+                      <p className="text-xs text-gray-400 mt-1">{resource.description}</p>
+                    )}
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Available:</span>
+                        <span className="font-semibold text-green-600">{resource.available} / {resource.total || resource.available} {resource.unit}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <button
+                    onClick={() => {
+                      setFormData({
+                        ...formData,
+                        resourceType: resource.name,
+                        quantity: 1
+                      });
+                      setShowRequestForm(true);
+                      setActiveTab('my-requests');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="w-full px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    Request this Resource
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
@@ -701,3 +619,4 @@ const Resources = ({ userRole = 'CEO' }) => {
 };
 
 export default Resources;
+

@@ -7,6 +7,7 @@ const multer = require('multer');
 const Roadmap = require('../models/Roadmap');
 const Task = require('../models/Task');
 const { protect } = require('../middleware/authMiddleware');
+const { notifyMvpSubmitted } = require('../utils/notificationDispatcher');
 
 const initials = (name = 'U') => name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
 const uploadDir = path.join(__dirname, '../../uploads/roadmap-attachments');
@@ -167,6 +168,7 @@ router.post('/:id/share', async (req, res) => {
       { new: true }
     );
     if (!roadmap) return res.status(404).json({ success: false, message: 'Roadmap not found' });
+    await notifyMvpSubmitted(roadmap, req.user);
     res.json({ success: true, data: toDto(roadmap) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to share roadmap' });

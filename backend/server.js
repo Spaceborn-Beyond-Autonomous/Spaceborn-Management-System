@@ -32,7 +32,7 @@ app.post('/api/test-register', async (req, res) => {
       lastName,
       email,
       role: role || 'Member',
-      department: department || 'Engineering'
+      department: department || 'Core Systems'
     });
     
     res.json({ success: true, message: 'User created!', userId: user.employeeId });

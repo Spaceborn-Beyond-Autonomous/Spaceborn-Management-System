@@ -25,7 +25,7 @@ exports.register = async (req, res) => {
       firstName,
       lastName,
       role: role || 'Member',
-      department: department || 'Engineering',
+      department: department || 'Core Systems',
       employeeId,
       phone,
       joinDate,

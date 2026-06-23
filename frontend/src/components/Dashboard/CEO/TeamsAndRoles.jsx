@@ -5,6 +5,7 @@ import {
   Briefcase, Shield, Building2, AlertCircle 
 } from 'lucide-react';
 import employeeService from '../../../services/employeeService';
+import { DEPARTMENTS } from '../../../utils/departments';
 
 const TeamsAndRoles = ({ userRole = 'CEO' }) => {
   const [activeTab, setActiveTab] = useState('teams');
@@ -14,7 +15,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
   const [teams, setTeams] = useState([]);
   const [members, setMembers] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [departments, setDepartments] = useState(['All']);
+  const [departments, setDepartments] = useState(['All', ...DEPARTMENTS]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showMemberModal, setShowMemberModal] = useState(false);
@@ -34,8 +35,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
       const employees = await employeeService.getAllEmployees();
       
       // Calculate departments from employees data
-      const uniqueDepartments = ['All', ...new Set(employees.map(emp => emp.department).filter(Boolean))];
-      setDepartments(uniqueDepartments);
+      setDepartments(['All', ...DEPARTMENTS]);
       
       if (activeTab === 'teams') {
         // Calculate teams/departments from employees

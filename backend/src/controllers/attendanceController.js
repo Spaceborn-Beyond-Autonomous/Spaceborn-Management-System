@@ -274,7 +274,7 @@ exports.getRosterAttendance = async (req, res) => {
     // Scope:
     // - CEO/Manager: all departments unless a department filter is passed
     // - Other roles: their own department
-    const hasCompanyAttendanceAccess = ['CEO', 'Manager'].includes(viewRole);
+    const hasCompanyAttendanceAccess = ['CEO', 'COO', 'Manager'].includes(viewRole);
     const scopeDepartment = hasCompanyAttendanceAccess
       ? (department && department !== 'all' ? department : null)
       : user?.department;

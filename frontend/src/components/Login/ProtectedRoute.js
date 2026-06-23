@@ -107,7 +107,6 @@ const ProtectedRoute = ({
     };
     
     verifyAccess();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startRedirectCountdown = () => {
@@ -132,6 +131,7 @@ const ProtectedRoute = ({
     switch(role) {
       case 'CEO': return 'bg-purple-100 text-purple-700';
       case 'Manager': return 'bg-blue-100 text-blue-700';
+      case 'COO': return 'bg-blue-100 text-blue-700';
       case 'Team Lead': return 'bg-green-100 text-green-700';
       case 'Member': return 'bg-gray-100 text-gray-700';
       default: return 'bg-gray-100 text-gray-700';

@@ -85,7 +85,7 @@ const RiskRegister = ({ userRole = 'CEO' }) => {
     const mockRisks = [
       { 
         id: 1, 
-        title: 'Talent retention in Engineering', 
+        title: 'Talent retention in Core Systems', 
         severity: 'high', 
         probability: 70, 
         impact: 'Schedule delays', 
@@ -107,7 +107,7 @@ const RiskRegister = ({ userRole = 'CEO' }) => {
         mitigation: 'Aggressive marketing, product differentiation',
         trend: 'stable',
         status: 'active',
-        owner: 'Marketing Department',
+        owner: 'AI/LLM & Perception Department',
         mitigationStatus: 'planned',
         createdAt: '2026-06-01',
         updatedAt: '2026-06-07',

@@ -31,7 +31,7 @@ const SessionManager = ({
         timestamp: Date.now()
       }));
     }
-  }, [isDevMode, user]);
+  }, [isDevMode(), user]);
 
   // Check session and token validity
   const checkSession = useCallback(async () => {

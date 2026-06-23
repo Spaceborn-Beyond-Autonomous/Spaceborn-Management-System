@@ -141,7 +141,7 @@ const DepartmentOverview = ({ userRole = 'CEO' }) => {
       },
       { 
         id: 5, 
-        name: 'Robotics & Simulation', 
+        name: 'HR', 
         lead: 'Neha Gupta',
         leadAvatar: 'NG',
         members: 10, 

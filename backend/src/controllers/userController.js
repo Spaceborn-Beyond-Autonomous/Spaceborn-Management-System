@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { formatResponse } = require('../utils/helpers');
+const { uploadEmployeeDocumentToDrive } = require('../services/googleDriveService');
 
 const DEPARTMENTS = [
   'Platform and DevOps',
@@ -33,12 +34,59 @@ const normalizeDepartments = (departments) => {
 const getFullName = (user) =>
   user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim();
 
+const buildDriveUrls = (fileId, webViewLink, webContentLink) => ({
+  fileUrl: webContentLink || `https://drive.google.com/uc?export=download&id=${fileId}`,
+  viewUrl: webViewLink || `https://drive.google.com/file/d/${fileId}/view`
+});
+
+const applyDocumentToDto = (employee, documentType, document) => {
+  const docs = employee.documents || {};
+
+  if (docs.profile_photo) employee.profilePhoto = docs.profile_photo;
+  if (docs.aadhaar) employee.aadhaar = { ...(employee.aadhaar || {}), ...docs.aadhaar };
+  if (docs.pan) employee.pan = { ...(employee.pan || {}), ...docs.pan };
+  if (docs.resume) employee.resume = docs.resume;
+  if (docs.nda) employee.nda = { ...(employee.nda || {}), ...docs.nda };
+  if (docs.code_of_conduct) employee.codeOfConduct = { ...(employee.codeOfConduct || {}), ...docs.code_of_conduct };
+  if (docs.ip_agreement) employee.ipAgreement = { ...(employee.ipAgreement || {}), ...docs.ip_agreement };
+  if (Array.isArray(docs.education)) {
+    employee.education = { ...(employee.education || {}), documents: docs.education };
+  }
+  if (Array.isArray(docs.onboarding)) employee.onboardingDocs = docs.onboarding;
+
+  if (documentType && document) {
+    employee.lastUploadedDocument = document;
+  }
+
+  return employee;
+};
+
+const mergeEmployeeDocument = (documents = {}, documentType, document) => {
+  const nextDocuments = { ...documents };
+
+  if (documentType === 'education' || documentType === 'onboarding') {
+    nextDocuments[documentType] = [...(Array.isArray(nextDocuments[documentType]) ? nextDocuments[documentType] : []), document];
+    return nextDocuments;
+  }
+
+  nextDocuments[documentType] = {
+    ...(nextDocuments[documentType] || {}),
+    ...document,
+    ...(documentType === 'resume' ? { version: ((nextDocuments.resume && nextDocuments.resume.version) || 0) + 1 } : {}),
+    ...(documentType === 'nda' ? { signed: true, signedDate: document.uploaded } : {}),
+    ...(documentType === 'code_of_conduct' ? { signed: true, accepted: true, signedDate: document.uploaded } : {}),
+    ...(documentType === 'ip_agreement' ? { signed: true, accepted: true, signedDate: document.uploaded } : {})
+  };
+
+  return nextDocuments;
+};
+
 const toEmployeeDto = (user) => {
   if (!user) return null;
   const plain = typeof user.toObject === 'function' ? user.toObject() : user;
   const name = getFullName(plain);
 
-  return {
+  const employee = {
     id: plain._id,
     _id: plain._id,
     employeeId: plain.employeeId,
@@ -58,7 +106,10 @@ const toEmployeeDto = (user) => {
     isActive: plain.isActive !== false,
     createdAt: plain.createdAt,
     updatedAt: plain.updatedAt,
+    documents: plain.documents || {},
   };
+
+  return applyDocumentToDto(employee);
 };
 
 const splitName = (body) => {
@@ -534,4 +585,69 @@ exports.updateLeaveBalance = async (req, res) => {
     Other: 3,
     [req.body.leaveType]: Math.max(0, Number(req.body.days) || 0)
   }));
+};
+
+exports.uploadEmployeeDocument = async (req, res) => {
+  try {
+    const allowedTypes = [
+      'profile_photo',
+      'aadhaar',
+      'pan',
+      'resume',
+      'education',
+      'nda',
+      'code_of_conduct',
+      'ip_agreement',
+      'onboarding'
+    ];
+    const documentType = req.body.documentType;
+
+    if (!req.file) {
+      return res.status(400).json(formatResponse(false, 'Document file is required'));
+    }
+
+    if (!allowedTypes.includes(documentType)) {
+      return res.status(400).json(formatResponse(false, 'Invalid document type'));
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json(formatResponse(false, 'Employee not found'));
+    }
+
+    const accessToken = req.body.googleAccessToken || req.get('x-google-access-token');
+    const driveFile = await uploadEmployeeDocumentToDrive({
+      file: req.file,
+      employee: user,
+      documentType,
+      accessToken
+    });
+
+    const uploaded = new Date().toISOString().split('T')[0];
+    const urls = buildDriveUrls(driveFile.id, driveFile.webViewLink, driveFile.webContentLink);
+    const document = {
+      name: req.file.originalname,
+      fileName: req.file.originalname,
+      fileId: driveFile.id,
+      mimeType: driveFile.mimeType || req.file.mimetype,
+      size: driveFile.size || req.file.size,
+      uploaded,
+      uploadedAt: new Date(),
+      uploadedBy: req.user?._id,
+      ...urls
+    };
+
+    user.documents = mergeEmployeeDocument(user.documents || {}, documentType, document);
+    user.markModified('documents');
+    await user.save();
+
+    const employee = applyDocumentToDto(toEmployeeDto(user), documentType, document);
+    res.status(201).json(formatResponse(true, 'Document uploaded to Google Drive successfully', {
+      employee,
+      document
+    }));
+  } catch (error) {
+    console.error('Employee document upload error:', error);
+    res.status(500).json(formatResponse(false, error.message || 'Failed to upload employee document'));
+  }
 };

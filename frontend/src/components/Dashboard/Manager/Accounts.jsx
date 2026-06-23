@@ -34,10 +34,10 @@ const Accounts = ({ userRole = 'Manager' }) => {
     byRole: {}
   });
 
-  // Available roles based on user role (Manager)
+  // Available roles based on user role (Manager/COO)
   const getAvailableRoles = () => {
-    if (userRole === 'Manager') {
-      return ['Team Lead', 'Member'];
+    if (userRole === 'Manager' || userRole === 'COO') {
+      return ['COO', 'Manager', 'Team Lead', 'Member', 'HR'];
     }
     return ['Member'];
   };
@@ -47,8 +47,11 @@ const Accounts = ({ userRole = 'Manager' }) => {
   // Generate Employee ID
   const generateEmployeeId = () => {
     const rolePrefix = {
+      'COO': 'COO',
+      'Manager': 'MGR',
       'Team Lead': 'LD',
-      'Member': 'EMP'
+      'Member': 'EMP',
+      'HR': 'HR'
     };
     
     const prefix = rolePrefix[formData.role] || 'EMP';
@@ -157,12 +160,9 @@ const Accounts = ({ userRole = 'Manager' }) => {
       
       if (response.ok) {
         const data = await response.json();
-        // Filter accounts that Manager can see (Team Leads and Members only)
-        const filteredData = data.filter(account => 
-          account.role === 'Team Lead' || account.role === 'Member'
-        );
-        setAllAccounts(filteredData);
-        setRecentlyCreated(filteredData.slice(-4).reverse());
+        const accounts = Array.isArray(data) ? data : (data.data || data.accounts || []);
+        setAllAccounts(accounts);
+        setRecentlyCreated(accounts.slice(-4).reverse());
       } else {
         throw new Error('Failed to fetch accounts');
       }
@@ -179,11 +179,13 @@ const Accounts = ({ userRole = 'Manager' }) => {
 
   const loadMockAllAccounts = () => {
     const mockAccounts = [
-      { id: 1, name: 'Mike Johnson', initials: 'MJ', role: 'Team Lead', department: 'Core Systems', date: '2021-02-10', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', password: 'Pass@789', phone: '+1 (555) 000-0003', designation: 'Engineering Lead', status: 'Active', joinDate: '2021-02-10', createdAt: '2021-02-10T00:00:00Z' },
-      { id: 2, name: 'Ravi Das', initials: 'RD', role: 'Member', department: 'Core Systems', date: '2022-06-01', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', password: 'Pass@101', phone: '+1 (555) 000-0004', designation: 'Frontend Developer', status: 'Active', joinDate: '2022-06-01', createdAt: '2022-06-01T00:00:00Z' },
-      { id: 3, name: 'Priya Sharma', initials: 'PS', role: 'Member', department: 'Core Systems', date: '2022-08-15', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', password: 'Pass@202', phone: '+1 (555) 000-0005', designation: 'Backend Developer', status: 'Active', joinDate: '2022-08-15', createdAt: '2022-08-15T00:00:00Z' },
-      { id: 4, name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: 'AI/LLM & Perception', date: '2023-01-10', email: 'sita.krishnan@spaceborn.com', employeeId: 'LD002', password: 'Pass@303', phone: '+1 (555) 000-0006', designation: 'Marketing Lead', status: 'Active', joinDate: '2023-01-10', createdAt: '2023-01-10T00:00:00Z' },
-      { id: 5, name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: 'Hardware & Integration', date: '2023-03-15', email: 'anil.mehta@spaceborn.com', employeeId: 'LD003', password: 'Pass@404', phone: '+1 (555) 000-0007', designation: 'Design Lead', status: 'Active', joinDate: '2023-03-15', createdAt: '2023-03-15T00:00:00Z' }
+      { id: 1, name: 'Aarav Mehta', initials: 'AM', role: 'COO', department: 'Platform and DevOps', date: '2021-01-10', email: 'aarav.mehta@spaceborn.com', employeeId: 'COO001', password: 'Pass@234', phone: '+1 (555) 000-0008', designation: 'Chief Operating Officer', status: 'Active', joinDate: '2021-01-10', createdAt: '2021-01-10T00:00:00Z' },
+      { id: 2, name: 'Jane Smith', initials: 'JS', role: 'Manager', department: 'Platform and DevOps', date: '2020-03-20', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', password: 'Pass@456', phone: '+1 (555) 000-0002', designation: 'Platform and DevOps Manager', status: 'Active', joinDate: '2020-03-20', createdAt: '2020-03-20T00:00:00Z' },
+      { id: 3, name: 'Mike Johnson', initials: 'MJ', role: 'Team Lead', department: 'Core Systems', date: '2021-02-10', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', password: 'Pass@789', phone: '+1 (555) 000-0003', designation: 'Core Systems Lead', status: 'Active', joinDate: '2021-02-10', createdAt: '2021-02-10T00:00:00Z' },
+      { id: 4, name: 'Ravi Das', initials: 'RD', role: 'Member', department: 'Core Systems', date: '2022-06-01', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', password: 'Pass@101', phone: '+1 (555) 000-0004', designation: 'Frontend Developer', status: 'Active', joinDate: '2022-06-01', createdAt: '2022-06-01T00:00:00Z' },
+      { id: 5, name: 'Priya Sharma', initials: 'PS', role: 'Member', department: 'Core Systems', date: '2022-08-15', email: 'priya.sharma@spaceborn.com', employeeId: 'EMP002', password: 'Pass@202', phone: '+1 (555) 000-0005', designation: 'Backend Developer', status: 'Active', joinDate: '2022-08-15', createdAt: '2022-08-15T00:00:00Z' },
+      { id: 6, name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: 'AI/LLM & Perception', date: '2023-01-10', email: 'sita.krishnan@spaceborn.com', employeeId: 'LD002', password: 'Pass@303', phone: '+1 (555) 000-0006', designation: 'AI/LLM & Perception Lead', status: 'Active', joinDate: '2023-01-10', createdAt: '2023-01-10T00:00:00Z' },
+      { id: 7, name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: 'Hardware & Integration', date: '2023-03-15', email: 'anil.mehta@spaceborn.com', employeeId: 'LD003', password: 'Pass@404', phone: '+1 (555) 000-0007', designation: 'Hardware & Integration Lead', status: 'Active', joinDate: '2023-03-15', createdAt: '2023-03-15T00:00:00Z' }
     ];
     setAllAccounts(mockAccounts);
     setRecentlyCreated(mockAccounts.slice(-4).reverse());
@@ -210,7 +212,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
       setDepartments(depts);
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Core Systems', 'Hardware & Integration', 'AI/LLM & Perception', 'Platform and DevOps', 'Robotics & Simulation', 'Robotics & Simulation', 'Robotics & Simulation']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
     }
   };
 
@@ -225,7 +227,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
       
       if (response.ok) {
         const data = await response.json();
-        setStats(data);
+        setStats(data.data || data);
       } else if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockStats();
       }
@@ -240,11 +242,14 @@ const Accounts = ({ userRole = 'Manager' }) => {
 
   const loadMockStats = () => {
     setStats({
-      totalCreated: allAccounts.length || 5,
+      totalCreated: allAccounts.length || 7,
       thisMonth: 1,
       byRole: {
+        'COO': 1,
+        'Manager': 1,
         'Team Lead': 3,
-        'Member': 2
+        'Member': 2,
+        'HR': 0
       }
     });
   };
@@ -461,7 +466,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
       {/* Role Creation Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-6 text-sm text-blue-700 flex items-center gap-2">
         <AlertCircle className="w-4 h-4" />
-        Manager - can create: Team Leads and Members only
+        {userRole} - can create: COO, Managers, Team Leads, Members, HR
       </div>
 
       {/* Credentials Modal */}
@@ -653,7 +658,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
 {stats.byRole ? (
   <div className="mt-6 bg-white rounded-xl border border-gray-200 p-4">
     <h3 className="text-sm font-semibold text-gray-700 mb-3">Role Distribution</h3>
-    <div className="grid grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       {Object.keys(stats.byRole).map((role) => (
         <div key={role} className="text-center p-2 bg-gray-50 rounded-lg">
           <p className="text-lg font-bold text-gray-900">{stats.byRole[role]}</p>

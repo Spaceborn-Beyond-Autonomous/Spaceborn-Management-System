@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import employeeService from '../../../services/employeeService';
 import authService from '../../../services/authService';
+import { normalizeDepartment } from '../../../utils/departments';
 
 const TeamsAndRoles = ({ userRole = 'Manager' }) => {
   const [activeTab, setActiveTab] = useState('teams');
@@ -15,7 +16,7 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
   const [teams, setTeams] = useState([]);
   const [members, setMembers] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [departments, setDepartments] = useState(['All']);
+  const [departments, setDepartments] = useState(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception', 'All']);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showMemberModal, setShowMemberModal] = useState(false);
@@ -46,10 +47,10 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
       // Fetch employees from service
       const employees = await employeeService.getAllEmployees();
       const user = authService.getCurrentUser();
-      const managerDepartment = user?.department;
+      const managerDepartment = normalizeDepartment(user?.department);
       
       // Filter employees for manager's department only
-      const filteredEmployees = employees.filter(emp => emp.department === managerDepartment);
+      const filteredEmployees = employees.filter(emp => normalizeDepartment(emp.department) === managerDepartment);
       
       // Calculate departments from employees data (only manager's department)
       const uniqueDepartments = ['All', managerDepartment];

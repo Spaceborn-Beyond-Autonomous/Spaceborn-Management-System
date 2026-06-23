@@ -118,3 +118,6 @@ dist
 # Mac OS
 .DS_Store
 **/.DS_Store
+
+# Local Uploads
+backend/uploads/

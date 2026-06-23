@@ -38,7 +38,7 @@ router.post('/warning', authMiddleware, emailLimiter, async (req, res) => {
     const { to, subject, html } = req.body; 
      
     // Only CEO and Managers can send warnings 
-    if (!['CEO', 'Manager'].includes(req.user.role)) { 
+    if (!['CEO', 'COO', 'Manager'].includes(req.user.role)) { 
       return res.status(403).json({ error: 'Unauthorized' }); 
     } 
      

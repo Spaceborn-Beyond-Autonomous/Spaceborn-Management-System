@@ -1,6 +1,7 @@
 const Task = require('../models/Task');
 const User = require('../models/User');
 const { formatResponse } = require('../utils/helpers');
+const { notifyTaskAssigned } = require('../utils/notificationDispatcher');
 
 const getUserName = (user) =>
   user?.name || user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim();
@@ -99,7 +100,7 @@ exports.createTask = async (req, res) => {
       assignedTo,
       assignedToName: finalAssignedToName || '',
       assignedToInitials: finalAssignedToInitials || '',
-      department: department || 'Engineering',
+      department: department || 'Core Systems',
       priority: priority || 'medium',
       // Schema stores dueDate as String; accept date or yyyy-mm-dd and store as provided.
       dueDate: dueDate || '',
@@ -109,6 +110,10 @@ exports.createTask = async (req, res) => {
       createdBy,
       createdAt: createdAt || new Date().toISOString()
     });
+
+    if (req.user?.role === 'Team Lead') {
+      await notifyTaskAssigned(task);
+    }
 
     res.status(201).json(formatResponse(true, 'Task created successfully', task));
   } catch (err) {

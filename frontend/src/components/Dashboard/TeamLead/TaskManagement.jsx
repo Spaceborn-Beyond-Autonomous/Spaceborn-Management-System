@@ -1,13 +1,32 @@
-// src/components/Dashboard/TeamLead/TaskManagement.js
+// src/components/Dashboard/TeamLead/TaskManagement.jsx
 import React, { useState, useEffect } from 'react';
+
 import authService from '../../../services/authService';
-import employeeService from '../../../services/employeeService';
+import taskService from '../../../services/taskService';
+import userService from '../../../services/userService';
+import {
+  calculateTaskStats,
+  deriveStatusFromProgress,
+  filterTasks,
+  formatPriorityLabel,
+  getInitialsFromName,
+  getTaskId,
+  normalizeTask,
+  normalizeTaskList,
+} from '../../../utils/taskMapper';
 
 const TaskManagement = ({ userRole = 'Team Lead' }) => {
+
   const [tasks, setTasks] = useState([]);
+
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+
   const [teamMembers, setTeamMembers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  // Team Lead must be restricted to their own department.
+  // Keep state but do not allow user to expand beyond their department.
   const [selectedDepartment, setSelectedDepartment] = useState('All');
+
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,84 +57,73 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
   useEffect(() => {
     fetchTeamMembers();
     fetchTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDepartment, selectedStatus, searchQuery]);
+
 
   const fetchTeamMembers = async () => {
     try {
-      const token = authService.getToken();
       const currentUser = authService.getCurrentUser();
-      
-      if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
-        // Mock team members
+      const department = (currentUser?.department || '').trim();
+
+      if (!department) {
+        setTeamMembers([]);
+        return;
+      }
+
+      if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         setTeamMembers([
-          { id: 4, name: 'Ravi Das', role: 'Member', department: currentUser?.department || 'Core Systems', email: 'ravi.das@spaceborn.com', initials: 'RD' },
-          { id: 5, name: 'Priya Sharma', role: 'Member', department: currentUser?.department || 'Core Systems', email: 'priya.sharma@spaceborn.com', initials: 'PS' },
-          { id: 6, name: 'Nisha Kumar', role: 'Member', department: currentUser?.department || 'Core Systems', email: 'nisha.kumar@spaceborn.com', initials: 'NK' },
-          { id: 10, name: 'Suresh M', role: 'Member', department: currentUser?.department || 'Core Systems', email: 'suresh.m@spaceborn.com', initials: 'SM' }
+          { id: 4, name: 'Ravi Das', role: 'Member', department, initials: 'RD' },
+          { id: 5, name: 'Priya Sharma', role: 'Member', department, initials: 'PS' },
         ]);
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_BASE_URL}/team-members?department=${currentUser?.department}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setTeamMembers(data);
-      }
+      const list = await userService.getDepartmentMembers(department);
+      setTeamMembers(list);
     } catch (error) {
       console.error('Error fetching team members:', error);
-      // Mock fallback
-      setTeamMembers([
-        { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi.das@spaceborn.com', initials: 'RD' },
-        { id: 5, name: 'Priya Sharma', role: 'Member', department: 'Core Systems', email: 'priya.sharma@spaceborn.com', initials: 'PS' }
-      ]);
+      setTeamMembers([]);
     }
   };
 
   const fetchTasks = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const token = authService.getToken();
       const currentUser = authService.getCurrentUser();
-      
+      const department = currentUser?.department;
+
       if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockData();
         setIsLoading(false);
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const params = new URLSearchParams();
-      if (selectedDepartment !== 'All') params.append('department', selectedDepartment);
-      if (selectedStatus !== 'All') params.append('status', selectedStatus);
-      if (searchQuery) params.append('search', searchQuery);
-      
-      const response = await fetch(`${API_BASE_URL}/tasks?${params.toString()}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const rawTasks = await taskService.getDepartmentTasks(department);
+      const filtered = filterTasks(rawTasks, {
+        search: searchQuery,
+        status: selectedStatus,
+        department: selectedDepartment,
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        // Filter tasks for team lead's department only
-        const filteredTasks = (data.tasks || data).filter(task => 
-          task.department === currentUser?.department
-        );
-        setTasks(filteredTasks);
-        calculateStats(filteredTasks);
-      } else {
-        throw new Error('Failed to fetch tasks');
-      }
-      
+
+      const normalized = normalizeTaskList(filtered);
+      setTasks(normalized);
+      setStats({
+        totalTasks: normalized.length,
+        completedTasks: normalized.filter(t => t.status === 'Completed').length,
+        inProgressTasks: normalized.filter(t => t.status === 'In progress').length,
+        pendingTasks: normalized.filter(t => t.status === 'Pending').length,
+        overdueTasks: normalized.filter(t => t.status === 'Overdue').length,
+      });
     } catch (error) {
       console.error('Error fetching tasks:', error);
       setError('Failed to load tasks');
-      loadMockData();
+      if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+        loadMockData();
+      }
     } finally {
       setIsLoading(false);
     }
@@ -124,217 +132,148 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
   const loadMockData = () => {
     const currentUser = authService.getCurrentUser();
     const department = currentUser?.department || 'Core Systems';
-    
-    const mockTasks = [
-      { 
-        id: 1, 
-        initials: 'RD', 
-        name: 'Ravi Das', 
-        task: 'Build login UI', 
-        dept: department, 
-        progress: 74, 
+
+    const mockTasks = normalizeTaskList([
+      {
+        id: 1,
+        title: 'Build login UI',
+        assignedToName: 'Ravi Das',
+        assignedToInitials: 'RD',
+        department,
+        progress: 74,
         status: 'In progress',
         priority: 'high',
         dueDate: '2026-06-10',
         description: 'Implement the login page with validation',
-        assignedTo: 4
+        assignedTo: 4,
       },
-      { 
-        id: 2, 
-        initials: 'NK', 
-        name: 'Nisha Kumar', 
-        task: 'Write unit tests', 
-        dept: department, 
-        progress: 0, 
+      {
+        id: 2,
+        title: 'Write unit tests',
+        assignedToName: 'Nisha Kumar',
+        assignedToInitials: 'NK',
+        department,
+        progress: 0,
         status: 'Pending',
         priority: 'medium',
         dueDate: '2026-06-15',
         description: 'Write unit tests for all components',
-        assignedTo: 6
+        assignedTo: 6,
       },
-      { 
-        id: 3, 
-        initials: 'SM', 
-        name: 'Suresh M', 
-        task: 'DB schema design', 
-        dept: department, 
-        progress: 40, 
-        status: 'Overdue',
-        priority: 'high',
-        dueDate: '2026-06-05',
-        description: 'Design the database schema for the new feature',
-        assignedTo: 10
-      },
-      { 
-        id: 4, 
-        initials: 'PS', 
-        name: 'Priya Sharma', 
-        task: 'API Integration', 
-        dept: department, 
-        progress: 100, 
-        status: 'Completed',
-        priority: 'high',
-        dueDate: '2026-06-08',
-        description: 'Integrate REST APIs for dashboard',
-        assignedTo: 5
-      }
-    ];
-    
-    let filtered = mockTasks;
-    if (selectedStatus !== 'All') {
-      filtered = mockTasks.filter(t => t.status === selectedStatus);
-    }
-    if (searchQuery) {
-      filtered = filtered.filter(t => 
-        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.task.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    setTasks(filtered);
-    calculateStats(filtered);
-  };
+    ]);
 
-  const calculateStats = (tasksData) => {
-    const total = tasksData.length;
-    const completed = tasksData.filter(t => t.status === 'Completed').length;
-    const inProgress = tasksData.filter(t => t.status === 'In progress').length;
-    const pending = tasksData.filter(t => t.status === 'Pending').length;
-    const overdue = tasksData.filter(t => t.status === 'Overdue').length;
-    
+    const filtered = filterTasks(mockTasks, { search: searchQuery, status: selectedStatus });
+    setTasks(filtered);
+    const stats = calculateTaskStats(filtered);
     setStats({
-      totalTasks: total,
-      completedTasks: completed,
-      inProgressTasks: inProgress,
-      pendingTasks: pending,
-      overdueTasks: overdue
+      totalTasks: stats.total,
+      completedTasks: stats.completed,
+      inProgressTasks: stats.inProgress,
+      pendingTasks: stats.pending,
+      overdueTasks: stats.overdue,
     });
   };
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
-    
-    const selectedMember = teamMembers.find(m => m.id === parseInt(newTask.assignedTo));
-    
+
+    const selectedMember = teamMembers.find(m => String(m.id) === String(newTask.assignedTo));
+
     const taskData = {
       title: newTask.title,
       description: newTask.description,
-      assignedTo: parseInt(newTask.assignedTo),
+      assignedTo: selectedMember?.id,
       assignedToName: selectedMember?.name,
-      assignedToInitials: selectedMember?.initials,
+      assignedToInitials: selectedMember?.initials ?? getInitialsFromName(selectedMember?.name),
       department: selectedMember?.department,
       priority: newTask.priority,
       dueDate: newTask.dueDate,
-      estimatedHours: newTask.estimatedHours,
+      estimatedHours: newTask.estimatedHours === '' ? 0 : Number(newTask.estimatedHours),
       progress: 0,
       status: 'Pending',
       createdBy: authService.getCurrentUser()?.id,
-      createdAt: new Date().toISOString()
     };
-    
+
     try {
-      const token = authService.getToken();
-      if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
-        // Mock task creation
-        const newTaskObj = {
-          id: tasks.length + 1,
-          initials: selectedMember?.initials || 'U',
-          name: selectedMember?.name,
-          task: newTask.title,
-          dept: selectedMember?.department,
-          progress: 0,
-          status: 'Pending',
-          priority: newTask.priority,
-          dueDate: newTask.dueDate,
-          description: newTask.description,
-          assignedTo: parseInt(newTask.assignedTo)
-        };
-        setTasks([newTaskObj, ...tasks]);
-        calculateStats([newTaskObj, ...tasks]);
-        setShowCreateModal(false);
-        setNewTask({
-          title: '',
-          description: '',
-          assignedTo: '',
-          priority: 'medium',
-          dueDate: '',
-          estimatedHours: ''
+      if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+        const created = normalizeTask({ ...taskData, id: tasks.length + 1 });
+        const nextTasks = [created, ...safeTasks];
+        setTasks(nextTasks);
+        const s = calculateTaskStats(nextTasks);
+        setStats({
+          totalTasks: s.total,
+          completedTasks: s.completed,
+          inProgressTasks: s.inProgress,
+          pendingTasks: s.pending,
+          overdueTasks: s.overdue,
         });
-        alert('Task created successfully!');
+        setShowCreateModal(false);
+        resetNewTaskForm();
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(taskData)
+      const created = await taskService.createTask(taskData);
+      const normalized = normalizeTask(created);
+      const nextTasks = [normalized, ...safeTasks];
+      setTasks(nextTasks);
+      const s = calculateTaskStats(nextTasks);
+      setStats({
+        totalTasks: s.total,
+        completedTasks: s.completed,
+        inProgressTasks: s.inProgress,
+        pendingTasks: s.pending,
+        overdueTasks: s.overdue,
       });
-      
-      if (response.ok) {
-        const created = await response.json();
-        setTasks([created, ...tasks]);
-        calculateStats([created, ...tasks]);
-        setShowCreateModal(false);
-        setNewTask({
-          title: '',
-          description: '',
-          assignedTo: '',
-          priority: 'medium',
-          dueDate: '',
-          estimatedHours: ''
-        });
-        alert('Task created successfully!');
-      } else {
-        throw new Error('Failed to create task');
-      }
-      
+      setShowCreateModal(false);
+      resetNewTaskForm();
     } catch (error) {
       console.error('Error creating task:', error);
       alert('Failed to create task');
     }
   };
 
+  const resetNewTaskForm = () => {
+    setNewTask({
+      title: '',
+      description: '',
+      assignedTo: '',
+      priority: 'medium',
+      dueDate: '',
+      estimatedHours: '',
+    });
+  };
+
   const updateTaskProgress = async (taskId, newProgress) => {
+    if (authService.getCurrentUser()?.role !== 'Team Lead') {
+      alert('Only Team Lead can update task progress');
+      return;
+    }
+
+    const newStatus = deriveStatusFromProgress(newProgress);
+
     try {
-      const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const newStatus = newProgress === 100 ? 'Completed' : (newProgress > 0 ? 'In progress' : 'Pending');
-      
-      if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
-        setTasks(tasks.map(task =>
-          task.id === taskId ? { ...task, progress: newProgress, status: newStatus } : task
-        ));
-        calculateStats(tasks.map(task =>
-          task.id === taskId ? { ...task, progress: newProgress, status: newStatus } : task
-        ));
-        alert('Task progress updated successfully');
+      if (process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
+        const updated = tasks.map(task =>
+          getTaskId(task) === taskId
+            ? { ...task, progress: newProgress, status: newStatus }
+            : task
+        );
+        setTasks(updated);
         return;
       }
-      
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/progress`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ progress: newProgress, status: newStatus }),
-      });
-      
-      if (response.ok) {
-        setTasks(tasks.map(task =>
-          task.id === taskId ? { ...task, progress: newProgress, status: newStatus } : task
-        ));
-        calculateStats(tasks.map(task =>
-          task.id === taskId ? { ...task, progress: newProgress, status: newStatus } : task
-        ));
-        alert('Task progress updated successfully');
+
+      await taskService.updateTaskProgress(taskId, newProgress);
+      if (newStatus !== selectedTask?.status) {
+        await taskService.updateTaskStatus(taskId, newStatus);
       }
-      
+
+      const updated = tasks.map(task =>
+        getTaskId(task) === taskId
+          ? { ...normalizeTask(task), progress: newProgress, status: newStatus }
+          : task
+      );
+      setTasks(updated);
+      setSelectedTask(prev => (getTaskId(prev) === taskId ? { ...prev, progress: newProgress, status: newStatus } : prev));
     } catch (error) {
       console.error('Error updating task progress:', error);
       alert('Failed to update task progress');
@@ -381,9 +320,10 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Task Management</h1>
         <p className="text-gray-500 mt-1">Manage and assign tasks to your team members</p>
-        <div className="mt-2 inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-xs">
+          <div className="mt-2 inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-xs">
           Team Lead View • {departmentName} Department
         </div>
+
       </div>
 
       {/* Stats Cards */}
@@ -410,10 +350,13 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
         </div>
       </div>
 
-      {/* Create Task Button */}
+      {/* Create Task Button (Team Lead only) */}
       <div className="mb-6 flex justify-end">
         <button
           onClick={() => setShowCreateModal(true)}
+          disabled={currentUser?.role !== 'Team Lead'}
+          style={currentUser?.role !== 'Team Lead' ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+
           className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 text-sm"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,30 +438,34 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {tasks.map((task) => (
-                  <tr key={task.id} className="hover:bg-gray-50 transition cursor-pointer" onClick={() => {
-                    setSelectedTask(task);
-                    setShowTaskModal(true);
-                  }}>
+                {(Array.isArray(tasks) ? tasks : []).map((task, idx) => (
+                  <tr
+                    key={getTaskId(task) ?? `${task.title}-${idx}`}
+                    className="hover:bg-gray-50 transition cursor-pointer"
+                    onClick={() => {
+                      setSelectedTask(task);
+                      setShowTaskModal(true);
+                    }}>
+
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-semibold">
-                          {task.initials}
+                          {task.assignedToInitials || getInitialsFromName(task.assignedToName)}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{task.name}</p>
+                          <p className="font-medium text-gray-900">{task.assignedToName || 'Unassigned'}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm text-gray-900 font-medium">{task.task}</p>
-                      {task.description && (
+                      <p className="text-sm text-gray-900 font-medium">{task.title}</p>
+                      {task.description ? (
                         <p className="text-xs text-gray-400 mt-1 truncate max-w-xs">{task.description}</p>
-                      )}
+                      ) : null}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
+                        {formatPriorityLabel(task.priority)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -596,9 +543,26 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                   >
                     <option value="">Select Team Member</option>
-                    {teamMembers.map(member => (
-                      <option key={member.id} value={member.id}>{member.name} ({member.role})</option>
-                    ))}
+                    {(() => {
+                      const dept = (currentUser?.department || '').trim().toLowerCase();
+                      const membersForDept = (teamMembers || []).filter(m =>
+                        typeof m.department === 'string' && m.department.trim().toLowerCase() === dept
+                      );
+
+                      if (membersForDept.length === 0) {
+                        return (
+                          <option value="" disabled>
+                            No members found for {currentUser?.department}
+                          </option>
+                        );
+                      }
+
+                      return membersForDept.map(member => (
+                        <option key={member.id} value={member.id}>
+                          {member.name} ({member.role})
+                        </option>
+                      ));
+                    })()}
                   </select>
                 </div>
                 
@@ -682,17 +646,17 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
               <div className="space-y-4">
                 <div>
                   <label className="text-xs text-gray-500 uppercase font-medium">Task Name</label>
-                  <p className="text-lg font-semibold text-gray-900">{selectedTask.task}</p>
+                  <p className="text-lg font-semibold text-gray-900">{selectedTask.title}</p>
                 </div>
-                
+
                 <div>
                   <label className="text-xs text-gray-500 uppercase font-medium">Assigned To</label>
                   <div className="flex items-center space-x-3 mt-1">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-semibold">
-                      {selectedTask.initials}
+                      {selectedTask.assignedToInitials || getInitialsFromName(selectedTask.assignedToName)}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{selectedTask.name}</p>
+                      <p className="font-medium text-gray-900">{selectedTask.assignedToName || 'Unassigned'}</p>
                     </div>
                   </div>
                 </div>
@@ -712,7 +676,7 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
                   <div>
                     <label className="text-xs text-gray-500 uppercase font-medium">Priority</label>
                     <p className={`mt-1 px-2 py-1 rounded-full text-xs font-medium inline-block ${getPriorityColor(selectedTask.priority)}`}>
-                      {selectedTask.priority}
+                      {formatPriorityLabel(selectedTask.priority)}
                     </p>
                   </div>
                 </div>
@@ -740,7 +704,7 @@ const TaskManagement = ({ userRole = 'Team Lead' }) => {
                       className="w-full"
                     />
                     <button
-                      onClick={() => updateTaskProgress(selectedTask.id, selectedTask.progress)}
+                      onClick={() => updateTaskProgress(getTaskId(selectedTask), selectedTask.progress)}
                       className="mt-2 w-full px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700"
                     >
                       Update Progress

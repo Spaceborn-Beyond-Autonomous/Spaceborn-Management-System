@@ -36,7 +36,7 @@ export const managerData = {
   
   pendingApprovals: [
     { id: 1, type: 'Leave Request', requester: 'Priya Sharma', dates: 'Jun 10-15', priority: 'medium' },
-    { id: 2, type: 'Budget Request', requester: 'Design Team', amount: '$5,000', priority: 'high' },
+    { id: 2, type: 'Budget Request', requester: 'Hardware & Integration Team', amount: '$5,000', priority: 'high' },
     { id: 3, type: 'Resource Request', requester: 'AI/LLM & Perception', item: 'AWS Credits', priority: 'medium' }
   ],
   
@@ -47,7 +47,7 @@ export const managerData = {
   },
   
   departmentMeetings: [
-    { title: 'Engineering Sync', time: '11:00 AM', attendees: 48, recurring: true },
+    { title: 'Core Systems Sync', time: '11:00 AM', attendees: 48, recurring: true },
     { title: 'Architecture Review', time: '2:00 PM', attendees: 12, date: 'Jun 7' },
     { title: 'Sprint Retrospective', time: '3:00 PM', attendees: 48, date: 'Jun 14' }
   ]

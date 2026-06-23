@@ -5,7 +5,7 @@ const executiveDecisionSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     priority: { type: String, enum: ['High', 'Medium', 'Low'], default: 'Medium' },
     due: { type: String, default: '' },
-    department: { type: String, default: 'Executive' },
+    department: { type: String, default: 'Platform and DevOps' },
     impact: { type: String, default: '' },
     status: { type: String, enum: ['pending', 'approved', 'rejected', 'reviewing'], default: 'pending' },
     description: { type: String, default: '' },

@@ -19,12 +19,15 @@ const toDto = (notification) => ({
   actionUrl: notification.actionUrl,
   actionLabel: notification.actionLabel,
   details: notification.details || {},
+  time: notification.createdAt,
   createdAt: notification.createdAt
 });
 
 const listForUser = async (userId, query = {}) => {
   const filter = { userId };
   if (query.read !== undefined) filter.read = query.read === 'true';
+  if (query.status === 'read') filter.read = true;
+  if (query.status === 'unread') filter.read = false;
   if (query.category && query.category !== 'All') filter.category = query.category;
   return Notification.find(filter).sort({ createdAt: -1 });
 };
@@ -34,7 +37,9 @@ router.use(protect);
 router.get('/', async (req, res) => {
   try {
     const notifications = await listForUser(req.user._id, req.query);
-    res.json({ success: true, data: notifications.map(toDto), notifications: notifications.map(toDto) });
+    const unreadCount = await Notification.countDocuments({ userId: req.user._id, read: false });
+    const data = notifications.map(toDto);
+    res.json({ success: true, data, notifications: data, unreadCount });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to fetch notifications' });
   }
@@ -62,7 +67,7 @@ router.post('/', async (req, res) => {
 
 router.post('/bulk', authorize('CEO', 'COO', 'Manager'), async (req, res) => {
   try {
-    const userQuery = req.user.role === 'Manager' ? { department: req.user.department, isActive: true } : { isActive: true };
+    const userQuery = (req.user.role === 'Manager' || req.user.role === 'COO') ? { department: req.user.department, isActive: true } : { isActive: true };
     const users = await User.find(userQuery).select('_id');
     const docs = users.map((user) => ({
       userId: user._id,
@@ -86,11 +91,13 @@ router.post('/bulk', authorize('CEO', 'COO', 'Manager'), async (req, res) => {
 router.get('/user/:userId', async (req, res) => {
   try {
     const requestedUserId = req.params.userId;
-    const canRead = String(req.user._id) === String(requestedUserId) || ['CEO', 'Manager', 'Team Lead'].includes(req.user.role);
+    const canRead = String(req.user._id) === String(requestedUserId) || ['CEO', 'COO', 'Manager', 'Team Lead'].includes(req.user.role);
     if (!canRead) return res.status(403).json({ success: false, message: 'Not authorized' });
 
     const notifications = await listForUser(requestedUserId, req.query);
-    res.json({ success: true, data: notifications.map(toDto), notifications: notifications.map(toDto) });
+    const unreadCount = await Notification.countDocuments({ userId: requestedUserId, read: false });
+    const data = notifications.map(toDto);
+    res.json({ success: true, data, notifications: data, unreadCount });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to fetch notifications' });
   }

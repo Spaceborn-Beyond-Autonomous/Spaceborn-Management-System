@@ -1,6 +1,7 @@
 const Meeting = require('../models/Meeting');
 const User = require('../models/User');
 const { formatResponse } = require('../utils/helpers');
+const { notifyMeetingCreated } = require('../utils/notificationDispatcher');
 
 // @desc    Create new meeting
 // @route   POST /api/meetings
@@ -27,6 +28,8 @@ exports.createMeeting = async (req, res) => {
       status: 'upcoming',
       attendees: []
     });
+
+    await notifyMeetingCreated(meeting);
 
     res.status(201).json(formatResponse(true, 'Meeting scheduled successfully', meeting));
   } catch (error) {
@@ -129,7 +132,7 @@ exports.updateMeeting = async (req, res) => {
     // Check if user is creator or CEO/Manager
     const isCreator = meeting.createdById.toString() === req.user._id.toString();
     const isCEO = req.user.role === 'CEO';
-    const isManager = req.user.role === 'Manager';
+    const isManager = req.user.role === 'Manager' || req.user.role === 'COO';
 
     if (!isCreator && !isCEO && !isManager) {
       return res.status(403).json(formatResponse(false, 'Not authorized to update this meeting'));

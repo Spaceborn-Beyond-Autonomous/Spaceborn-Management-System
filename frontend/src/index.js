@@ -6,8 +6,21 @@ import './index.css';
 import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-    <App />
-  </GoogleOAuthProvider>
-);
+const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+const renderApp = (clientId) => {
+  root.render(
+    <GoogleOAuthProvider clientId={clientId || 'missing-google-client-id'}>
+      <App />
+    </GoogleOAuthProvider>
+  );
+};
+
+fetch(`${apiBaseUrl}/config/google`)
+  .then((response) => response.ok ? response.json() : null)
+  .then((config) => {
+    renderApp(config?.data?.clientId || process.env.REACT_APP_GOOGLE_CLIENT_ID);
+  })
+  .catch(() => {
+    renderApp(process.env.REACT_APP_GOOGLE_CLIENT_ID);
+  });

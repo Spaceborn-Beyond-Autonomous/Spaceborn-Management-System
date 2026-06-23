@@ -9,9 +9,7 @@ const DEPARTMENTS = [
   'Platform and DevOps',
   'Core Systems',
   'Hardware & Integration',
-  'Robotics & Simulation',
-  'Founding Team',
-  'AI/LLM & Perception'
+  'Robotics & Simulation', 'AI/LLM & Perception'
 ];
 
 const DEPARTMENT_RENAMES = {
@@ -21,7 +19,7 @@ const DEPARTMENT_RENAMES = {
   Sales: 'Robotics & Simulation',
   HR: 'Robotics & Simulation',
   Finance: 'Robotics & Simulation',
-  Executive: 'Founding Team',
+  Executive: 'Platform and DevOps',
   Marketing: 'AI/LLM & Perception'
 };
 

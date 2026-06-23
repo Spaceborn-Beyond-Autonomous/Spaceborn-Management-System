@@ -43,6 +43,7 @@ export const usePermissions = (user) => {
   const setDefaultPermissions = () => {
     const defaultPermissions = {
       'CEO': ['view_all', 'edit_all', 'delete_all', 'manage_users', 'manage_roles'],
+      'COO': ['view_team', 'edit_team', 'approve_leave', 'view_reports', 'manage_resources'],
       'Manager': ['view_team', 'edit_team', 'approve_leave', 'view_reports', 'manage_resources'],
       'Team Lead': ['view_team', 'assign_tasks', 'view_reports', 'manage_sprints'],
       'Member': ['view_tasks', 'edit_tasks', 'submit_reports', 'view_profile']
@@ -53,8 +54,8 @@ export const usePermissions = (user) => {
       canView: true,
       canEdit: user?.role !== 'Member',
       canDelete: user?.role === 'CEO',
-      canApprove: ['CEO', 'Manager'].includes(user?.role),
-      canAssign: ['CEO', 'Manager', 'Team Lead'].includes(user?.role)
+      canApprove: ['CEO', 'COO', 'Manager'].includes(user?.role),
+      canAssign: ['CEO', 'COO', 'Manager', 'Team Lead'].includes(user?.role)
     });
   };
 
@@ -101,7 +102,7 @@ export const usePermissions = (user) => {
     can,
     getAccessLevel,
     isCEO: user?.role === 'CEO',
-    isManager: user?.role === 'Manager',
+    isManager: user?.role === 'Manager' || user?.role === 'COO',
     isTeamLead: user?.role === 'Team Lead',
     isMember: user?.role === 'Member'
   };

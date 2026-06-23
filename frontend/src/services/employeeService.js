@@ -1,18 +1,19 @@
 // src/services/employeeService.js
 import authService from './authService';
+import { DEPARTMENTS, normalizeDepartment, normalizeDepartmentFields, normalizeDepartments } from '../utils/departments';
 
 class EmployeeService {
   constructor() {
     this.cache = new Map();
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
     this.API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-    this.useMockData = true; // Set to false when backend is ready
+    this.useMockData = process.env.REACT_APP_USE_MOCK_AUTH === 'true';
   }
 
   // Mock data for development
   getMockEmployees() {
     return [
-      { id: 1, name: 'John Doe', role: 'CEO', department: 'Founding Team', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', phone: '+1 (555) 000-0001', joinDate: '2020-01-15', status: 'Active', manager: 'N/A' },
+      { id: 1, name: 'John Doe', role: 'CEO', department: 'Platform and DevOps', email: 'john.doe@spaceborn.com', employeeId: 'CEO001', phone: '+1 (555) 000-0001', joinDate: '2020-01-15', status: 'Active', manager: 'N/A' },
       { id: 2, name: 'Jane Smith', role: 'Manager', department: 'Platform and DevOps', email: 'jane.smith@spaceborn.com', employeeId: 'MGR001', phone: '+1 (555) 000-0002', joinDate: '2020-03-20', status: 'Active', manager: 'John Doe' },
       { id: 3, name: 'Mike Johnson', role: 'Team Lead', department: 'Core Systems', email: 'mike.johnson@spaceborn.com', employeeId: 'LD001', phone: '+1 (555) 000-0003', joinDate: '2021-02-10', status: 'Active', manager: 'Jane Smith' },
       { id: 4, name: 'Ravi Das', role: 'Member', department: 'Core Systems', email: 'ravi.das@spaceborn.com', employeeId: 'EMP001', phone: '+1 (555) 000-0004', joinDate: '2022-06-01', status: 'Active', manager: 'Mike Johnson' },
@@ -28,8 +29,7 @@ class EmployeeService {
   }
 
   getMockDepartments() {
-    const employees = this.getMockEmployees();
-    return [...new Set(employees.map(emp => emp.department))];
+    return DEPARTMENTS;
   }
 
   // Helper method to get cached data
@@ -95,7 +95,7 @@ class EmployeeService {
         throw new Error(data.message || `Request failed with status ${response.status}`);
       }
       
-      return data;
+      return normalizeDepartmentFields(data?.data ?? data?.employees ?? data);
     } catch (error) {
       console.error(`API Error (${endpoint}):`, error);
       // Fallback to mock data on error
@@ -186,8 +186,9 @@ class EmployeeService {
     const url = `/employees${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const data = await this.apiRequest(url);
     
-    this.setCached(cacheKey, data);
-    return data;
+    const normalizedData = normalizeDepartmentFields(data);
+    this.setCached(cacheKey, normalizedData);
+    return normalizedData;
   }
 
   async getEmployeeById(id) {
@@ -251,6 +252,10 @@ class EmployeeService {
     return data;
   }
 
+  async addEmployee(employeeData) {
+    return this.createEmployee(employeeData);
+  }
+
   async updateEmployee(id, employeeData) {
     if (!id) throw new Error('Employee ID is required');
     
@@ -277,6 +282,38 @@ class EmployeeService {
     return data;
   }
 
+  async uploadEmployeeDocument(id, file, documentType, googleAccessToken) {
+    if (!id) throw new Error('Employee ID is required');
+    if (!file) throw new Error('Document file is required');
+    if (!documentType) throw new Error('Document type is required');
+
+    const token = authService.getToken();
+    const formData = new FormData();
+    formData.append('document', file);
+    formData.append('documentType', documentType);
+    if (googleAccessToken) {
+      formData.append('googleAccessToken', googleAccessToken);
+    }
+
+    const response = await fetch(`${this.API_BASE_URL}/employees/${id}/documents`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...(googleAccessToken && { 'X-Google-Access-Token': googleAccessToken })
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || `Upload failed with status ${response.status}`);
+    }
+
+    this.clearCache();
+    return normalizeDepartmentFields(data?.data?.employee ?? data?.employee ?? data);
+  }
+
   // ==================== EMPLOYEE QUERIES ====================
 
   async getEmployeesByDepartment(department) {
@@ -286,9 +323,11 @@ class EmployeeService {
     const cached = this.getCached(cacheKey);
     if (cached) return cached;
     
-    const data = await this.apiRequest(`/employees/department/${encodeURIComponent(department)}`);
-    this.setCached(cacheKey, data);
-    return data;
+    const normalizedDepartment = normalizeDepartment(department);
+    const data = await this.apiRequest(`/employees/department/${encodeURIComponent(normalizedDepartment)}`);
+    const normalizedData = normalizeDepartmentFields(data);
+    this.setCached(cacheKey, normalizedData);
+    return normalizedData;
   }
 
   async getEmployeesByRole(role) {
@@ -334,8 +373,9 @@ class EmployeeService {
     if (cached) return cached;
     
     const data = await this.apiRequest('/employees/departments');
-    this.setCached(cacheKey, data);
-    return data;
+    const departments = normalizeDepartments(Array.isArray(data) ? data : DEPARTMENTS);
+    this.setCached(cacheKey, departments);
+    return departments;
   }
 
   async getDepartmentStats() {
@@ -344,7 +384,7 @@ class EmployeeService {
     if (cached) return cached;
     
     const employees = await this.getAllEmployees();
-    const departments = [...new Set(employees.map(emp => emp.department).filter(Boolean))];
+    const departments = DEPARTMENTS;
     
     const stats = departments.map(dept => {
       const deptEmployees = employees.filter(emp => emp.department === dept);
@@ -381,7 +421,7 @@ class EmployeeService {
   }
 
   calculateStats(employees) {
-    const departments = [...new Set(employees.map(emp => emp.department).filter(Boolean))];
+    const departments = DEPARTMENTS;
     const roles = [...new Set(employees.map(emp => emp.role).filter(Boolean))];
     
     const now = new Date();

@@ -9,7 +9,7 @@ const taskSchema = new mongoose.Schema(
     assignedToName: { type: String, default: '' },
     assignedToInitials: { type: String, default: '' },
 
-    department: { type: String, default: 'Engineering' },
+    department: { type: String, default: 'Core Systems' },
 
     priority: {
       type: String,

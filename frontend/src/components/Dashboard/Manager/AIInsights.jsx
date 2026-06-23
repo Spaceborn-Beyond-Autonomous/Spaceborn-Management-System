@@ -17,7 +17,7 @@ const AIInsights = ({ userRole = 'Manager' }) => {
   }, []);
 
   const loadMockData = () => {
-    // Mock data for Manager view (only Engineering department)
+    // Mock data for Manager view (only Core Systems department)
     const mockMembers = [
       {
         id: 'member_1',
@@ -164,12 +164,12 @@ const AIInsights = ({ userRole = 'Manager' }) => {
       {
         id: 'lead_1',
         name: 'Priya Sharma',
-        role: 'Engineering Lead',
+        role: 'Core Systems Lead',
         department: 'Core Systems',
         date: '2026-06-11',
         status: 'on_track',
         summary: 'Team completed 8 tasks today, bringing the Alpha project to 82% completion — ahead of the projected milestone. Ravi Das resolved two critical frontend bugs that were blocking QA sign-off. Nisha Kumar completed the database schema migration for the new auth module. No blockers reported. Sprint velocity is trending above average at 94%.',
-        expandedSummary: 'Engineering team continues to demonstrate strong performance. Code quality metrics improved by 8% this week. The frontend optimization efforts are paying off with 15% faster page load times. Backend API response times are within SLA. The team has proactively identified potential bottlenecks in the deployment pipeline and proposed solutions.',
+        expandedSummary: 'Core Systems team continues to demonstrate strong performance. Code quality metrics improved by 8% this week. The frontend optimization efforts are paying off with 15% faster page load times. Backend API response times are within SLA. The team has proactively identified potential bottlenecks in the deployment pipeline and proposed solutions.',
         metrics: {
           tasksDone: 8,
           activeBlockers: 0,

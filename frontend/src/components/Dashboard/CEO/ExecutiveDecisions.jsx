@@ -93,13 +93,13 @@ const ExecutiveDecisions = ({ userRole = 'CEO' }) => {
       },
       { 
         id: 2, 
-        title: 'VP of Engineering Hiring', 
+        title: 'VP of Core Systems Hiring', 
         priority: 'High', 
         due: '2026-06-10', 
         department: 'Robotics & Simulation', 
         impact: 'Core Systems', 
         status: 'pending',
-        description: 'Hire new VP of Engineering to lead technical teams',
+        description: 'Hire new VP of Core Systems to lead technical teams',
         proposedBy: 'CTO',
         proposedAt: '2026-06-02T14:00:00Z',
         impactAnalysis: 'Will strengthen technical leadership'

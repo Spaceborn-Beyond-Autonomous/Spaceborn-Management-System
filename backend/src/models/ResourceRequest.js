@@ -15,7 +15,7 @@ const resourceRequestSchema = new mongoose.Schema(
 
     requesterRole: {
       type: String,
-      enum: ['CEO', 'Manager', 'TeamLead', 'Member'],
+      enum: ['CEO', 'COO', 'Manager', 'TeamLead', 'Member'],
       required: true
     },
 
@@ -60,7 +60,7 @@ const resourceRequestSchema = new mongoose.Schema(
 
     approvalLevel: {
       type: String,
-       enum: ['TeamLead', 'Manager', 'CEO'],
+       enum: ['TeamLead', 'Manager', 'COO', 'CEO'],
       required: true
     },
 

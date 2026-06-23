@@ -4,10 +4,11 @@ import { DashboardProvider } from './contexts/DashboardContext';
 import { Sidebar } from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
 import { RoleSelection } from './pages/RoleSelection';
-import { CEODashboard } from './components/Dashboard/CEO/CEODashboard';
-import { ManagerDashboard } from './components/Dashboard/Manager/ManagerDashboard';
-import { TeamLeadDashboard } from './components/Dashboard/TeamLead/TeamLeadDashboard';
-import { MaintainerDashboard } from './components/Dashboard/Member/MemberDashboard';
+import CEODashboard from './components/Dashboard/CEO/CEODashboard';
+import ManagerDashboard from './components/Dashboard/Manager/ManagerDashboard';
+import TeamLeadDashboard from './components/Dashboard/TeamLead/TeamLeadDashboard';
+import MaintainerDashboard from './components/Dashboard/Member/MemberDashboard';
+
 
 function DashboardRouter() {
   const { user, logout } = useAuth();
