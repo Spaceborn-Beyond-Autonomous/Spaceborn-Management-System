@@ -935,11 +935,9 @@ const EmployeeManagement = ({
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="">Select Department</option>
-                    <option value="Core Systems">Core Systems</option>
-                    <option value="Hardware & Integration">Hardware & Integration</option>
-                    <option value="Robotics & Simulation">Robotics & Simulation</option>
-                    <option value="AI/LLM & Perception">AI/LLM & Perception</option>
-                    <option value="Platform and DevOps">Platform and DevOps</option>
+                    {DEPARTMENTS.map(dept => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
                   </select>
                 </div>
                 <div>

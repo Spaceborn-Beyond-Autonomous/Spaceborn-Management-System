@@ -4,7 +4,9 @@ export const DEPARTMENTS = [
   'Hardware & Integration',
   'Robotics & Simulation',
   'Founding Team',
-  'AI/LLM & Perception'
+  'AI/LLM & Perception',
+  'Management',
+  'CEO'
 ];
 
 export const DEPARTMENT_RENAMES = {

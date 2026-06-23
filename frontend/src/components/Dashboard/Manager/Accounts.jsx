@@ -212,7 +212,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
       setDepartments(depts);
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'Founding Team', 'AI/LLM & Perception', 'Management', 'CEO']);
     }
   };
 

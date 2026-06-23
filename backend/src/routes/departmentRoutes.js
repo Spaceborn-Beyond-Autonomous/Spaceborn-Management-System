@@ -9,7 +9,10 @@ const DEPARTMENTS = [
   'Platform and DevOps',
   'Core Systems',
   'Hardware & Integration',
-  'Robotics & Simulation', 'AI/LLM & Perception'
+  'Robotics & Simulation',
+  'AI/LLM & Perception',
+  'Management',
+  'CEO'
 ];
 
 const DEPARTMENT_RENAMES = {

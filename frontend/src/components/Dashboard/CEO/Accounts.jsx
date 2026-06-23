@@ -264,7 +264,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
       setDepartments(depts.filter(d => d !== 'Founding team'));
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception']);
+      setDepartments(['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'Founding Team', 'AI/LLM & Perception', 'Management', 'CEO']);
     }
   };
 
@@ -567,22 +567,27 @@ const Accounts = ({ userRole = 'CEO' }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">ROLE</label>
-                <input
-                  type="text"
+                <select
                   value={employeeForm.role}
                   onChange={(e) => setEmployeeForm((s) => ({ ...s, role: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
-                />
+                >
+                  {roles.map(role => (<option key={role} value={role}>{role}</option>))}
+                </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">DEPARTMENT</label>
-                <input
-                  type="text"
+                <select
                   value={employeeForm.department}
                   onChange={(e) => setEmployeeForm((s) => ({ ...s, department: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black focus:border-black"
-                />
+                >
+                  <option value="">Select Department</option>
+                  {[...new Set([...departments, employeeForm.department])].filter(Boolean).map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
