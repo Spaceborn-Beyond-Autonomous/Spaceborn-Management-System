@@ -635,7 +635,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
                     setEmployeeModalLoading(true);
                     setEmployeeModalError(null);
                     const token = authService.getToken();
-                    const id = selectedEmployee.employeeId || selectedEmployee.id;
+                    const id = selectedEmployee._id || selectedEmployee.id || selectedEmployee.employeeId;
                     await updateEmployeeById(token, id, {
                       name: employeeForm.fullName,
                       email: employeeForm.email,
@@ -667,7 +667,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
                     setResetPasswordLoading(true);
                     setResetPasswordResult(null);
                     const token = authService.getToken();
-                    const id = selectedEmployee.employeeId || selectedEmployee.id;
+                    const id = selectedEmployee._id || selectedEmployee.id || selectedEmployee.employeeId;
                     const newPassword = randomPassword();
                     const res = await resetEmployeePassword(token, id, newPassword);
                     setResetPasswordResult({ ...res, newPassword });
@@ -689,7 +689,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
                     setTerminateLoading(true);
                     setEmployeeModalError(null);
                     const token = authService.getToken();
-                    const id = selectedEmployee.employeeId || selectedEmployee.id;
+                    const id = selectedEmployee._id || selectedEmployee.id || selectedEmployee.employeeId;
                     if (employeeForm.status === 'Inactive') {
                       await activateEmployee(token, id);
                     } else {
