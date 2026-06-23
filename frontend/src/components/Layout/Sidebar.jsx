@@ -149,15 +149,12 @@ const Sidebar = ({ activeMenu, setActiveMenu, onLogout, collapsed = false, onTog
 
       {/* Role Tags */}
       {!collapsed && (
-        <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100">
-          <div className="flex space-x-2">
-            <span className={`px-2 py-1 text-xs font-medium rounded ${getRoleBadgeColor('CEO')}`}>CEO</span>
-            <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">Manager</span>
-          </div>
-          <div className="flex space-x-2">
-            <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">Lead</span>
-            <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">Member</span>
-          </div>
+        <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-gray-100">
+          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'CEO' ? getRoleBadgeColor('CEO') : 'bg-gray-100 text-gray-600'}`}>CEO</span>
+          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'COO' ? getRoleBadgeColor('COO') : 'bg-gray-100 text-gray-600'}`}>COO</span>
+          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'Manager' ? getRoleBadgeColor('Manager') : 'bg-gray-100 text-gray-600'}`}>Manager</span>
+          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'Team Lead' ? getRoleBadgeColor('Team Lead') : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
+          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'Member' ? getRoleBadgeColor('Member') : 'bg-gray-100 text-gray-600'}`}>Member</span>
         </div>
       )}
 

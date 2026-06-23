@@ -1,7 +1,7 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DashboardProvider } from './contexts/DashboardContext';
-import { Sidebar } from './components/Layout/Sidebar';
+import Sidebar from './components/Layout/Sidebar';
 import { Header } from './components/Layout/Header';
 import { RoleSelection } from './pages/RoleSelection';
 import CEODashboard from './components/Dashboard/CEO/CEODashboard';
