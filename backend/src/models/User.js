@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   fullName: { type: String },
   email: { type: String, unique: true, required: true },
   phone: String,
-  role: { type: String, enum: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member', 'HR'], default: 'Member' },
+  role: { type: String, enum: ['CEO', 'COO', 'Manager', 'Team Lead', 'Co-Head', 'Member', 'HR'], default: 'Member' },
   department: { type: String, default: 'Core Systems' },
   designation: String,
   team: String,

@@ -212,7 +212,7 @@ function App() {
     if (user.role === 'CEO' || user.role === 'Manager' || user.role === 'COO') {
       return employees;
     }
-    if (user.role === 'Team Lead') {
+    if (user.role === 'Team Lead' || user.role === 'Co-Head') {
       const userDept = getUserDepartment();
       return employees.filter(emp => emp.department === userDept);
     }
@@ -229,7 +229,7 @@ function App() {
     if (user.role === 'CEO') return 'Full company access — Viewing all employees';
     if (user.role === 'Manager') return 'Full company access — Viewing all employees';
     if (user.role === 'COO') return 'Full company access - Viewing all employees';
-    if (user.role === 'Team Lead') {
+    if (user.role === 'Team Lead' || user.role === 'Co-Head') {
       const dept = getUserDepartment();
       return `Department-level access — Viewing ${dept} team (${getFilteredEmployees().length} members)`;
     }
@@ -314,6 +314,7 @@ function App() {
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
+                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>Co-Head</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
               </div>
               <nav className="flex-1 p-4">
@@ -525,6 +526,7 @@ function App() {
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
+                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>Co-Head</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
               </div>
               <nav className="flex-1 p-4 overflow-y-auto">
@@ -706,9 +708,9 @@ function App() {
   }
 
   // ==================== TEAM LEAD DASHBOARD ====================
-  if (user.role === 'Team Lead') {
+  if (user.role === 'Team Lead' || user.role === 'Co-Head') {
     return (
-      <ProtectedRoute user={user} requiredRoles={['Team Lead']}>
+      <ProtectedRoute user={user} requiredRoles={['Team Lead', 'Co-Head']}>
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
@@ -721,6 +723,7 @@ function App() {
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
+                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>Co-Head</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
               </div>
               <nav className="flex-1 p-4 overflow-y-auto">
@@ -779,7 +782,7 @@ function App() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-500">Team Lead · {getUserDepartment()}</p>
+                    <p className="text-xs text-gray-500">{user.role} · {getUserDepartment()}</p>
                   </div>
                   <LogoutButton onLogout={handleLogout} />
                 </div>
@@ -828,6 +831,7 @@ function App() {
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
+                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>Co-Head</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
               </div>
               <nav className="flex-1 p-4 overflow-y-auto">
