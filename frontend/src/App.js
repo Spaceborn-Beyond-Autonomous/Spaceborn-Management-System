@@ -212,7 +212,7 @@ function App() {
     if (user.role === 'CEO' || user.role === 'Manager' || user.role === 'COO') {
       return employees;
     }
-    if (user.role === 'Team Lead' || user.role === 'Co-Head') {
+    if (user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head') {
       const userDept = getUserDepartment();
       return employees.filter(emp => emp.department === userDept);
     }
@@ -229,7 +229,7 @@ function App() {
     if (user.role === 'CEO') return 'Full company access — Viewing all employees';
     if (user.role === 'Manager') return 'Full company access — Viewing all employees';
     if (user.role === 'COO') return 'Full company access - Viewing all employees';
-    if (user.role === 'Team Lead' || user.role === 'Co-Head') {
+    if (user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head') {
       const dept = getUserDepartment();
       return `Department-level access — Viewing ${dept} team (${getFilteredEmployees().length} members)`;
     }
@@ -305,17 +305,19 @@ function App() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col fixed left-0 top-[73px] bottom-0 overflow-y-auto">
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-[73px] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-center">
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
-              <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-gray-100">
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>Co-Head</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex space-x-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' || user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{user.role === 'COO' ? 'COO' : 'Manager'}</span>
+                </div>
+                <div className="flex space-x-2 mt-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head' ? (user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700') : 'bg-gray-100 text-gray-600'}`}>{user.role === 'Co-Head' || user.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
+                </div>
               </div>
               <nav className="flex-1 p-4">
                 {/* OVERVIEW Section */}
@@ -517,17 +519,19 @@ function App() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col fixed left-0 top-[73px] bottom-0 overflow-y-auto">
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-[73px] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-center">
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
-              <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-gray-100">
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>Co-Head</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex space-x-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' || user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{user.role === 'COO' ? 'COO' : 'Manager'}</span>
+                </div>
+                <div className="flex space-x-2 mt-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head' ? (user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700') : 'bg-gray-100 text-gray-600'}`}>{user.role === 'Co-Head' || user.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
+                </div>
               </div>
               <nav className="flex-1 p-4 overflow-y-auto">
                 <div className="mb-6">
@@ -708,23 +712,25 @@ function App() {
   }
 
   // ==================== TEAM LEAD DASHBOARD ====================
-  if (user.role === 'Team Lead' || user.role === 'Co-Head') {
+  if (user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head') {
     return (
-      <ProtectedRoute user={user} requiredRoles={['Team Lead', 'Co-Head']}>
+      <ProtectedRoute user={user} requiredRoles={['Team Lead', 'Co-Head', 'CO Head']}>
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col fixed left-0 top-[73px] bottom-0 overflow-y-auto">
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-[73px] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-center">
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
-              <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-gray-100">
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>Co-Head</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex space-x-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' || user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{user.role === 'COO' ? 'COO' : 'Manager'}</span>
+                </div>
+                <div className="flex space-x-2 mt-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head' ? (user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700') : 'bg-gray-100 text-gray-600'}`}>{user.role === 'Co-Head' || user.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
+                </div>
               </div>
               <nav className="flex-1 p-4 overflow-y-auto">
                 <div className="mb-6">
@@ -822,17 +828,19 @@ function App() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col fixed left-0 top-[73px] bottom-0 overflow-y-auto">
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-[73px] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-center">
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
-              <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-gray-100">
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>Co-Head</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex space-x-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' || user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{user.role === 'COO' ? 'COO' : 'Manager'}</span>
+                </div>
+                <div className="flex space-x-2 mt-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head' ? (user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700') : 'bg-gray-100 text-gray-600'}`}>{user.role === 'Co-Head' || user.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
+                </div>
               </div>
               <nav className="flex-1 p-4 overflow-y-auto">
                 <div className="mb-6">

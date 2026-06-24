@@ -128,53 +128,6 @@ const LoginSystem = ({ onLoginSuccess }) => {
     setIsLoading(false);
   };
 
-  const handleQuickLogin = async (empId, pwd) => {
-    setEmployeeId(empId);
-    setPassword(pwd);
-    setIsLoading(true);
-    
-    try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          employeeId: empId.toUpperCase(), 
-          password: pwd 
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Quick login failed');
-        setIsLoading(false);
-        return;
-      }
-
-      const user = normalizeDepartmentFields(data.data.user);
-      const token = data.data.token;
-
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('userSession', JSON.stringify({
-        ...user,
-        isAuthenticated: true,
-        timestamp: Date.now()
-      }));
-
-      localStorage.setItem('rememberedEmployeeId', empId);
-      onLoginSuccess(user);
-      markAttendance(user, token);
-      
-    } catch (error) {
-      console.error('Quick login error:', error);
-      setError('Quick login failed. Please try manual login.');
-    }
-    
-    setIsLoading(false);
-  };
 
   const handleForgotPasswordClick = () => {
     if (!employeeId) {
@@ -308,40 +261,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
           </div>
         </div>
 
-        <div className="mt-6">
-          <p className="text-center text-xs text-gray-400 mb-3">Demo Employee IDs (Click to quick login via backend)</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => handleQuickLogin('CEO001', 'admin123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
-              <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold">JD</div>
-              <div><div className="text-xs font-medium text-black">John Doe</div><div className="text-xs text-gray-400">CEO001 · CEO</div></div>
-            </button>
-            <button onClick={() => handleQuickLogin('MGR001', 'manager123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
-              <div className="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center text-xs font-bold">JS</div>
-              <div><div className="text-xs font-medium text-black">Jane Smith</div><div className="text-xs text-gray-400">MGR001 · Manager</div></div>
-            </button>
-            <button onClick={() => handleQuickLogin('COO001', 'coo123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
-              <div className="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center text-xs font-bold">AM</div>
-              <div><div className="text-xs font-medium text-black">Aarav Mehta</div><div className="text-xs text-gray-400">COO001 - COO</div></div>
-            </button>
-            <button onClick={() => handleQuickLogin('LD001', 'lead123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
-              <div className="w-8 h-8 rounded-full bg-gray-600 text-white flex items-center justify-center text-xs font-bold">MJ</div>
-              <div><div className="text-xs font-medium text-black">Mike Johnson</div><div className="text-xs text-gray-400">LD001 · Team Lead</div></div>
-            </button>
-            <button onClick={() => handleQuickLogin('EMP001', 'member123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
-              <div className="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-bold">RD</div>
-              <div><div className="text-xs font-medium text-black">Ravi Das</div><div className="text-xs text-gray-400">EMP001 · Member</div></div>
-            </button>
-            <button onClick={() => handleQuickLogin('EMP002', 'member123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
-              <div className="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-bold">PS</div>
-              <div><div className="text-xs font-medium text-black">Priya Sharma</div><div className="text-xs text-gray-400">EMP002 · Member</div></div>
-            </button>
-            <button onClick={() => handleQuickLogin('HR001', 'hr123')} className="flex items-center space-x-2 p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-left">
-              <div className="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-bold">NG</div>
-              <div><div className="text-xs font-medium text-black">Neha Gupta</div><div className="text-xs text-gray-400">HR001 · HR</div></div>
-            </button>
-          </div>
-          <p className="text-center text-xs text-gray-400 mt-3">⚠️ 5 failed attempts will lock account for 15 minutes</p>
-        </div>
+
       </div>
     </div>
   );

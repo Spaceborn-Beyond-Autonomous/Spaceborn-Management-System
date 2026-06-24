@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, unique: true, required: true },
   phone: String,
-  role: { type: String, enum: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member', 'HR'], default: 'Member' },
+  role: { type: String, enum: ['CEO', 'COO', 'Manager', 'Team Lead', 'Member', 'HR', 'CO Head'], default: 'Member' },
   department: { type: String, default: 'Core Systems' },
   team: String,
   manager: String,
@@ -49,7 +49,7 @@ async function seed() {
       { employeeId: 'EMP001', password: 'member123', firstName: 'Ravi', lastName: 'Das', email: 'ravi.das@spaceborn.com', phone: '+91 98765 43213', role: 'Member', department: 'Core Systems', team: 'Team A', manager: 'Mike Johnson', joinDate: '2024-01-05' },
       { employeeId: 'EMP002', password: 'member123', firstName: 'Priya', lastName: 'Sharma', email: 'priya.sharma@spaceborn.com', phone: '+91 98765 43210', role: 'Member', department: 'Core Systems', team: 'Team A', manager: 'Mike Johnson', joinDate: '2023-01-15' },
       { employeeId: 'EMP003', password: 'member123', firstName: 'Nisha', lastName: 'Kumar', email: 'nisha.kumar@spaceborn.com', phone: '+91 98765 43214', role: 'Member', department: 'Core Systems', team: 'Team A', manager: 'Mike Johnson', joinDate: '2023-08-12' },
-      { employeeId: 'HR001', password: 'hr123', firstName: 'Neha', lastName: 'Gupta', email: 'neha.gupta@spaceborn.com', phone: '+91 98765 43215', role: 'HR', department: 'Robotics & Simulation', team: 'HR Team', manager: 'Jane Smith', joinDate: '2022-06-01' },
+      { employeeId: 'COH001', password: 'cohead123', firstName: 'Neha', lastName: 'Gupta', email: 'neha.gupta@spaceborn.com', phone: '+91 98765 43215', role: 'CO Head', department: 'Robotics & Simulation', team: 'Leadership Team', manager: 'Jane Smith', joinDate: '2022-06-01' },
     ];
 
     // Insert users (passwords will be hashed automatically)

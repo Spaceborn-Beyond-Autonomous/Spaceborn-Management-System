@@ -37,7 +37,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
   // Available roles based on user role (Manager/COO)
   const getAvailableRoles = () => {
     if (userRole === 'Manager' || userRole === 'COO') {
-      return ['COO', 'Manager', 'Team Lead', 'Member', 'HR'];
+      return ['COO', 'Manager', 'Team Lead', 'Member', 'CO Head'];
     }
     return ['Member'];
   };
@@ -51,7 +51,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
       'Manager': 'MGR',
       'Team Lead': 'LD',
       'Member': 'EMP',
-      'HR': 'HR'
+      'CO Head': 'COH'
     };
     
     const prefix = rolePrefix[formData.role] || 'EMP';
@@ -249,7 +249,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
         'Manager': 1,
         'Team Lead': 3,
         'Member': 2,
-        'HR': 0
+        'CO Head': 0
       }
     });
   };
@@ -466,7 +466,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
       {/* Role Creation Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-6 text-sm text-blue-700 flex items-center gap-2">
         <AlertCircle className="w-4 h-4" />
-        {userRole} - can create: COO, Managers, Team Leads, Members, HR
+        {userRole} - can create: COO, Managers, Team Leads, Members, CO Head
       </div>
 
       {/* Credentials Modal */}

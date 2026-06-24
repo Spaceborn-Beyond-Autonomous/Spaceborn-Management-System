@@ -6,6 +6,16 @@ const Task = require('../models/Task');
 const Leave = require('../models/Leave');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
+const DEPARTMENTS = [
+  'Platform and DevOps',
+  'Core Systems',
+  'Hardware & Integration',
+  'Robotics & Simulation',
+  'Founding Team',
+  'AI/LLM & Perception',
+  'Management',
+  'CEO'
+];
 
 router.get('/', protect, authorize('CEO'), async (req, res) => {
   try {
@@ -20,7 +30,7 @@ router.get('/', protect, authorize('CEO'), async (req, res) => {
     const completionRate = tasks.length ? Math.round((completedTasks / tasks.length) * 100) : 0;
     const retentionRate = users.length ? Math.round((activeUsers.length / users.length) * 100) : 100;
     const absenteeism = activeUsers.length ? Math.round((leaves.filter((leave) => leave.status === 'Approved').length / activeUsers.length) * 10) / 10 : 0;
-    const departments = [...new Set(activeUsers.map((user) => user.department).filter(Boolean))];
+    const departments = DEPARTMENTS;
     const overallScore = Math.round((completionRate + retentionRate + Math.max(0, 100 - absenteeism * 10)) / 3);
 
     const metrics = [

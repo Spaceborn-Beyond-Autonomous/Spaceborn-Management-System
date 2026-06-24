@@ -104,6 +104,8 @@ const Sidebar = ({ activeMenu, setActiveMenu, onLogout, collapsed = false, onTog
       case 'COO': return 'bg-blue-100 text-blue-700';
       case 'Manager': return 'bg-blue-100 text-blue-700';
       case 'Team Lead': return 'bg-green-100 text-green-700';
+      case 'CO Head':
+      case 'Co-Head': return 'bg-teal-100 text-teal-700';
       case 'Member': return 'bg-cyan-100 text-cyan-700';
       default: return 'bg-gray-100 text-gray-700';
     }
@@ -149,12 +151,15 @@ const Sidebar = ({ activeMenu, setActiveMenu, onLogout, collapsed = false, onTog
 
       {/* Role Tags */}
       {!collapsed && (
-        <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-gray-100">
-          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'CEO' ? getRoleBadgeColor('CEO') : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'COO' ? getRoleBadgeColor('COO') : 'bg-gray-100 text-gray-600'}`}>COO</span>
-          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'Manager' ? getRoleBadgeColor('Manager') : 'bg-gray-100 text-gray-600'}`}>Manager</span>
-          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'Team Lead' ? getRoleBadgeColor('Team Lead') : 'bg-gray-100 text-gray-600'}`}>Team Lead</span>
-          <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'Member' ? getRoleBadgeColor('Member') : 'bg-gray-100 text-gray-600'}`}>Member</span>
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="flex space-x-2">
+            <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'CEO' ? getRoleBadgeColor('CEO') : 'bg-gray-100 text-gray-600'}`}>CEO</span>
+            <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'COO' || user?.role === 'Manager' ? getRoleBadgeColor(user?.role) : 'bg-gray-100 text-gray-600'}`}>{user?.role === 'COO' ? 'COO' : 'Manager'}</span>
+          </div>
+          <div className="flex space-x-2 mt-2">
+            <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'Team Lead' || user?.role === 'Co-Head' || user?.role === 'CO Head' ? getRoleBadgeColor(user?.role) : 'bg-gray-100 text-gray-600'}`}>{user?.role === 'Co-Head' || user?.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+            <span className={`px-2 py-1 text-xs font-medium rounded ${user?.role === 'Member' ? getRoleBadgeColor('Member') : 'bg-gray-100 text-gray-600'}`}>Member</span>
+          </div>
         </div>
       )}
 

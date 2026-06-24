@@ -53,9 +53,9 @@ export async function resetEmployeePassword(token, id, newPassword) {
 }
 
 export async function deactivateEmployee(token, id) {
-  // Backend controller has deactivateEmployee: POST /api/users/:id/deactivate
-  const res = await fetch(`${API_BASE_URL}/users/${id}/deactivate`, {
-    method: 'POST',
+  // TERMINATE: permanently delete employee record: DELETE /api/users/:id
+  const res = await fetch(`${API_BASE_URL}/users/${id}`, {
+    method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'

@@ -6,6 +6,7 @@ const {
   getAllEmployees,
   getEmployee,
   updateEmployee,
+  deleteEmployee,
   resetPassword,
   deactivateEmployee,
   activateEmployee,
@@ -23,5 +24,6 @@ router.put('/:id', protect, authorize('CEO', 'COO', 'Manager'), updateEmployee);
 router.post('/:id/reset-password', protect, authorize('CEO', 'COO', 'Manager'), resetPassword);
 router.post('/:id/deactivate', protect, authorize('CEO', 'COO', 'Manager'), deactivateEmployee);
 router.post('/:id/activate', protect, authorize('CEO', 'COO', 'Manager'), activateEmployee);
+router.delete('/:id', protect, authorize('CEO', 'COO', 'Manager'), deleteEmployee);
 
 module.exports = router;

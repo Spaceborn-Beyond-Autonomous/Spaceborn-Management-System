@@ -7,6 +7,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
   const [reason, setReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState('');
   const [hasPending, setHasPending] = useState(false);
 
@@ -22,20 +23,13 @@ const ForgotPassword = ({ onBackToLogin }) => {
     setError('');
 
     try {
-      const pending = await authService.hasPendingResetRequest(employeeId);
-      
-      if (pending) {
-        setHasPending(true);
-        setIsLoading(false);
-        return;
-      }
-
-      const result = await authService.requestPasswordReset(employeeId, reason);
-      
+      // Use immediate reset that returns a temporary password
+      const result = await authService.forgotPasswordImmediate(employeeId, reason);
       if (result.success) {
+        setNewPassword(result.newPassword || result.temporaryPassword || '');
         setSubmitted(true);
       } else {
-        setError(result.error);
+        setError(result.error || result.message || 'Failed to reset password');
       }
     } catch (err) {
       setError(err.message || 'Failed to send request. Please try again.');
@@ -59,14 +53,15 @@ const ForgotPassword = ({ onBackToLogin }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Sent!</h2>
-          <p className="text-gray-600 mb-6">
-            Your password reset request has been sent to your manager. 
-            You will receive an email with a new password once approved.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Temporary Password</h2>
+          <p className="text-gray-600 mb-4">A temporary password has been generated for your account.</p>
+          <div className="mb-4 p-3 bg-yellow-50 rounded-lg inline-block border border-yellow-200">
+            <code className="font-mono text-lg font-bold text-yellow-800">{newPassword}</code>
+          </div>
+          <p className="text-gray-600 mb-6 text-sm">Use this password to login, then change it from your profile.</p>
           <button
             onClick={handleBackToLogin}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors w-full"
           >
             Back to Login
           </button>
@@ -91,7 +86,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
           </p>
           <button
             onClick={handleBackToLogin}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors w-full"
           >
             Back to Login
           </button>
@@ -110,7 +105,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
         </div>
         <h2 className="text-2xl font-bold text-gray-900">Forgot Password?</h2>
         <p className="text-gray-600 mt-2">
-          Enter your Employee ID and your manager will be notified to approve a password reset.
+          Enter your Employee ID to generate a temporary password for your account immediately.
         </p>
       </div>
 
@@ -154,7 +149,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
           disabled={isLoading}
           className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Sending Request...' : 'Send Reset Request'}
+          {isLoading ? 'Resetting Password...' : 'Generate Temp Password'}
         </button>
 
         <button
@@ -168,8 +163,8 @@ const ForgotPassword = ({ onBackToLogin }) => {
 
       <div className="mt-6 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-500 text-center">
-          Your request will be sent to your manager for approval.
-          Once approved, a new password will be emailed to you.
+          This will immediately update your password in the database.
+          Nodemailer will also attempt to email this password to your registered address.
         </p>
       </div>
     </div>

@@ -20,7 +20,9 @@ export const getRoles = async () => {
     MANAGER: 'Manager',
     TEAM_LEAD: 'Team Lead',
     MEMBER: 'Member',
-    HR: 'HR'
+    HR: 'HR',
+    CO_HEAD: 'CO Head',
+    CO_HEAD_HYPHEN: 'Co-Head'
   };
 };
 

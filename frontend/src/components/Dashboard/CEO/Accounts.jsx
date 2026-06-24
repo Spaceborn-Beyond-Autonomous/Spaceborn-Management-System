@@ -76,16 +76,16 @@ const Accounts = ({ userRole = 'CEO' }) => {
   const [stats, setStats] = useState({
   totalCreated: 0,
   thisMonth: 0,
-  byRole: { CEO: 0, COO: 0, Manager: 0, 'Team Lead': 0, Member: 0, HR: 0 }
+  byRole: { CEO: 0, COO: 0, Manager: 0, 'Team Lead': 0, Member: 0, 'CO Head': 0 }
 });
 
   // Available roles based on user role
   const getAvailableRoles = () => {
     if (userRole === 'CEO') {
-      return ['CEO', 'COO', 'Manager', 'Team Lead', 'Member', 'HR'];
+      return ['CEO', 'COO', 'Manager', 'Team Lead', 'Member', 'CO Head'];
     }
     if (userRole === 'COO' || userRole === 'Manager') {
-      return ['COO', 'Manager', 'Team Lead', 'Member', 'HR'];
+      return ['COO', 'Manager', 'Team Lead', 'Member', 'CO Head'];
     }
     return ['Member'];
   };
@@ -100,7 +100,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
       'Manager': 'MGR',
       'Team Lead': 'LD',
       'Member': 'EMP',
-      'HR': 'HR'
+      'CO Head': 'COH'
     };
     
     const prefix = rolePrefix[formData.role] || 'EMP';
@@ -302,7 +302,7 @@ const Accounts = ({ userRole = 'CEO' }) => {
         'Manager': 1,
         'Team Lead': 3,
         'Member': 2,
-        'HR': 0
+        'CO Head': 0
       }
     });
   };
@@ -520,8 +520,8 @@ const Accounts = ({ userRole = 'CEO' }) => {
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-6 text-sm text-blue-700 flex items-center gap-2">
         <AlertCircle className="w-4 h-4" />
         {userRole === 'CEO' 
-          ? 'CEO - can create: COO, Managers, Team Leads, Members, HR'
-          : `${userRole} - can create: COO, Managers, Team Leads, Members, HR`}
+          ? 'CEO - can create: COO, Managers, Team Leads, Members, CO Head'
+          : `${userRole} - can create: COO, Managers, Team Leads, Members, CO Head`}
       </div>
 
       {/* Employee View/Edit Modal */}

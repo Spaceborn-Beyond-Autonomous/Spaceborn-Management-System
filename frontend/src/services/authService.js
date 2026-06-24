@@ -898,6 +898,41 @@ class AuthService {
     return this.requestPasswordReset(employeeId);
   }
 
+  // Immediately generate a temporary password and return it (public flow)
+  async forgotPasswordImmediate(employeeId, reason = '') {
+    if (!employeeId) return { success: false, error: 'Employee ID is required' };
+
+    if (this.USE_MOCK) {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const user = this.mockUsers[employeeId.toUpperCase()];
+      if (!user) return { success: false, error: 'Employee ID not found' };
+
+      const newPassword = this.generateRandomPassword ? this.generateRandomPassword() : 'tempPass@123';
+      if (this.mockUsers[employeeId.toUpperCase()]) {
+        this.mockUsers[employeeId.toUpperCase()].password = newPassword;
+      }
+      return { success: true, newPassword, message: `Temporary password generated for ${user.name}` };
+    }
+
+    try {
+      const response = await fetch(`${this.API_BASE_URL}/auth/forgot-password/immediate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeId: employeeId.toUpperCase(), reason })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Request failed');
+      }
+
+      return { success: true, newPassword: data.temporaryPassword, message: data.message };
+    } catch (error) {
+      console.error('Forgot password immediate error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Refresh token
   async refreshToken() {
     if (this.USE_MOCK) {

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { formatResponse } = require('../utils/helpers');
 const { uploadEmployeeDocumentToDrive } = require('../services/googleDriveService');
+const crypto = require('crypto');
 
 const DEPARTMENTS = [
   'Platform and DevOps',
@@ -127,6 +128,11 @@ const splitName = (body) => {
     firstName: parts[0],
     lastName: parts.slice(1).join(' ') || parts[0],
   };
+};
+
+const generateRandomPassword = () => {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+  return Array.from({ length: 12 }, () => alphabet[crypto.randomInt(alphabet.length)]).join('');
 };
 
 const buildEmployeeQuery = (queryParams = {}, currentUser = null) => {
@@ -345,11 +351,7 @@ exports.updateEmployee = async (req, res) => {
 // @access  Private (Manager, CEO)
 exports.resetPassword = async (req, res) => {
   try {
-    const { newPassword } = req.body;
-
-    if (!newPassword) {
-      return res.status(400).json(formatResponse(false, 'New password is required'));
-    }
+    const newPassword = req.body.newPassword || generateRandomPassword();
 
     if (newPassword.length < 6) {
       return res.status(400).json(formatResponse(false, 'Password must be at least 6 characters'));
@@ -556,13 +558,10 @@ exports.searchEmployees = async (req, res) => {
 
 exports.deleteEmployee = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json(formatResponse(false, 'Employee not found'));
 
-    user.isActive = false;
-    await user.save();
-
-    res.status(200).json(formatResponse(true, 'Employee deactivated successfully', toEmployeeDto(user)));
+    res.status(200).json(formatResponse(true, 'Employee permanently deleted', toEmployeeDto(user)));
   } catch (error) {
     res.status(500).json(formatResponse(false, error.message));
   }

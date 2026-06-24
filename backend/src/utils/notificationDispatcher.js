@@ -219,6 +219,45 @@ const notifyTaskAssigned = async (task) => {
   });
 };
 
+const notifyPasswordResetRequested = async (request) => {
+  return notifyRoles(['COO', 'Manager'], {
+    title: 'Password Reset Requested',
+    message: `${request.employeeName} requested a password reset`,
+    description: request.reason || 'Review this request in Password Reset Requests.',
+    category: 'System',
+    priority: 'high',
+    actionUrl: '/password-reset-requests',
+    actionLabel: 'Review Request',
+    details: {
+      employee: request.employeeName,
+      employeeId: request.employeeId,
+      email: request.employeeEmail,
+      department: request.department,
+      role: request.role,
+      reason: request.reason || 'Not provided'
+    }
+  });
+};
+
+const notifyPasswordResetDecision = async (request, status) => {
+  return notifyUserByEmployeeId(request.employeeId, {
+    title: `Password Reset ${status === 'approved' ? 'Approved' : 'Rejected'}`,
+    message: status === 'approved'
+      ? 'Your password reset request was approved. Check your registered email.'
+      : 'Your password reset request was rejected.',
+    description: status === 'approved' ? request.comments || '' : request.rejectionReason || '',
+    category: 'System',
+    priority: status === 'approved' ? 'medium' : 'high',
+    actionUrl: null,
+    actionLabel: null,
+    details: {
+      status,
+      decidedBy: request.approvedByName || request.rejectedByName,
+      comments: request.comments || request.rejectionReason || ''
+    }
+  });
+};
+
 module.exports = {
   notifyUsers,
   notifyRoles,
@@ -229,5 +268,7 @@ module.exports = {
   notifyResourceDecision,
   notifyReportSubmitted,
   notifyMvpSubmitted,
-  notifyTaskAssigned
+  notifyTaskAssigned,
+  notifyPasswordResetRequested,
+  notifyPasswordResetDecision
 };
