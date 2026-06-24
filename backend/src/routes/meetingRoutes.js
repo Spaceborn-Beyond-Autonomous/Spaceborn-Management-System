@@ -8,7 +8,8 @@ const {
   getMeeting,
   updateMeeting,
   deleteMeeting,
-  addAttendee
+  addAttendee,
+  syncTranscript
 } = require('../controllers/meetingController');
 
 // Create meeting - CEO, Manager, Team Lead
@@ -31,5 +32,8 @@ router.delete('/:id', protect, deleteMeeting);
 
 // Join/attend meeting - All roles
 router.post('/:id/attend', protect, addAttendee);
+
+// Sync transcript and summarize - All roles
+router.post('/:id/sync-transcript', protect, syncTranscript);
 
 module.exports = router;

@@ -121,3 +121,6 @@ dist
 
 # Local Uploads
 backend/uploads/
+
+# Analysis Results
+analysis_results.md
