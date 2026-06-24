@@ -279,7 +279,7 @@ exports.getRosterAttendance = async (req, res) => {
       ? (department && department !== 'all' ? department : null)
       : user?.department;
 
-    const usersQuery = { role: { $in: ['CEO', 'Manager', 'Team Lead', 'Member', 'HR'] } };
+    const usersQuery = { role: { $in: ['CEO', 'COO', 'Manager', 'Co-Head', 'CO Head', 'Team Lead', 'Member', 'HR'] } };
     if (scopeDepartment) usersQuery.department = scopeDepartment;
 
     const employees = await User.find(usersQuery).select('employeeId firstName lastName fullName role department');

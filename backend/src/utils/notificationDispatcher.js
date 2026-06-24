@@ -63,7 +63,7 @@ const notifyMeetingCreated = async (meeting) => {
     isActive: true,
     $or: [
       { role: { $in: ['CEO', 'COO', 'Manager'] } },
-      { role: { $in: ['Team Lead', 'Member'] }, ...departmentFilter }
+      { role: { $in: ['Team Lead', 'Co-Head', 'CO Head', 'Member'] }, ...departmentFilter }
     ]
   }).select('_id');
 

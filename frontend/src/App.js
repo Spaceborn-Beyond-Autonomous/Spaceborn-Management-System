@@ -437,16 +437,7 @@ function App() {
                 </div>
               </nav>
               <div className="p-4 border-t border-gray-200">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-semibold">
-                    {user.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-500">CEO</p>
-                  </div>
-                  <LogoutButton onLogout={handleLogout} />
-                </div>
+                <LogoutButton onLogout={handleLogout} />
               </div>
             </aside>
             <main className="flex-1 ml-64 overflow-y-auto mt-[73px]">
@@ -653,16 +644,7 @@ function App() {
                 </div>
               </nav>
               <div className="p-4 border-t border-gray-200">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-semibold">
-                    {user.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-500">{managerDisplayRole}</p>
-                  </div>
-                  <LogoutButton onLogout={handleLogout} />
-                </div>
+                <LogoutButton onLogout={handleLogout} />
               </div>
             </aside>
             <main className="flex-1 ml-64 overflow-y-auto mt-[73px]">
