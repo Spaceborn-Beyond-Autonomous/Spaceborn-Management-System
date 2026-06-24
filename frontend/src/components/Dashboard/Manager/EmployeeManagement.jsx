@@ -68,8 +68,25 @@ const EmployeeManagement = ({
   // Get unique departments
   const departments = DEPARTMENTS;
   
-  // Get stats
-  const stats = getEmployeeStats();
+  // Calculate stats dynamically
+  const activeCount = allEmployees.filter(e => e.status === 'Active' || e.isActive !== false).length;
+  const onLeaveCount = allEmployees.filter(e => e.status === 'On Leave' || e.employmentStatus === 'On Leave').length;
+  const ndaSignedCount = allEmployees.filter(e => e.documents?.nda || e.ndaSigned !== false).length;
+  const onboardedCount = allEmployees.filter(e => e.status !== 'Pending' && e.employmentStatus !== 'Pending').length;
+
+  const stats = {
+    total: allEmployees.length,
+    active: activeCount,
+    onLeave: onLeaveCount,
+    ndaSigned: ndaSignedCount,
+    onboarded: onboardedCount
+  };
+
+  const roleCounts = allEmployees.reduce((acc, emp) => {
+    const role = emp.role || 'Member';
+    acc[role] = (acc[role] || 0) + 1;
+    return acc;
+  }, {});
 
   // Filter employees
   const filteredEmployees = allEmployees.filter(emp => {
@@ -225,11 +242,14 @@ const EmployeeManagement = ({
   const getRoleBadge = (role) => {
     const badges = {
       CEO: 'bg-purple-100 text-purple-700',
+      COO: 'bg-blue-100 text-blue-700',
       Manager: 'bg-blue-100 text-blue-700',
+      'Co-Head': 'bg-teal-100 text-teal-700',
+      'CO Head': 'bg-teal-100 text-teal-700',
       'Team Lead': 'bg-green-100 text-green-700',
-      Member: 'bg-gray-100 text-gray-700'
+      Member: 'bg-cyan-100 text-cyan-700'
     };
-    return badges[role] || badges.Member;
+    return badges[role] || 'bg-gray-100 text-gray-700';
   };
 
   return (
@@ -266,12 +286,13 @@ const EmployeeManagement = ({
 
       {/* Role Summary */}
       <div className="bg-white rounded-xl border shadow-sm p-3">
-        <div className="flex items-center space-x-4 text-sm">
-          <span className="text-gray-500">Employees by Role:</span>
-          <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded">CEO (1)</span>
-          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded">Manager (1)</span>
-          <span className="px-2 py-1 bg-green-100 text-green-700 rounded">Lead (2)</span>
-          <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">Member (5)</span>
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-gray-500 mr-2">Employees by Role:</span>
+          {Object.entries(roleCounts).map(([role, count]) => (
+            <span key={role} className={`px-2 py-1 rounded ${getRoleBadge(role)}`}>
+              {role} ({count})
+            </span>
+          ))}
         </div>
       </div>
 
