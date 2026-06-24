@@ -18,7 +18,7 @@ const ShiftTimer = ({ user, onLogout }) => {
   const GRACE_PERIOD = 15; // 15 minutes grace period
 
   useEffect(() => {
-    // Load saved attendance data
+    // Load saved attendance data only on mount
     const savedAttendance = localStorage.getItem('attendance_marked');
     const savedLoginTime = localStorage.getItem('login_time');
     const savedHistory = localStorage.getItem('attendance_history');
@@ -32,7 +32,9 @@ const ShiftTimer = ({ user, onLogout }) => {
     if (savedHistory) {
       setAttendanceHistory(JSON.parse(savedHistory));
     }
+  }, []); // Run only once on mount
 
+  useEffect(() => {
     // Real-time clock update
     const timer = setInterval(() => {
       const now = new Date();

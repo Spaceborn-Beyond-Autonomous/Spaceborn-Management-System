@@ -310,12 +310,12 @@ function App() {
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
               <div className="px-4 py-3 border-b border-gray-100">
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' || user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{user.role === 'COO' ? 'COO' : 'Manager'}</span>
-                </div>
-                <div className="flex space-x-2 mt-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head' ? (user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700') : 'bg-gray-100 text-gray-600'}`}>{user.role === 'Co-Head' || user.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' || user.role === 'CO Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>CO Head</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Lead</span>
                   <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
                 </div>
               </div>
@@ -524,12 +524,12 @@ function App() {
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
               <div className="px-4 py-3 border-b border-gray-100">
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' || user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{user.role === 'COO' ? 'COO' : 'Manager'}</span>
-                </div>
-                <div className="flex space-x-2 mt-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head' ? (user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700') : 'bg-gray-100 text-gray-600'}`}>{user.role === 'Co-Head' || user.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' || user.role === 'CO Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>CO Head</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Lead</span>
                   <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
                 </div>
               </div>
@@ -723,12 +723,12 @@ function App() {
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
               <div className="px-4 py-3 border-b border-gray-100">
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' || user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{user.role === 'COO' ? 'COO' : 'Manager'}</span>
-                </div>
-                <div className="flex space-x-2 mt-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head' ? (user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700') : 'bg-gray-100 text-gray-600'}`}>{user.role === 'Co-Head' || user.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' || user.role === 'CO Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>CO Head</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Lead</span>
                   <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
                 </div>
               </div>
@@ -833,12 +833,12 @@ function App() {
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
               <div className="px-4 py-3 border-b border-gray-100">
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'CEO' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>CEO</span>
-                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' || user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{user.role === 'COO' ? 'COO' : 'Manager'}</span>
-                </div>
-                <div className="flex space-x-2 mt-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' || user.role === 'Co-Head' || user.role === 'CO Head' ? (user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700') : 'bg-gray-100 text-gray-600'}`}>{user.role === 'Co-Head' || user.role === 'CO Head' ? 'CO Head' : 'Lead'}</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'COO' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>COO</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>Manager</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Co-Head' || user.role === 'CO Head' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>CO Head</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Team Lead' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>Lead</span>
                   <span className={`px-2 py-1 text-xs font-medium rounded ${user.role === 'Member' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>Member</span>
                 </div>
               </div>

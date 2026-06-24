@@ -635,8 +635,12 @@ const Accounts = ({ userRole = 'Manager' }) => {
                       <td className="px-6 py-4 font-mono text-sm text-gray-900">{account.employeeId}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium">{account.initials || account.name?.charAt(0)}</div>
-                          <span className="font-medium">{account.name}</span>
+                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium">
+                            {account.initials || (account.name || account.fullName || account.firstName || 'U').charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-medium">
+                            {account.name || account.fullName || (account.firstName ? `${account.firstName} ${account.lastName || ''}`.trim() : 'Unknown')}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-gray-600">{account.email}</td>
