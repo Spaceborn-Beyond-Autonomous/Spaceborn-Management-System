@@ -27,7 +27,7 @@ const TeamLeadDashboardPage = () => {
         return;
       }
       
-      if (currentUser.role !== 'Team Lead') {
+      if (currentUser.role !== 'Team Lead' && currentUser.role !== 'CO Head' && currentUser.role !== 'Co-Head') {
         const hasTeamLeadAccess = await checkTeamLeadAccess(currentUser);
         if (!hasTeamLeadAccess) {
           navigate('/unauthorized');
@@ -52,7 +52,7 @@ const TeamLeadDashboardPage = () => {
     } catch (error) {
       console.log('Using fallback role check');
     }
-    return user.role === 'Team Lead';
+    return user.role === 'Team Lead' || user.role === 'CO Head' || user.role === 'Co-Head';
   };
 
   const fetchMenuItems = async (currentUser) => {

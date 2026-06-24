@@ -305,7 +305,7 @@ function App() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-[73px] overflow-y-auto">
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col bottom-0 fixed left-0 top-[73px] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-center">
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
@@ -519,7 +519,7 @@ function App() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-[73px] overflow-y-auto">
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col bottom-0 fixed left-0 top-[73px] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-center">
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
@@ -718,7 +718,7 @@ function App() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-[73px] overflow-y-auto">
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col bottom-0 fixed left-0 top-[73px] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-center">
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>
@@ -828,7 +828,7 @@ function App() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <ShiftTimer user={user} onLogout={handleLogout} />
           <div className="flex flex-1">
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-[73px] overflow-y-auto">
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col bottom-0 fixed left-0 top-[73px] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-center">
                 <img src={require('./assets/spaceborn-logo.png')} alt="Spaceborn" className="h-16 w-auto object-contain" />
               </div>

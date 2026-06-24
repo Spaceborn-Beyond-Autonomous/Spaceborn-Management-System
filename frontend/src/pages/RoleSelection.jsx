@@ -49,6 +49,8 @@ const RoleSelection = () => {
       'CEO': <Shield className="w-8 h-8" />,
       'Manager': <Users className="w-8 h-8" />,
       'Team Lead': <Building2 className="w-8 h-8" />,
+      'CO Head': <Building2 className="w-8 h-8" />,
+      'Co-Head': <Building2 className="w-8 h-8" />,
       'Member': <User className="w-8 h-8" />
     };
     return icons[roleName] || <User className="w-8 h-8" />;
@@ -59,6 +61,8 @@ const RoleSelection = () => {
       'CEO': 'purple',
       'Manager': 'blue',
       'Team Lead': 'green',
+      'CO Head': 'green',
+      'Co-Head': 'green',
       'Member': 'gray'
     };
     return colors[roleName] || 'gray';
@@ -69,6 +73,8 @@ const RoleSelection = () => {
       'CEO': 'Full company access and strategic control',
       'Manager': 'Department management and resource allocation',
       'Team Lead': 'Team leadership and task coordination',
+      'CO Head': 'Team leadership and task coordination',
+      'Co-Head': 'Team leadership and task coordination',
       'Member': 'Individual contributor with task management'
     };
     return descriptions[roleName] || 'Access to assigned features';
@@ -102,6 +108,8 @@ const RoleSelection = () => {
         'CEO': '/ceo/dashboard',
         'Manager': '/manager/dashboard',
         'Team Lead': '/teamlead/dashboard',
+        'CO Head': '/teamlead/dashboard',
+        'Co-Head': '/teamlead/dashboard',
         'Member': '/member/dashboard'
       };
       
@@ -113,6 +121,8 @@ const RoleSelection = () => {
         'CEO': '/ceo/dashboard',
         'Manager': '/manager/dashboard',
         'Team Lead': '/teamlead/dashboard',
+        'CO Head': '/teamlead/dashboard',
+        'Co-Head': '/teamlead/dashboard',
         'Member': '/member/dashboard'
       };
       navigate(fallbackRoutes[selectedRole] || '/dashboard');

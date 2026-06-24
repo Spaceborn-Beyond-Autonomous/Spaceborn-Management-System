@@ -104,9 +104,6 @@ const ShiftTimer = ({ user, onLogout }) => {
     
     if (lateMinutes > 0) {
       status = 'late';
-      setWarningMessage(`⚠️ You are ${lateMinutes} minutes late!`);
-      setShowWarning(true);
-      setTimeout(() => setShowWarning(false), 5000);
     }
     
     setShiftStatus(status);
@@ -136,7 +133,7 @@ const ShiftTimer = ({ user, onLogout }) => {
     setAttendanceHistory(updatedHistory);
     localStorage.setItem('attendance_history', JSON.stringify(updatedHistory));
     
-    alert(`✅ Attendance marked at ${now.toLocaleTimeString()}\n${status === 'late' ? `⚠️ Late by ${lateMinutes} minutes` : 'On time'}`);
+    alert(`✅ Attendance marked at ${now.toLocaleTimeString()}`);
   };
 
   const handleLogout = () => {
@@ -202,13 +199,11 @@ const ShiftTimer = ({ user, onLogout }) => {
   };
 
   const getStatusColor = () => {
-    if (shiftStatus === 'late') return 'text-yellow-600 bg-yellow-50';
     if (isLoggedIn) return 'text-green-600 bg-green-50';
     return 'text-gray-600 bg-gray-50';
   };
 
   const getStatusText = () => {
-    if (shiftStatus === 'late') return '⚠️ Late Login';
     if (isLoggedIn) return '✓ Active';
     return '● Offline';
   };
@@ -299,15 +294,7 @@ const ShiftTimer = ({ user, onLogout }) => {
         </div>
       </div>
       
-      {/* Late Login Warning Banner */}
-      {shiftStatus === 'late' && (
-        <div className="mt-2 pt-2 border-t border-yellow-100">
-          <div className="flex items-center space-x-2 text-xs text-yellow-700">
-            <span>⚠️</span>
-            <span>Late login recorded. Please ensure timely login in the future.</span>
-          </div>
-        </div>
-      )}
+      {/* Late Login Warning Banner Removed as requested */}
     </div>
   );
 };

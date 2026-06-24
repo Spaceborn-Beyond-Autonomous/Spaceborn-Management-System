@@ -326,6 +326,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
       } catch (fetchError) {
         console.log('API not available, using mock mode');
       }
+      employeeService.clearCache();
       
       const initials = formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase();
       const newAccount = {
