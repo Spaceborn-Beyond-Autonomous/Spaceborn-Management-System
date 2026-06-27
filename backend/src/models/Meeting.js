@@ -44,7 +44,19 @@ const meetingSchema = new mongoose.Schema({
   },
   attendees: [{
     type: String
-  }]
+  }],
+  transcript: {
+    type: String,
+    default: ''
+  },
+  summary: {
+    type: String,
+    default: ''
+  },
+  transcriptSynced: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 // Indexes

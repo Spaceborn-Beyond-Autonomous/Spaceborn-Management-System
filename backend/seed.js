@@ -52,9 +52,12 @@ async function seed() {
       { employeeId: 'COH001', password: 'cohead123', firstName: 'Neha', lastName: 'Gupta', email: 'neha.gupta@spaceborn.com', phone: '+91 98765 43215', role: 'CO Head', department: 'Robotics & Simulation', team: 'Leadership Team', manager: 'Jane Smith', joinDate: '2022-06-01' },
     ];
 
-    // Insert users (passwords will be hashed automatically)
-    await User.insertMany(users);
-    console.log('✅ Seeded 7 users successfully!');
+    // Insert users (passwords will be hashed automatically via save middleware)
+    for (const u of users) {
+      const newUser = new User(u);
+      await newUser.save();
+    }
+    console.log('✅ Seeded 8 users successfully!');
 
     // Display the users
     const allUsers = await User.find({}).select('-password');

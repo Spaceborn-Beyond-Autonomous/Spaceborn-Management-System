@@ -25,6 +25,5 @@ router.post('/:id/reset-password', protect, authorize('CEO', 'COO', 'Manager'), 
 router.post('/:id/deactivate', protect, authorize('CEO', 'COO', 'Manager'), deactivateEmployee);
 router.post('/:id/activate', protect, authorize('CEO', 'COO', 'Manager'), activateEmployee);
 router.delete('/:id', protect, authorize('CEO', 'COO', 'Manager'), deleteEmployee);
-router.post('/:id/terminate', protect, authorize('CEO', 'COO', 'Manager'), deleteEmployee);
 
 module.exports = router;

@@ -19,6 +19,8 @@ const Projects = ({ userRole = 'Manager' }) => {
     completed: 0
   });
   const [departments, setDepartments] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -30,6 +32,8 @@ const Projects = ({ userRole = 'Manager' }) => {
   });
 
   useEffect(() => {
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
     fetchDepartments();
     fetchProjects();
   }, [selectedDepartment, selectedStatus, searchQuery]);
@@ -59,9 +63,16 @@ const Projects = ({ userRole = 'Manager' }) => {
       
       if (response.ok) {
         const data = await response.json();
-        const nextProjects = data.projects || data;
-        setProjects(nextProjects);
-        calculateStats(nextProjects);
+        const user = authService.getCurrentUser();
+        // Filter projects for manager's department
+        if (user && user.department) {
+          const filteredProjects = (data.projects || data).filter(p => p.department === user.department);
+          setProjects(filteredProjects);
+          calculateStats(filteredProjects);
+        } else {
+          setProjects(data.projects || data);
+          calculateStats(data.projects || data);
+        }
       } else {
         throw new Error('Failed to fetch projects');
       }
@@ -105,6 +116,9 @@ const Projects = ({ userRole = 'Manager' }) => {
   };
 
   const loadMockData = () => {
+    const user = authService.getCurrentUser();
+    const managerDepartment = user?.department || 'Core Systems';
+    
     const mockProjects = [
       { 
         id: 1, 
@@ -112,7 +126,7 @@ const Projects = ({ userRole = 'Manager' }) => {
         description: 'Upgrade API infrastructure', 
         progress: 75, 
         status: 'on-track', 
-        department: 'Core Systems', 
+        department: managerDepartment, 
         dueDate: '2026-06-10', 
         tasks: { completed: 34, total: 45 },
         lead: 'Mike Johnson'
@@ -123,7 +137,7 @@ const Projects = ({ userRole = 'Manager' }) => {
         description: 'Migrate to new database system', 
         progress: 45, 
         status: 'at-risk', 
-        department: 'Platform and DevOps', 
+        department: managerDepartment, 
         dueDate: '2026-07-15', 
         tasks: { completed: 18, total: 40 },
         lead: 'Ravi Das'
@@ -134,7 +148,7 @@ const Projects = ({ userRole = 'Manager' }) => {
         description: 'Security compliance and audit', 
         progress: 30, 
         status: 'delayed', 
-        department: 'Hardware & Integration', 
+        department: managerDepartment, 
         dueDate: '2026-06-20', 
         tasks: { completed: 9, total: 32 },
         lead: 'Suresh M'
@@ -145,7 +159,7 @@ const Projects = ({ userRole = 'Manager' }) => {
         description: 'Automated deployment pipeline', 
         progress: 95, 
         status: 'completed', 
-        department: 'Robotics & Simulation', 
+        department: managerDepartment, 
         dueDate: '2026-05-15', 
         tasks: { completed: 28, total: 30 },
         lead: 'Nisha Kumar'
@@ -156,7 +170,7 @@ const Projects = ({ userRole = 'Manager' }) => {
         description: 'Complete UI overhaul', 
         progress: 65, 
         status: 'on-track', 
-        department: 'AI/LLM & Perception', 
+        department: managerDepartment, 
         dueDate: '2026-06-25', 
         tasks: { completed: 25, total: 38 },
         lead: 'Priya Sharma'
@@ -164,8 +178,10 @@ const Projects = ({ userRole = 'Manager' }) => {
     ];
     
     let filtered = mockProjects;
-    if (selectedDepartment !== 'All') {
-      filtered = filtered.filter(p => p.department === selectedDepartment);
+    if (selectedDepartment !== 'All' && selectedDepartment !== managerDepartment) {
+      filtered = [];
+    } else if (selectedDepartment === managerDepartment) {
+      filtered = mockProjects;
     }
     if (selectedStatus !== 'All') {
       filtered = filtered.filter(p => p.status === selectedStatus);
@@ -285,7 +301,7 @@ const Projects = ({ userRole = 'Manager' }) => {
   };
 
   const statusOptions = ['All', 'on-track', 'at-risk', 'delayed', 'completed'];
-  const departmentName = 'all departments';
+  const departmentName = currentUser?.department || 'Your';
 
   if (isLoading && projects.length === 0) {
     return (
@@ -300,9 +316,9 @@ const Projects = ({ userRole = 'Manager' }) => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Team Projects</h1>
-        <p className="text-gray-500 mt-1">Manage and track projects across all departments</p>
+        <p className="text-gray-500 mt-1">Manage and track projects for {departmentName} department</p>
         <div className="mt-2 inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-xs">
-          Manager View - All departments
+          Manager View • {departmentName} Department
         </div>
       </div>
 
@@ -375,6 +391,13 @@ const Projects = ({ userRole = 'Manager' }) => {
         </div>
       </div>
 
+      {/* Info Banner for Managers */}
+      {selectedDepartment !== 'All' && selectedDepartment !== currentUser?.department && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-4 text-sm text-amber-700">
+          Showing projects for {selectedDepartment} department. You can only create projects for your own department ({currentUser?.department}).
+        </div>
+      )}
+
       {/* Error State */}
       {error && projects.length === 0 ? (
         <div className="bg-white rounded-xl border border-rose-200 p-8 text-center">
@@ -392,7 +415,7 @@ const Projects = ({ userRole = 'Manager' }) => {
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl">
             📁
           </div>
-          <p className="text-gray-500">No projects found for {departmentName}</p>
+          <p className="text-gray-500">No projects found for {departmentName} department</p>
           <p className="text-gray-400 text-sm mt-1">Try adjusting your filters or create a new project</p>
         </div>
       ) : (
@@ -485,7 +508,7 @@ const Projects = ({ userRole = 'Manager' }) => {
                 <h2 className="text-xl font-bold text-gray-900">Create New Project</h2>
                 <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Select any department for this project</p>
+              <p className="text-xs text-gray-500 mt-1 mt-1">Projects will be created for {currentUser?.department} department</p>
             </div>
             
             <form onSubmit={handleCreateProject} className="p-6 space-y-4">
@@ -525,6 +548,9 @@ const Projects = ({ userRole = 'Manager' }) => {
                     <option key={dept} value={dept}>{dept}</option>
                   ))}
                 </select>
+                {formData.department && formData.department !== currentUser?.department && (
+                  <p className="text-xs text-amber-600 mt-1">Note: You can only create projects for your own department ({currentUser?.department})</p>
+                )}
               </div>
               
               <div>

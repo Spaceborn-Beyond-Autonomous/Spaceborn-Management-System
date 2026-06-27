@@ -67,7 +67,7 @@ router.post('/', async (req, res) => {
 
 router.post('/bulk', authorize('CEO', 'COO', 'Manager'), async (req, res) => {
   try {
-    const userQuery = { isActive: true };
+    const userQuery = (req.user.role === 'Manager' || req.user.role === 'COO') ? { department: req.user.department, isActive: true } : { isActive: true };
     const users = await User.find(userQuery).select('_id');
     const docs = users.map((user) => ({
       userId: user._id,

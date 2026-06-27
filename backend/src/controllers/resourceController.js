@@ -187,6 +187,10 @@ exports.getRequests = async (req, res) => {
     if (department) filter.department = department;
     if (requester === 'me') filter.requester = req.user._id;
 
+    if ((req.user.role === 'Manager' || req.user.role === 'COO') && !department) {
+      filter.department = req.user.department;
+    }
+
     const requests = await ResourceRequest.find(filter).sort({ createdAt: -1 });
 
     res.status(200).json({

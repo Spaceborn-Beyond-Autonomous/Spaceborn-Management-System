@@ -1,7 +1,6 @@
 const User = require('../models/User');
 const { formatResponse } = require('../utils/helpers');
 const { uploadEmployeeDocumentToDrive } = require('../services/googleDriveService');
-const { canTerminateUser } = require('../utils/terminationPermissions');
 const crypto = require('crypto');
 
 const DEPARTMENTS = [
@@ -108,9 +107,6 @@ const toEmployeeDto = (user) => {
     joinDate: plain.joinDate,
     status: plain.isActive === false ? 'Inactive' : 'Active',
     isActive: plain.isActive !== false,
-    isOnline: Boolean(plain.isOnline),
-    lastSeen: plain.lastSeen,
-    terminatedAt: plain.terminatedAt,
     createdAt: plain.createdAt,
     updatedAt: plain.updatedAt,
     documents: plain.documents || {},
@@ -562,19 +558,10 @@ exports.searchEmployees = async (req, res) => {
 
 exports.deleteEmployee = async (req, res) => {
   try {
-    const targetUser = await User.findById(req.params.id);
-    if (!targetUser) return res.status(404).json(formatResponse(false, 'Employee not found'));
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json(formatResponse(false, 'Employee not found'));
 
-    const actor = req.user;
-    const allowed = canTerminateUser(actor, { role: targetUser.role });
-
-    if (!allowed) {
-      return res.status(403).json(formatResponse(false, 'You do not have permission to terminate this employee'));
-    }
-
-    await User.findByIdAndDelete(req.params.id);
-
-    res.status(200).json(formatResponse(true, 'Employee permanently deleted', toEmployeeDto(targetUser)));
+    res.status(200).json(formatResponse(true, 'Employee permanently deleted', toEmployeeDto(user)));
   } catch (error) {
     res.status(500).json(formatResponse(false, error.message));
   }

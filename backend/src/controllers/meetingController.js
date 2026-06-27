@@ -209,3 +209,42 @@ exports.addAttendee = async (req, res) => {
     res.status(500).json(formatResponse(false, error.message));
   }
 };
+
+// @desc    Sync Google Meet transcript and generate AI summary
+// @route   POST /api/meetings/:id/sync-transcript
+// @access  Private (All roles)
+exports.syncTranscript = async (req, res) => {
+  try {
+    const { syncMeetingTranscript } = require('../services/meetTranscriptService');
+    const meeting = await Meeting.findById(req.params.id);
+
+    if (!meeting) {
+      return res.status(404).json(formatResponse(false, 'Meeting not found'));
+    }
+
+    if (!meeting.meetingLink) {
+      return res.status(400).json(formatResponse(false, 'Meeting does not have a Google Meet link configured'));
+    }
+
+    const googleAccessToken = req.headers['x-google-access-token'] || req.body.googleAccessToken || null;
+
+    const syncResult = await syncMeetingTranscript({
+      meetingLink: meeting.meetingLink,
+      meetingTitle: meeting.title,
+      accessToken: googleAccessToken
+    });
+
+    meeting.transcript = syncResult.transcript;
+    meeting.summary = syncResult.summary;
+    meeting.status = 'completed';
+    meeting.transcriptSynced = true;
+
+    await meeting.save();
+
+    res.status(200).json(formatResponse(true, 'Meeting transcript synced and summarized successfully', meeting));
+  } catch (error) {
+    console.error('Sync meeting transcript error:', error);
+    res.status(500).json(formatResponse(false, error.message || 'Failed to sync meeting transcript'));
+  }
+};
+

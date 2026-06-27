@@ -31,7 +31,11 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
     phone: '',
     joinDate: ''
   });
+  const [currentUser, setCurrentUser] = useState(null);
+
   useEffect(() => {
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
     fetchAllData();
   }, [activeTab, selectedDepartment, searchQuery]);
 
@@ -42,15 +46,18 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
     try {
       // Fetch employees from service
       const employees = await employeeService.getAllEmployees();
-      const filteredEmployees = employees;
-      const uniqueDepartments = [
-        'All',
-        ...new Set(employees.map(emp => normalizeDepartment(emp.department)).filter(Boolean))
-      ];
+      const user = authService.getCurrentUser();
+      const managerDepartment = normalizeDepartment(user?.department);
+      
+      // Filter employees for manager's department only
+      const filteredEmployees = employees.filter(emp => normalizeDepartment(emp.department) === managerDepartment);
+      
+      // Calculate departments from employees data (only manager's department)
+      const uniqueDepartments = ['All', managerDepartment];
       setDepartments(uniqueDepartments);
       
       if (activeTab === 'teams') {
-        // Calculate teams/departments from employees across the company
+        // Calculate teams/departments from employees (only manager's department)
         const deptMap = new Map();
         
         filteredEmployees.forEach(emp => {
@@ -93,8 +100,8 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
         // Filter members based on search and department
         let filteredMembers = [...filteredEmployees];
         
-        if (selectedDepartment !== 'All') {
-          filteredMembers = filteredMembers.filter(member => normalizeDepartment(member.department) === selectedDepartment);
+        if (selectedDepartment !== 'All' && selectedDepartment !== managerDepartment) {
+          filteredMembers = [];
         }
         
         if (searchQuery) {
@@ -118,7 +125,7 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
       }
       
       if (activeTab === 'roles') {
-        // Roles from employee data across the company
+        // Roles from employee data (only roles in manager's department)
         const roleMap = new Map();
         
         filteredEmployees.forEach(emp => {
@@ -210,7 +217,7 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
   const getRolePermissions = (role) => {
     const permissions = {
       'CEO': 'Full Access, Strategic Decisions, Financial View, All Approvals',
-      'Manager': 'Company Access, Resource Allocation, Approvals, Reports',
+      'Manager': 'Department Access, Resource Allocation, Approvals, Reports',
       'Team Lead': 'Team Access, Sprint Management, Task Assignment, Reviews',
       'Lead': 'Team Access, Sprint Management, Task Assignment',
       'Member': 'Task Management, Profile View, Reports View',
@@ -304,7 +311,7 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
     return colors[role] || 'bg-gray-100 text-gray-700';
   };
 
-  const managerDepartment = 'all departments';
+  const managerDepartment = currentUser?.department || 'your';
 
   if (isLoading && (activeTab === 'teams' ? teams.length === 0 : activeTab === 'members' ? members.length === 0 : roles.length === 0)) {
     return (
@@ -319,9 +326,9 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Team Management</h1>
-        <p className="text-gray-500 mt-1">Manage team members, departments, and access roles across the company</p>
+        <p className="text-gray-500 mt-1">Manage your team members, department, and access roles</p>
         <div className="mt-2 inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-xs">
-          Manager View - All departments
+          Manager View • {managerDepartment} Department
         </div>
       </div>
 
@@ -330,7 +337,7 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
         <div className="bg-white rounded-xl border p-5">
           <div className="flex items-center gap-3 mb-2">
             <Building2 className="w-5 h-5 text-blue-500" />
-            <span className="text-sm text-gray-500">Departments</span>
+            <span className="text-sm text-gray-500">Department</span>
           </div>
           <div className="text-2xl font-bold text-gray-900">{teams.length}</div>
           <div className="text-xs text-gray-400 mt-1">{managerDepartment}</div>
@@ -647,7 +654,7 @@ const TeamsAndRoles = ({ userRole = 'Manager' }) => {
                 <h2 className="text-xl font-bold text-gray-900">Add Team Member</h2>
                 <button onClick={() => setShowAddMemberModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Member will be added to your profile department</p>
+              <p className="text-xs text-gray-500 mt-1">Member will be added to {managerDepartment} department</p>
             </div>
             
             <form onSubmit={handleAddMember} className="p-6 space-y-4">

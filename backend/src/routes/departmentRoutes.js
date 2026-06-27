@@ -31,8 +31,8 @@ const normalizeDepartment = (department) => DEPARTMENT_RENAMES[department] || de
 router.get('/', protect, async (req, res) => {
   try {
     const [userDepartments, taskDepartments] = await Promise.all([
-      User.distinct('department', {}),
-      Task.distinct('department', {})
+      User.distinct('department', (req.user.role === 'Manager' || req.user.role === 'COO') ? { department: req.user.department } : {}),
+      Task.distinct('department', (req.user.role === 'Manager' || req.user.role === 'COO') ? { department: req.user.department } : {})
     ]);
 
     const rawDepartments = [...userDepartments, ...taskDepartments].map(normalizeDepartment);

@@ -72,7 +72,8 @@ const ManagerDashboard = () => {
   const fetchTeamHealth = async () => {
     try {
       const employees = await employeeService.getAllEmployees();
-      const teamMembers = employees.filter(emp => emp.role !== 'CEO');
+      const user = authService.getCurrentUser();
+      const teamMembers = employees.filter(emp => emp.department === user?.department);
       
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
@@ -105,6 +106,8 @@ const ManagerDashboard = () => {
     
     try {
       const token = authService.getToken();
+      const currentUserData = authService.getCurrentUser();
+      
       if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockData();
         setIsLoading(false);
@@ -172,7 +175,8 @@ const ManagerDashboard = () => {
   const fetchTopPerformers = async () => {
     try {
       const employees = await employeeService.getAllEmployees();
-      const teamMembers = employees.filter(emp => emp.role !== 'CEO');
+      const user = authService.getCurrentUser();
+      const teamMembers = employees.filter(emp => emp.department === user?.department);
       
       const performers = teamMembers.map(member => ({
         name: member.name,
@@ -300,6 +304,7 @@ const ManagerDashboard = () => {
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
   };
 
+  const managerDepartment = currentUser?.department || 'your';
   const managerName = currentUser?.name || 'Manager';
 
   const renderOverview = () => (
@@ -309,12 +314,12 @@ const ManagerDashboard = () => {
         <h2 className="text-xl font-semibold text-gray-900">{managerName}</h2>
         <div className="flex items-center gap-2 mt-1 flex-wrap">
           <span className="text-sm font-medium text-blue-700 bg-blue-100 px-2 py-0.5 rounded">{currentUser?.role || 'Manager'}</span>
-          <span className="text-sm text-gray-500">All departments</span>
+          <span className="text-sm text-gray-500">{managerDepartment} Department</span>
           <span className="text-sm text-gray-500">•</span>
           <span className="text-sm text-gray-500">{stats.teamMembers} Team Members</span>
         </div>
         <p className="text-gray-600 text-sm mt-3">
-          Leading company-wide operations, focusing on delivery excellence, team growth, and cross-functional collaboration.
+          Leading the {managerDepartment} team, focusing on delivery excellence, team growth, and cross-functional collaboration.
         </p>
       </div>
 

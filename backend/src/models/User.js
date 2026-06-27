@@ -19,9 +19,6 @@ const userSchema = new mongoose.Schema({
   joinDate: { type: String },
   documents: { type: mongoose.Schema.Types.Mixed, default: {} },
   isActive: { type: Boolean, default: true },
-  isOnline: { type: Boolean, default: false },
-  lastSeen: { type: Date, default: Date.now },
-  terminatedAt: { type: Date },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdByName: String
 }, { timestamps: true });

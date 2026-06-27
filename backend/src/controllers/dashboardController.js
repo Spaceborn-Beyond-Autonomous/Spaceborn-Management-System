@@ -327,8 +327,6 @@ const getDepartmentTasks = (tasks, department) => {
   return tasks.filter(task => task.department === department);
 };
 
-const hasCompanyWideAccess = (user) => ['CEO', 'COO', 'Manager'].includes(user?.role);
-
 const getMemberTasks = (tasks, user) => {
   return tasks.filter(task => taskBelongsToUser(task, user));
 };
@@ -490,40 +488,37 @@ exports.getCeoDashboard = async (req, res) => {
 exports.getManagerDashboard = async (req, res) => {
   try {
     const { users, tasks, meetings, resourceRequests, reports, leaves } = await getAllDashboardCollections();
-    const department = hasCompanyWideAccess(req.user) ? null : req.user.department;
-    const scopedUsers = department ? getDepartmentUsers(users, department) : users.filter(user => user.isActive !== false);
-    const scopedTasks = department ? getDepartmentTasks(tasks, department) : tasks;
-    const scopedReports = department ? reports.filter(report => report.department === department) : reports;
-    const scopedLeaves = department ? leaves.filter(leave => leave.department === department) : leaves;
-    const stats = taskStats(scopedTasks);
-    const departments = department ? [department] : getDepartments(users, tasks);
-    const departmentProgress = buildDepartmentProgress(departments, users, tasks);
-    const teamMembers = scopedUsers.filter(user => user.role !== 'CEO');
+    const department = req.user.department;
+    const departmentUsers = getDepartmentUsers(users, department);
+    const departmentTasks = getDepartmentTasks(tasks, department);
+    const stats = taskStats(departmentTasks);
+    const departmentProgress = buildDepartmentProgress([department], users, tasks);
+    const teamMembers = departmentUsers.filter(user => user.role !== 'CEO');
 
     res.json({
       departmentProgress,
       upcomingMeetings: buildUpcomingMeetings(meetings, department, 5, true),
       resourceRequests: buildResourceRequests(resourceRequests, department, 5, true),
-      actionItems: buildActionItems(scopedTasks, resourceRequests, leaves, department, 6),
-      recentActivity: buildRecentActivity(scopedTasks, reports, leaves, resourceRequests, department, 8),
+      actionItems: buildActionItems(departmentTasks, resourceRequests, leaves, department, 6),
+      recentActivity: buildRecentActivity(departmentTasks, reports, leaves, resourceRequests, department, 8),
       stats: {
         totalTasks: stats.total,
         completedTasks: stats.completed,
-        pendingApprovals: buildActionItems(scopedTasks, resourceRequests, leaves, department).filter(item => item.status === 'pending').length,
-        resourceRequests: resourceRequests.filter(request => (!department || request.department === department) && request.status === 'pending').length,
+        pendingApprovals: buildActionItems(departmentTasks, resourceRequests, leaves, department).filter(item => item.status === 'pending').length,
+        resourceRequests: resourceRequests.filter(request => request.department === department && request.status === 'pending').length,
         teamMembers: teamMembers.length,
-        projectsActive: scopedTasks.filter(task => task.status !== 'Completed').length,
+        projectsActive: departmentTasks.filter(task => task.status !== 'Completed').length,
         sprintVelocity: stats.completionRate,
       },
-      topPerformers: buildTopPerformers(teamMembers, scopedTasks, scopedReports, 5),
+      topPerformers: buildTopPerformers(teamMembers, departmentTasks, reports.filter(report => report.department === department), 5),
       teamHealth: {
         newJoinees: teamMembers.filter(user => {
           const joinDate = parseDate(user.joinDate || user.createdAt);
           const now = new Date();
           return joinDate && joinDate.getMonth() === now.getMonth() && joinDate.getFullYear() === now.getFullYear();
         }).length,
-        terminated: users.filter(user => (!department || user.department === department) && user.isActive === false).length,
-        onLeave: scopedLeaves.filter(leave => leave.status === 'Approved').length,
+        terminated: users.filter(user => user.department === department && user.isActive === false).length,
+        onLeave: leaves.filter(leave => leave.department === department && leave.status === 'Approved').length,
         satisfaction: stats.completionRate,
       },
     });
@@ -570,8 +565,8 @@ exports.getDashboardStats = async (req, res) => {
 exports.getManagerDepartmentProgress = async (req, res) => {
   try {
     const { users, tasks } = await getAllDashboardCollections();
-    const departments = hasCompanyWideAccess(req.user) ? getDepartments(users, tasks) : [req.user.department];
-    res.json(buildDepartmentProgress(departments, users, tasks));
+    const department = req.user.department;
+    res.json(buildDepartmentProgress([department], users, tasks));
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to load department progress' });
   }
@@ -580,8 +575,7 @@ exports.getManagerDepartmentProgress = async (req, res) => {
 exports.getManagerUpcomingMeetings = async (req, res) => {
   try {
     const meetings = await Meeting.find({}).lean();
-    const department = hasCompanyWideAccess(req.user) ? null : req.user.department;
-    res.json(buildUpcomingMeetings(meetings, department, 5, true));
+    res.json(buildUpcomingMeetings(meetings, req.user.department, 5, true));
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to load meetings' });
   }
@@ -590,8 +584,7 @@ exports.getManagerUpcomingMeetings = async (req, res) => {
 exports.getManagerResourceRequests = async (req, res) => {
   try {
     const requests = await ResourceRequest.find({}).lean();
-    const department = hasCompanyWideAccess(req.user) ? null : req.user.department;
-    res.json(buildResourceRequests(requests, department, 5, true));
+    res.json(buildResourceRequests(requests, req.user.department, 5, true));
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to load resource requests' });
   }
@@ -600,9 +593,7 @@ exports.getManagerResourceRequests = async (req, res) => {
 exports.getManagerActionItems = async (req, res) => {
   try {
     const { tasks, resourceRequests, leaves } = await getAllDashboardCollections();
-    const department = hasCompanyWideAccess(req.user) ? null : req.user.department;
-    const scopedTasks = department ? getDepartmentTasks(tasks, department) : tasks;
-    res.json(buildActionItems(scopedTasks, resourceRequests, leaves, department, 6));
+    res.json(buildActionItems(getDepartmentTasks(tasks, req.user.department), resourceRequests, leaves, req.user.department, 6));
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to load action items' });
   }
@@ -611,9 +602,7 @@ exports.getManagerActionItems = async (req, res) => {
 exports.getManagerRecentActivity = async (req, res) => {
   try {
     const { tasks, reports, leaves, resourceRequests } = await getAllDashboardCollections();
-    const department = hasCompanyWideAccess(req.user) ? null : req.user.department;
-    const scopedTasks = department ? getDepartmentTasks(tasks, department) : tasks;
-    res.json(buildRecentActivity(scopedTasks, reports, leaves, resourceRequests, department, 8));
+    res.json(buildRecentActivity(getDepartmentTasks(tasks, req.user.department), reports, leaves, resourceRequests, req.user.department, 8));
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to load recent activity' });
   }
