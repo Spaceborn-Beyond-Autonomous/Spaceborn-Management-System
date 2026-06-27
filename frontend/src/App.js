@@ -285,7 +285,7 @@ function App() {
   const handleDeleteEmployee = async (employeeId) => {
     try {
       await employeeService.deleteEmployee(employeeId);
-      setEmployees(prev => prev.filter(emp => emp.id !== employeeId));
+      setEmployees(prev => prev.filter(emp => String(emp.id || emp._id) !== String(employeeId)));
       return true;
     } catch (error) {
       console.error('Error deleting employee:', error);
@@ -658,7 +658,7 @@ function App() {
                 {managerActiveMenu === 'EmployeeManagement' && (
                   <EmployeeManagementComponent 
                     employees={getFilteredEmployees()}
-                    userRole={managerFeatureRole}
+                    userRole={user.role}
                     accessLevel={getAccessLevelText()}
                     userDepartment={getUserDepartment()}
                     canEdit={true}
@@ -669,12 +669,12 @@ function App() {
                     onDeleteEmployee={handleDeleteEmployee}
                   />
                 )}
-                {managerActiveMenu === 'TeamReports' && <TeamReportsComponent userRole={managerDisplayRole} department={isCOO ? null : getUserDepartment()} user={user} />}
+                {managerActiveMenu === 'TeamReports' && <TeamReportsComponent userRole={managerDisplayRole} department={null} user={user} />}
                 {managerActiveMenu === 'LeaveManagement' && (
                   <LeaveManagement 
                     user={user}
-                    userRole={managerFeatureRole}
-                    userDepartment={user.department}
+                    userRole={managerDisplayRole}
+                    userDepartment={null}
                   />
                 )}
                 {managerActiveMenu === 'Automation' && <AutomationDashboardComponent user={user} userRole={managerFeatureRole} />}

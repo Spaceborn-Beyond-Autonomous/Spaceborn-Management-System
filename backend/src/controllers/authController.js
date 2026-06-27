@@ -79,6 +79,10 @@ exports.login = async (req, res) => {
       return res.status(401).json(formatResponse(false, 'Invalid credentials'));
     }
     
+    user.isOnline = true;
+    user.lastSeen = new Date();
+    await user.save();
+
     const token = user.getSignedJwtToken();
     
     res.json(formatResponse(true, 'Login successful', {
@@ -99,6 +103,17 @@ exports.login = async (req, res) => {
 
 // Logout
 exports.logout = async (req, res) => {
+  try {
+    if (req.user?.id) {
+      await User.findByIdAndUpdate(req.user.id, {
+        isOnline: false,
+        lastSeen: new Date()
+      });
+    }
+  } catch (error) {
+    console.error('Logout update error:', error);
+  }
+
   res.json(formatResponse(true, 'Logged out'));
 };
 

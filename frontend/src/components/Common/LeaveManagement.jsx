@@ -218,9 +218,8 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
       let filteredLeaves = leaves;
       let filteredBreaks = breaksList;
 
-      if (userRole === 'Manager') {
-        // Keep leave department filtering as-is.
-        filteredLeaves = leaves.filter(l => l.department === userDepartment);
+      if (userRole === 'Manager' || userRole === 'COO') {
+        filteredLeaves = leaves;
 
         // Hour breaks: do NOT filter by department here.
         // This component previously ended up showing empty results across roles if `department`
@@ -836,7 +835,7 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Select Employee</label>
                 <select value={breakData.userId} onChange={(e) => setBreakData({...breakData, userId: e.target.value})} className="w-full px-3 py-2 border rounded-lg" required>
                   <option value="">-- Select Employee --</option>
-                  {employees.filter(emp => emp.role !== 'CEO' && (isCEO ? true : emp.department === userDepartment)).map(emp => (<option key={emp.id} value={emp.id}>{emp.name} ({emp.department})</option>))}
+                  {employees.filter(emp => emp.role !== 'CEO' && (isCEO || userRole === 'Manager' || userRole === 'COO' ? true : emp.department === userDepartment)).map(emp => (<option key={emp.id} value={emp.id}>{emp.name} ({emp.department})</option>))}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4"><div><label className="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" value={breakData.date} onChange={(e) => setBreakData({...breakData, date: e.target.value})} className="w-full px-3 py-2 border rounded-lg" required /></div><div><label className="block text-sm font-medium text-gray-700 mb-1">Hours</label><select value={breakData.hours} onChange={(e) => setBreakData({...breakData, hours: parseFloat(e.target.value)})} className="w-full px-3 py-2 border rounded-lg"><option value={0.5}>0.5 hours</option><option value={1}>1 hour</option><option value={2}>2 hours</option></select></div></div>

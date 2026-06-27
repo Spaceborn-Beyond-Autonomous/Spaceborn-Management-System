@@ -57,7 +57,7 @@ const AutomationDashboard = ({ user, userRole = 'Manager' }) => {
   });
 
   const currentUser = authService.getCurrentUser();
-  const managerDepartment = currentUser?.department || 'Core Systems';
+  const managerDepartment = 'All Departments';
 
   useEffect(() => {
     fetchAllData();
@@ -93,13 +93,11 @@ const AutomationDashboard = ({ user, userRole = 'Manager' }) => {
     try {
       const warningsData = await warningSimulatorService.getPendingWarnings();
       const statsData = await warningSimulatorService.getWarningStats();
-      // Filter warnings for manager's department only
-      const deptWarnings = warningsData.filter(w => w.department === managerDepartment);
-      setWarnings(deptWarnings);
+      setWarnings(warningsData);
       setWarningStats({
         ...statsData,
-        activeWarnings: deptWarnings.length,
-        totalWarnings: deptWarnings.length
+        activeWarnings: warningsData.length,
+        totalWarnings: warningsData.length
       });
     } catch (error) {
       console.error('Error fetching warnings:', error);
@@ -117,14 +115,14 @@ const AutomationDashboard = ({ user, userRole = 'Manager' }) => {
   };
 
   const loadMockData = () => {
-    // Mock attendance data for manager's department
+    // Mock attendance data across departments
     const mockAttendance = [
-      { name: 'Mike Johnson', department: managerDepartment, present: 18, absent: 2, late: 1, percentage: 85 },
-      { name: 'Ravi Das', department: managerDepartment, present: 20, absent: 0, late: 0, percentage: 100 },
-      { name: 'Priya Sharma', department: managerDepartment, present: 17, absent: 2, late: 1, percentage: 80 },
-      { name: 'Nisha Kumar', department: managerDepartment, present: 19, absent: 0, late: 1, percentage: 95 },
-      { name: 'Suresh M', department: managerDepartment, present: 16, absent: 3, late: 1, percentage: 75 },
-      { name: 'Alex Chen', department: managerDepartment, present: 18, absent: 1, late: 1, percentage: 90 }
+      { name: 'Mike Johnson', department: 'Core Systems', present: 18, absent: 2, late: 1, percentage: 85 },
+      { name: 'Ravi Das', department: 'Core Systems', present: 20, absent: 0, late: 0, percentage: 100 },
+      { name: 'Priya Sharma', department: 'Platform and DevOps', present: 17, absent: 2, late: 1, percentage: 80 },
+      { name: 'Nisha Kumar', department: 'Hardware & Integration', present: 19, absent: 0, late: 1, percentage: 95 },
+      { name: 'Suresh M', department: 'Robotics & Simulation', present: 16, absent: 3, late: 1, percentage: 75 },
+      { name: 'Alex Chen', department: 'AI/LLM & Perception', present: 18, absent: 1, late: 1, percentage: 90 }
     ];
     setAttendanceData(mockAttendance);
 

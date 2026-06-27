@@ -114,7 +114,7 @@ router.post('/', async (req, res) => {
   try {
     const userDepartment = req.user?.department;
     const requestedDepartment = req.body.department || userDepartment || 'Core Systems';
-    const department = (req.user.role === 'Manager' || req.user.role === 'COO') ? userDepartment : requestedDepartment;
+    const department = requestedDepartment;
 
     const project = await Project.create({
       name: req.body.name,

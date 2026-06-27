@@ -27,6 +27,11 @@ const protect = async (req, res, next) => {
       });
     }
 
+    await User.findByIdAndUpdate(user._id, {
+      isOnline: true,
+      lastSeen: new Date()
+    });
+
     req.user = {
       ...decoded,
       id: String(user._id),

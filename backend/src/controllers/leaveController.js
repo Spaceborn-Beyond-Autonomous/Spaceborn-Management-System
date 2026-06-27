@@ -62,7 +62,7 @@ exports.getAllLeaves = async (req, res) => {
   try {
     const { role, department } = req.query;
     let query = {};
-    if ((role === 'Manager' || role === 'COO') && department) query.department = department;
+    if (role !== 'Manager' && role !== 'COO' && department) query.department = department;
     const leaves = await Leave.find(query).sort({ createdAt: -1 });
     res.status(200).json(formatResponse(true, 'Leaves fetched', leaves));
   } catch (error) {
@@ -127,7 +127,6 @@ exports.getPendingLeaves = async (req, res) => {
     let query = { status: 'Pending' };
     if (role === 'Manager' || role === 'COO') {
       query.pendingApprovals = { $in: ['Manager'] };
-      if (department) query.department = department;
     } else if (role === 'CEO') {
       query.pendingApprovals = { $in: ['CEO'] };
     }
