@@ -685,11 +685,6 @@ class AuthService {
       
       let requests = [...this.mockResetRequests];
       
-      // Managers only see their department's requests
-      if (currentUser.role === 'Manager' || currentUser.role === 'COO') {
-        requests = requests.filter(r => r.department === currentUser.department);
-      }
-      
       // Only show pending requests
       return requests.filter(r => r.status === 'pending');
     }
@@ -837,10 +832,6 @@ class AuthService {
     
     if (this.USE_MOCK) {
       let requests = [...this.mockResetRequests];
-      
-      if (currentUser.role === 'Manager' || currentUser.role === 'COO') {
-        requests = requests.filter(r => r.department === currentUser.department);
-      }
       
       const today = new Date().toDateString();
       const thisMonth = new Date().getMonth();

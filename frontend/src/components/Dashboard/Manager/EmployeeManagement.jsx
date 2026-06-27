@@ -4,7 +4,6 @@ import { DEPARTMENTS, normalizeDepartment } from '../../../utils/departments';
 import { 
   employeeMasterData, 
   addEmployee,
-  deleteEmployee,
   resetEmployeePassword,
   getEmployeeStats
 } from '../../../data/employeeData';
@@ -64,6 +63,13 @@ const EmployeeManagement = ({
 
   // Get all employees
   const allEmployees = employees.length > 0 ? employees : Object.values(employeeMasterData);
+  const canTerminateEmployee = (employee) => {
+    if (!employee) return false;
+    if (userRole === 'CEO') return true;
+    if (userRole === 'COO') return employee.role !== 'CEO';
+    if (userRole === 'Manager') return !['CEO', 'COO'].includes(employee.role);
+    return false;
+  };
   
   // Get unique departments
   const departments = DEPARTMENTS;
@@ -175,11 +181,11 @@ const EmployeeManagement = ({
   };
 
   const handleTerminate = async (employee) => {
-    if (window.confirm(`Are you sure you want to terminate ${employee.name}? This action can be reversed.`)) {
+    if (window.confirm(`Are you sure you want to terminate ${employee.name}? This will permanently remove them from the database.`)) {
       try {
-        await deleteEmployee(employee.id);
+        await employeeService.deleteEmployee(employee.id || employee._id);
         if (onDeleteEmployee) {
-          await onDeleteEmployee(employee.id);
+          await onDeleteEmployee(employee.id || employee._id);
         }
         alert(`${employee.name} has been terminated.`);
       } catch (error) {
@@ -369,12 +375,16 @@ const EmployeeManagement = ({
               {filteredEmployees.map((employee) => (
                 <tr key={employee.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleViewEmployee(employee)}
-                      className="font-medium text-purple-600 hover:text-purple-700 hover:underline"
-                    >
-                      {employee.name}
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <span className={`h-2.5 w-2.5 rounded-full ${employee.isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      <button
+                        onClick={() => handleViewEmployee(employee)}
+                        className="font-medium text-purple-600 hover:text-purple-700 hover:underline"
+                      >
+                        {employee.name}
+                      </button>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">{employee.isOnline ? 'Online now' : `Last seen ${employee.lastSeen ? new Date(employee.lastSeen).toLocaleString() : 'recently'}`}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{employee.id || employee.employeeId}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{employee.department}</td>
@@ -403,7 +413,7 @@ const EmployeeManagement = ({
                       >
                         Reset Pwd
                       </button>
-                      {canDelete && employee.employmentStatus !== 'terminated' && (
+                      {canDelete && employee.employmentStatus !== 'terminated' && canTerminateEmployee(employee) && (
                         <button
                           onClick={() => handleTerminate(employee)}
                           className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors"
