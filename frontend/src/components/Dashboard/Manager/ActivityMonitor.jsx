@@ -5,7 +5,6 @@ import employeeService from '../../../services/employeeService';
 import reportService from '../../../services/reportService';
 import leaveService from '../../../services/leaveService';
 import taskService from '../../../services/taskService';
-import authService from '../../../services/authService';
 
 const ActivityMonitor = ({ userRole = 'Manager' }) => {
   const [activities, setActivities] = useState([]);
@@ -45,25 +44,21 @@ const ActivityMonitor = ({ userRole = 'Manager' }) => {
     }
   };
 
-  // Mock data for development (Manager-specific view)
+  // Mock data for development (company-wide view)
   const getMockActivities = () => {
-    const currentUser = authService.getCurrentUser();
-    const managerDepartment = currentUser?.department || 'Core Systems';
-    
-    // Only show activities from the manager's department
     return [
-      { id: 1, type: 'report', name: 'Nisha Kumar', initials: 'NK', role: 'Member', department: managerDepartment, action: 'submitted daily work report', details: 'Completed UI component development and fixed navigation bugs', timestamp: new Date(Date.now() - 2 * 86400000).toISOString() },
-      { id: 2, type: 'report', name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: managerDepartment, action: 'submitted daily work report', details: 'Reviewed design system and updated component library', timestamp: new Date(Date.now() - 2 * 86400000).toISOString() },
-      { id: 3, type: 'meeting', name: 'Ravi Das', initials: 'RD', role: 'Member', department: managerDepartment, action: 'scheduled meeting', details: 'Sprint Planning - Tomorrow at 10 AM', timestamp: new Date(Date.now() - 2 * 86400000).toISOString() },
-      { id: 4, type: 'leave', name: 'Mike Johnson', initials: 'MJ', role: 'Team Lead', department: managerDepartment, action: 'approved leave request', details: 'Priya Sharma - Sick Leave (2 days)', timestamp: new Date(Date.now() - 3 * 86400000).toISOString() },
-      { id: 5, type: 'task', name: 'Priya Sharma', initials: 'PS', role: 'Member', department: managerDepartment, action: 'completed task', details: 'Code review for PR #123', timestamp: new Date(Date.now() - 3 * 86400000).toISOString() },
-      { id: 6, type: 'pending', name: 'Suresh M', initials: 'SM', role: 'Member', department: managerDepartment, action: 'applied for leave', details: 'Annual leave (3 days) - Pending approval', timestamp: new Date(Date.now() - 4 * 86400000).toISOString() },
-      { id: 7, type: 'progress', name: 'Nisha Kumar', initials: 'NK', role: 'Member', department: managerDepartment, action: 'updated task progress', details: 'Build login UI - 75% complete', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
-      { id: 8, type: 'report', name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: managerDepartment, action: 'submitted weekly report', details: 'Team performance and project updates', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
-      { id: 9, type: 'task', name: 'Alex Chen', initials: 'AC', role: 'Member', department: managerDepartment, action: 'completed task', details: 'Fix navigation bug in header', timestamp: new Date(Date.now() - 5 * 86400000).toISOString() },
+      { id: 1, type: 'report', name: 'Nisha Kumar', initials: 'NK', role: 'Member', department: 'Core Systems', action: 'submitted daily work report', details: 'Completed UI component development and fixed navigation bugs', timestamp: new Date(Date.now() - 2 * 86400000).toISOString() },
+      { id: 2, type: 'report', name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: 'Hardware & Integration', action: 'submitted daily work report', details: 'Reviewed design system and updated component library', timestamp: new Date(Date.now() - 2 * 86400000).toISOString() },
+      { id: 3, type: 'meeting', name: 'Ravi Das', initials: 'RD', role: 'Member', department: 'Platform and DevOps', action: 'scheduled meeting', details: 'Sprint Planning - Tomorrow at 10 AM', timestamp: new Date(Date.now() - 2 * 86400000).toISOString() },
+      { id: 4, type: 'leave', name: 'Mike Johnson', initials: 'MJ', role: 'Team Lead', department: 'Core Systems', action: 'approved leave request', details: 'Priya Sharma - Sick Leave (2 days)', timestamp: new Date(Date.now() - 3 * 86400000).toISOString() },
+      { id: 5, type: 'task', name: 'Priya Sharma', initials: 'PS', role: 'Member', department: 'Robotics & Simulation', action: 'completed task', details: 'Code review for PR #123', timestamp: new Date(Date.now() - 3 * 86400000).toISOString() },
+      { id: 6, type: 'pending', name: 'Suresh M', initials: 'SM', role: 'Member', department: 'AI/LLM & Perception', action: 'applied for leave', details: 'Annual leave (3 days) - Pending approval', timestamp: new Date(Date.now() - 4 * 86400000).toISOString() },
+      { id: 7, type: 'progress', name: 'Nisha Kumar', initials: 'NK', role: 'Member', department: 'Core Systems', action: 'updated task progress', details: 'Build login UI - 75% complete', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
+      { id: 8, type: 'report', name: 'Sita Krishnan', initials: 'SK', role: 'Team Lead', department: 'AI/LLM & Perception', action: 'submitted weekly report', details: 'Team performance and project updates', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
+      { id: 9, type: 'task', name: 'Alex Chen', initials: 'AC', role: 'Member', department: 'Platform and DevOps', action: 'completed task', details: 'Fix navigation bug in header', timestamp: new Date(Date.now() - 5 * 86400000).toISOString() },
       { id: 10, type: 'leave', name: 'Jane Smith', initials: 'JS', role: 'Manager', department: 'Platform and DevOps', action: 'approved leave request', details: 'Team Member - Casual Leave (1 day)', timestamp: new Date(Date.now() - 5 * 86400000).toISOString() },
-      { id: 11, type: 'task', name: 'Ravi Das', initials: 'RD', role: 'Member', department: managerDepartment, action: 'started new task', details: 'Implement authentication module', timestamp: new Date(Date.now() - 6 * 86400000).toISOString() },
-      { id: 12, type: 'meeting', name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: managerDepartment, action: 'created meeting', details: 'Hardware & Integration Review - Friday 2 PM', timestamp: new Date(Date.now() - 4 * 86400000).toISOString() }
+      { id: 11, type: 'task', name: 'Ravi Das', initials: 'RD', role: 'Member', department: 'Core Systems', action: 'started new task', details: 'Implement authentication module', timestamp: new Date(Date.now() - 6 * 86400000).toISOString() },
+      { id: 12, type: 'meeting', name: 'Anil Mehta', initials: 'AM', role: 'Team Lead', department: 'Hardware & Integration', action: 'created meeting', details: 'Hardware & Integration Review - Friday 2 PM', timestamp: new Date(Date.now() - 4 * 86400000).toISOString() }
     ];
   };
 
@@ -79,27 +74,15 @@ const ActivityMonitor = ({ userRole = 'Manager' }) => {
         console.log('Using mock data for Manager Activity Monitor');
         activityList = getMockActivities();
       } else {
-        // Fetch real data from services (filtered by manager's department)
-        const currentUser = authService.getCurrentUser();
-        const managerDepartment = currentUser?.department;
-        
-        const [employees, reports, leaveRequests, tasks] = await Promise.all([
-          employeeService.getAllEmployees(),
+        const [reports, leaveRequests, tasks] = await Promise.all([
           reportService.getAllReports().catch(() => []),
           leaveService.getAllRequests().catch(() => []),
           taskService.getAllTasks().catch(() => [])
         ]);
 
-        // Filter by department if manager
-        const filteredReports = managerDepartment 
-          ? reports.filter(r => r.department === managerDepartment)
-          : reports;
-        const filteredLeaveRequests = managerDepartment
-          ? leaveRequests.filter(l => l.department === managerDepartment)
-          : leaveRequests;
-        const filteredTasks = managerDepartment
-          ? tasks.filter(t => t.department === managerDepartment)
-          : tasks;
+        const filteredReports = reports;
+        const filteredLeaveRequests = leaveRequests;
+        const filteredTasks = tasks;
 
         // Report submission activities
         filteredReports.forEach(report => {

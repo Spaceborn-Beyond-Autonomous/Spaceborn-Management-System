@@ -21,11 +21,6 @@ const Meetings = ({ userRole = 'CEO' }) => {
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [departments, setDepartments] = useState([]);
 
-  // Google Meet Transcript Sync & Summarization State
-  const [isSyncing, setIsSyncing] = useState({});
-  const [selectedMeeting, setSelectedMeeting] = useState(null);
-  const [activeModalTab, setActiveModalTab] = useState('summary');
-
   const departmentsList = ['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception', 'All'];
   const filterButtons = ['Platform and DevOps', 'Core Systems', 'Hardware & Integration', 'Robotics & Simulation', 'AI/LLM & Perception', 'All'];
 
@@ -308,112 +303,6 @@ const Meetings = ({ userRole = 'CEO' }) => {
     return userRole === 'CEO' || userRole === 'Manager';
   };
 
-  const handleSyncTranscript = async (meetingId, meetingLink, meetingTitle) => {
-    setIsSyncing(prev => ({ ...prev, [meetingId]: true }));
-    try {
-      const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/meetings/${meetingId}/sync-transcript`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const responseData = await response.json();
-      if (response.ok && responseData.success) {
-        setScheduledMeetings(prev => prev.map(m => {
-          const mid = m.id || m._id;
-          if (mid === meetingId) {
-            return responseData.data;
-          }
-          return m;
-        }));
-        alert('Transcript synced and summarized successfully!');
-      } else {
-        throw new Error(responseData.error || responseData.message || 'Failed to sync transcript');
-      }
-    } catch (error) {
-      console.error('Error syncing transcript:', error);
-      alert(`Failed to sync transcript: ${error.message}`);
-    } finally {
-      setIsSyncing(prev => ({ ...prev, [meetingId]: false }));
-    }
-  };
-
-  const parseMarkdownToJSX = (markdownText) => {
-    if (!markdownText) return <p className="text-gray-500 italic">No summary details available.</p>;
-    
-    const sections = markdownText.split('###');
-    return sections.map((section, idx) => {
-      if (!section.trim()) return null;
-      
-      const lines = section.split('\n');
-      const title = lines[0].trim();
-      const contentLines = lines.slice(1);
-      
-      return (
-        <div key={idx} className="mb-6 bg-gray-50 p-5 rounded-xl border border-gray-100">
-          <h4 className="text-md font-bold text-gray-900 mb-3 border-b border-gray-200 pb-2 flex items-center space-x-2">
-            {title.toLowerCase().includes('overview') && <span>📝</span>}
-            {title.toLowerCase().includes('takeaway') && <span>📌</span>}
-            {title.toLowerCase().includes('action') && <span>⚡</span>}
-            <span>{title}</span>
-          </h4>
-          <div className="text-sm text-gray-700 space-y-2">
-            {contentLines.map((line, lineIdx) => {
-              const trimmed = line.trim();
-              if (!trimmed) return null;
-              
-              // Checklist item
-              if (trimmed.startsWith('- [ ]') || trimmed.startsWith('- [x]')) {
-                const checked = trimmed.startsWith('- [x]');
-                const taskText = trimmed.substring(5).trim();
-                
-                // Highlight assignee name if matches @Name
-                const assigneeMatch = taskText.match(/@([\w]+)/);
-                let displayName = taskText;
-                if (assigneeMatch) {
-                  const name = assigneeMatch[1];
-                  displayName = taskText.replace(`@${name}`, `<span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-semibold">@${name}</span>`);
-                }
-                
-                return (
-                  <div key={lineIdx} className="flex items-start space-x-3 py-1">
-                    <input 
-                      type="checkbox" 
-                      checked={checked} 
-                      readOnly 
-                      className="mt-1 rounded text-blue-600 focus:ring-blue-500" 
-                    />
-                    <span 
-                      className={`${checked ? 'line-through text-gray-400' : 'text-gray-700'}`}
-                      dangerouslySetInnerHTML={{ __html: displayName }}
-                    />
-                  </div>
-                );
-              }
-              
-              // Bullet item
-              if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
-                const bulletText = trimmed.substring(1).trim();
-                return (
-                  <li key={lineIdx} className="list-disc ml-5 pl-1 py-0.5 text-gray-700">
-                    {bulletText}
-                  </li>
-                );
-              }
-              
-              return <p key={lineIdx} className="leading-relaxed">{trimmed}</p>;
-            })}
-          </div>
-        </div>
-      );
-    });
-  };
-
   if (isLoading && scheduledMeetings.length === 0) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -605,172 +494,64 @@ const Meetings = ({ userRole = 'CEO' }) => {
       ) : (
         /* Meetings List */
         <div className="space-y-4">
-          {scheduledMeetings.map((meeting) => {
-            const meetingId = meeting.id || meeting._id;
-            return (
-              <div key={meetingId} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{meeting.title}</h3>
-                      {meeting.department === 'All' && (
-                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                          All-Hands
-                        </span>
-                      )}
-                      {meeting.transcriptSynced ? (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                          Completed (Transcript Synced)
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                          Upcoming
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      For {meeting.department} · By {meeting.createdBy}
-                    </p>
-                    <div className="flex items-center space-x-4 mt-3">
-                      <span className="text-sm text-gray-600">
-                        📅 {formatDate(meeting.date)} at {meeting.time}
-                      </span>
-                      {meeting.duration && (
-                        <span className="text-sm text-gray-600">
-                          ⏱️ {meeting.duration}
-                        </span>
-                      )}
-                    </div>
-                    {meeting.description && (
-                      <p className="text-sm text-gray-500 mt-2">{meeting.description}</p>
-                    )}
-                    {meeting.attendees && meeting.attendees.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-xs text-gray-400">
-                          Attendees: {meeting.attendees.join(', ')}
-                        </p>
-                      </div>
-                    )}
-                  </div>
+          {scheduledMeetings.map((meeting) => (
+            <div key={meeting.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
                   <div className="flex items-center space-x-3">
-                    {meeting.transcriptSynced ? (
-                      <button
-                        onClick={() => {
-                          setSelectedMeeting(meeting);
-                          setActiveModalTab('summary');
-                        }}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
-                      >
-                        <span>View Notes</span>
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => joinMeeting(meeting.meetingLink)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          Join meeting
-                        </button>
-                        <button
-                          onClick={() => handleSyncTranscript(meetingId, meeting.meetingLink, meeting.title)}
-                          disabled={isSyncing[meetingId]}
-                          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-indigo-300 transition-colors flex items-center space-x-2"
-                        >
-                          {isSyncing[meetingId] && (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          )}
-                          <span>{isSyncing[meetingId] ? 'Syncing...' : 'Sync Transcript'}</span>
-                        </button>
-                      </>
-                    )}
-                    {canDeleteMeeting() && (
-                      <button
-                        onClick={() => deleteMeeting(meetingId)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete meeting"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                    <h3 className="text-lg font-semibold text-gray-900">{meeting.title}</h3>
+                    {meeting.department === 'All' && (
+                      <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                        All-Hands
+                      </span>
                     )}
                   </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    For {meeting.department} · By {meeting.createdBy}
+                  </p>
+                  <div className="flex items-center space-x-4 mt-3">
+                    <span className="text-sm text-gray-600">
+                      📅 {formatDate(meeting.date)} at {meeting.time}
+                    </span>
+                    {meeting.duration && (
+                      <span className="text-sm text-gray-600">
+                        ⏱️ {meeting.duration}
+                      </span>
+                    )}
+                  </div>
+                  {meeting.description && (
+                    <p className="text-sm text-gray-500 mt-2">{meeting.description}</p>
+                  )}
+                  {meeting.attendees && meeting.attendees.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-400">
+                        Attendees: {meeting.attendees.join(', ')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={() => joinMeeting(meeting.meetingLink)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Join meeting
+                  </button>
+                  {canDeleteMeeting() && (
+                    <button
+                      onClick={() => deleteMeeting(meeting.id || meeting._id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete meeting"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Transcript & Summary Modal */}
-      {selectedMeeting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-gray-100 flex justify-between items-start">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">{selectedMeeting.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  For {selectedMeeting.department} · Conducted on {formatDate(selectedMeeting.date)}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedMeeting(null)}
-                className="p-1 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
-
-            {/* Tabs */}
-            <div className="border-b border-gray-100 bg-gray-50 flex px-6 py-2 space-x-4">
-              <button
-                onClick={() => setActiveModalTab('summary')}
-                className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${
-                  activeModalTab === 'summary'
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                📝 AI Summary & Actions
-              </button>
-              <button
-                onClick={() => setActiveModalTab('transcript')}
-                className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${
-                  activeModalTab === 'transcript'
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                💬 Full Transcript
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 min-h-[40vh]">
-              {activeModalTab === 'summary' ? (
-                <div className="prose max-w-none">
-                  {parseMarkdownToJSX(selectedMeeting.summary)}
-                </div>
-              ) : (
-                <div className="bg-gray-900 text-gray-100 p-5 rounded-xl border border-gray-800 font-mono text-sm leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-[50vh]">
-                  {selectedMeeting.transcript || "No raw transcript text was saved."}
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-gray-100 flex justify-end">
-              <button
-                onClick={() => setSelectedMeeting(null)}
-                className="px-5 py-2 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition"
-              >
-                Close Window
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
       )}
     </div>
