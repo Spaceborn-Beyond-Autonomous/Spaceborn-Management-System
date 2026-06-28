@@ -1,8 +1,8 @@
 import React from 'react';
-import ManagerNotifications from '../Manager/Notifications.jsx';
+import CEONotifications from '../CEO/Notifications.jsx';
 
 const Notifications = (props) => (
-  <ManagerNotifications {...props} userRole={props.userRole || 'Manager'} />
+  <CEONotifications {...props} userRole={props.userRole || 'COO'} />
 );
 
 export default Notifications;

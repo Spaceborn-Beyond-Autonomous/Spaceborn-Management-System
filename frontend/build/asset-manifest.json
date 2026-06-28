@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.174b2df8.css",
+    "main.js": "/static/js/main.871e7d5b.js",
+    "static/media/spaceborn-logo.png": "/static/media/spaceborn-logo.363c58031dd6b0bd4ba0.png",
+    "index.html": "/index.html",
+    "main.174b2df8.css.map": "/static/css/main.174b2df8.css.map",
+    "main.871e7d5b.js.map": "/static/js/main.871e7d5b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.174b2df8.css",
+    "static/js/main.871e7d5b.js"
+  ]
+}
