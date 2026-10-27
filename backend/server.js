@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const connectDB = require('./src/config/db');
@@ -43,7 +42,7 @@ app.post('/api/test-login', async (req, res) => {
     const { employeeId, password } = req.body;
     const User = require('./src/models/User');
     
-    const user = await User.findOne({ employeeId: (employeeId || '').toUpperCase() }).select('+password');
+    const user = await User.findOne({ employeeId: (employeeId || '').toUpperCase() });
     if (!user) {
       return res.status(401).json({ success: false, error: 'User not found' });
     }
@@ -84,11 +83,11 @@ app.post('/api/test-login', async (req, res) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Space Born API Running' });
+  res.json({ status: 'OK', message: 'Space Born API Running (PostgreSQL / PGlite)' });
 });
 
 app.get('/api/test', (req, res) => {
-  res.json({ ok: true });
+  res.json({ ok: true, engine: 'PostgreSQL' });
 });
 
 const PORT = process.env.PORT || 5000;

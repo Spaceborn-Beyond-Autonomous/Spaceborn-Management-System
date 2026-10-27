@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 
@@ -40,7 +39,7 @@ const notifyRoles = async (roles, payload, extraQuery = {}) => {
 const notifyUserById = async (userId, payload) => {
   if (!userId) return [];
 
-  const query = mongoose.Types.ObjectId.isValid(String(userId))
+  const query = Boolean(String(userId).length === 24 && /^[0-9a-fA-F]+$/.test(String(userId)))
     ? { _id: userId }
     : { employeeId: String(userId) };
 

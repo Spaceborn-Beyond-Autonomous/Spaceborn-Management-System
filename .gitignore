@@ -125,3 +125,6 @@ backend/uploads/
 # Frontend build
 build/
 frontend/build/
+
+# Embedded PostgreSQL data
+backend/data/

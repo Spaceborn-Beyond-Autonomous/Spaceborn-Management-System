@@ -1,5 +1,4 @@
 // controllers/reportController.js
-const mongoose = require('mongoose');
 const Report = require('../models/Report');
 const { formatResponse } = require('../utils/helpers');
 const { notifyReportSubmitted } = require('../utils/notificationDispatcher');
@@ -144,7 +143,7 @@ exports.updateReport = async (req, res) => {
     const { id } = req.params;
     let report;
     
-    if (mongoose.Types.ObjectId.isValid(id)) {
+    if (Boolean(id)) {
       report = await Report.findById(id);
     }
     
@@ -180,7 +179,7 @@ exports.deleteReport = async (req, res) => {
     
     // Try to find by _id or by userId+date
     let report;
-    if (mongoose.Types.ObjectId.isValid(id)) {
+    if (Boolean(id)) {
       report = await Report.findById(id);
     }
     
