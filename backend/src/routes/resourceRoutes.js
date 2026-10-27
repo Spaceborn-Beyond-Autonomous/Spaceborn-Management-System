@@ -7,7 +7,6 @@ const resourceController = require('../controllers/resourceController');
 console.log('✅ RESOURCE ROUTES LOADED');
 
 const { protect, authorize } = require('../middleware/authMiddleware');
-const roleMiddleware = require('../middleware/roleMiddleware');
 
 /*
 |--------------------------------------------------------------------------
