@@ -1,28 +1,21 @@
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://spaceborn-management-system.vercel.app'
-  ],
+  origin: true,
   credentials: true
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-  res.json({ status: 'OK', message: 'Space Born API Running' });
-});
-
 // ======================
-// Route registrations
+// API Route registrations
 // ======================
-// Centralize API mounting here so whichever entrypoint starts the server,
-// dashboard routes are always available.
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/config', require('./routes/configRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
@@ -51,6 +44,32 @@ app.use('/api/meetings', require('./routes/meetingRoutes'));
 app.use('/api/resources', require('./routes/resourceRoutes'));
 app.use('/api/reports', require('./routes/reports'));
 
+// ======================
+// Health Check Route
+// ======================
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Space Born API Running (PostgreSQL / PGlite)' });
+});
+
+// ======================
+// Unified Frontend Serving (Approach A)
+// ======================
+const frontendBuildPath = path.resolve(__dirname, '../../frontend/build');
+
+if (fs.existsSync(frontendBuildPath)) {
+  console.log('📦 Serving compiled React frontend from:', frontendBuildPath);
+  app.use(express.static(frontendBuildPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.json({ status: 'OK', message: 'Space Born API Running (Frontend build not found)' });
+  });
+}
+
 module.exports = app;
-
-

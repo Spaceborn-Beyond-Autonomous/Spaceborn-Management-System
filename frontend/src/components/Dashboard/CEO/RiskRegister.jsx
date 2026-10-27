@@ -38,7 +38,7 @@ const RiskRegister = ({ userRole = 'CEO' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const params = new URLSearchParams();
       if (filterSeverity !== 'all') params.append('severity', filterSeverity);

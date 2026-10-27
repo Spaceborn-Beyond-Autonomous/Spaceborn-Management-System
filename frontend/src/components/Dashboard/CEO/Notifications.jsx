@@ -34,7 +34,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const params = new URLSearchParams();
       if (activeTab !== 'All') params.append('category', activeTab);
@@ -255,7 +255,7 @@ setNotifications(notificationsData);
     try {
       const token = authService.getToken();
       if (token && process.env.REACT_APP_USE_MOCK_AUTH !== 'true') {
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
         
         await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
           method: 'PUT',
@@ -289,7 +289,7 @@ setNotifications(notificationsData);
     try {
       const token = authService.getToken();
       if (token && process.env.REACT_APP_USE_MOCK_AUTH !== 'true') {
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
         
         await fetch(`${API_BASE_URL}/notifications/mark-all-read`, {
           method: 'PUT',
@@ -320,7 +320,7 @@ setNotifications(notificationsData);
     try {
       const token = authService.getToken();
       if (token && process.env.REACT_APP_USE_MOCK_AUTH !== 'true') {
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
         
         await fetch(`${API_BASE_URL}/notifications/${notificationId}`, {
           method: 'DELETE',
@@ -424,7 +424,7 @@ setNotifications(notificationsData);
         const token = authService.getToken();
         if (!token) return;
 
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
         const response = await fetch(`${API_BASE_URL}/notifications/unread-count`, {
           headers: { Authorization: `Bearer ${token}` },
         });

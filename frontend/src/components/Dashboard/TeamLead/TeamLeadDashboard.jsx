@@ -51,7 +51,7 @@ const TeamLeadDashboard = () => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       // Try to fetch profile
       try {
@@ -144,7 +144,7 @@ const TeamLeadDashboard = () => {
     try {
       const token = authService.getToken();
       const currentUser = authService.getCurrentUser();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const reportPayload = {
         teamLeadId: currentUser?.id,

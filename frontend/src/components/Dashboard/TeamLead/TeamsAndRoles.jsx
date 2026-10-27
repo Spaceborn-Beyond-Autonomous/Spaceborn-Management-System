@@ -55,7 +55,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       // Build query parameters
       const params = new URLSearchParams();
@@ -93,7 +93,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
   const fetchDepartments = async () => {
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/departments`, {
         headers: {
@@ -207,7 +207,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
     
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/team-members`, {
         method: 'POST',
@@ -247,7 +247,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
   const updateTeamMember = async () => {
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/team-members/${selectedMember.id}`, {
         method: 'PUT',
@@ -279,7 +279,7 @@ const TeamsAndRoles = ({ userRole = 'CEO' }) => {
     
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/team-members/${memberId}`, {
         method: 'DELETE',

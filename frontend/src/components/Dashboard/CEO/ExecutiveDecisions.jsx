@@ -38,7 +38,7 @@ const ExecutiveDecisions = ({ userRole = 'CEO' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const params = new URLSearchParams();
       if (filter !== 'all') params.append('status', filter);
@@ -160,7 +160,7 @@ const ExecutiveDecisions = ({ userRole = 'CEO' }) => {
     try {
       const token = authService.getToken();
       const currentUser = authService.getCurrentUser();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/executive-decisions/${decisionId}/approve`, {
         method: 'PUT',
@@ -200,7 +200,7 @@ const ExecutiveDecisions = ({ userRole = 'CEO' }) => {
     try {
       const token = authService.getToken();
       const currentUser = authService.getCurrentUser();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/executive-decisions/${decisionId}/reject`, {
         method: 'PUT',

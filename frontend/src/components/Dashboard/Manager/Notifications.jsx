@@ -34,7 +34,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const params = new URLSearchParams();
       if (activeTab !== 'All') params.append('category', activeTab);
@@ -257,7 +257,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
     try {
       const token = authService.getToken();
       if (token && process.env.REACT_APP_USE_MOCK_AUTH !== 'true') {
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
         
         await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
           method: 'PUT',
@@ -291,7 +291,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
     try {
       const token = authService.getToken();
       if (token && process.env.REACT_APP_USE_MOCK_AUTH !== 'true') {
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
         
         await fetch(`${API_BASE_URL}/notifications/mark-all-read`, {
           method: 'PUT',
@@ -322,7 +322,7 @@ const Notifications = ({ userRole = 'Manager' }) => {
     try {
       const token = authService.getToken();
       if (token && process.env.REACT_APP_USE_MOCK_AUTH !== 'true') {
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
         
         await fetch(`${API_BASE_URL}/notifications/${notificationId}`, {
           method: 'DELETE',

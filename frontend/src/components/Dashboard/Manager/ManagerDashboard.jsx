@@ -51,7 +51,7 @@ const ManagerDashboard = () => {
   const fetchActiveSessionsCount = async () => {
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/auth/sessions/active/count`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -111,7 +111,7 @@ const ManagerDashboard = () => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       // Fetch all data in parallel
       const [progressRes, meetingsRes, resourcesRes, actionsRes, activityRes] = await Promise.all([

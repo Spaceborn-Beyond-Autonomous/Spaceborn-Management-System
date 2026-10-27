@@ -46,7 +46,7 @@ const Resources = ({ userRole = 'Member' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/resources/my-requests`, {
         headers: {
@@ -89,7 +89,7 @@ const Resources = ({ userRole = 'Member' }) => {
   const fetchAvailableResources = async () => {
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       const response = await fetch(`${API_BASE_URL}/resources/available`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -204,7 +204,7 @@ const Resources = ({ userRole = 'Member' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const requesterId =
         currentUser?.id ||

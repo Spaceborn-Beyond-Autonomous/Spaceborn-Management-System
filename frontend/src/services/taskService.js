@@ -5,7 +5,7 @@ class TaskService {
   constructor() {
     this.cache = new Map();
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
-    this.API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    this.API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
   }
 
   // Helper method to get cached data

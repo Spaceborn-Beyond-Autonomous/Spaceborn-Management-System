@@ -176,7 +176,7 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
       let breaksList = [];
       try {
         const loggedInUser = authService.getCurrentUser();
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
         const token = authService.getToken();
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
@@ -389,7 +389,7 @@ const LeaveManagement = ({ user, userRole, userDepartment }) => {
     }
   };
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
   const getAuthHeaders = () => {
     const token = authService.getToken();

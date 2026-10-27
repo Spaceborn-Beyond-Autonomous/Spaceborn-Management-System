@@ -6,7 +6,7 @@ import './index.css';
 import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const apiBaseUrl = process.env.REACT_APP_API_URL || '/api';
 
 const renderApp = (clientId) => {
   root.render(

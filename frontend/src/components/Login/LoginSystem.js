@@ -34,7 +34,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
   // Auto-mark attendance on login
   const markAttendance = async (user, token) => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       await fetch(`${API_BASE_URL}/attendance/auto-mark`, {
         method: 'POST',
         headers: {
@@ -67,7 +67,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
     setIsLoading(true);
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',

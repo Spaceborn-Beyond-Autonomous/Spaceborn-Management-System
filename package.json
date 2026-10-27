@@ -1,0 +1,23 @@
+{
+  "name": "spaceborn-management-system",
+  "version": "1.0.0",
+  "description": "Spaceborn Management System - Unified Full-Stack Platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/server.js",
+    "seed": "node backend/seed.js",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm start --prefix frontend"
+  },
+  "keywords": [
+    "management-system",
+    "express",
+    "react",
+    "postgresql",
+    "pglite"
+  ],
+  "author": "Spaceborn Beyond Autonomous",
+  "license": "MIT"
+}

@@ -152,7 +152,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/accounts/all`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -219,7 +219,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
   const fetchStats = async () => {
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const response = await fetch(`${API_BASE_URL}/accounts/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -286,7 +286,7 @@ const Accounts = ({ userRole = 'Manager' }) => {
     try {
       const token = authService.getToken();
       const currentUser = authService.getCurrentUser();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const employeeId = generateEmployeeId();
       const password = generatePassword();

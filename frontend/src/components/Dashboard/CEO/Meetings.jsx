@@ -44,7 +44,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const params = new URLSearchParams();
       if (filterDepartment !== 'All') params.append('department', filterDepartment);
@@ -83,7 +83,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
 
   const fetchDepartments = async () => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       const token = authService.getToken();
       
       const response = await fetch(`${API_BASE_URL}/departments`, {
@@ -187,7 +187,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const meetingData = {
         ...formData,
@@ -271,7 +271,7 @@ const Meetings = ({ userRole = 'CEO' }) => {
   if (!window.confirm('Delete this meeting?')) return;
   
   const token = authService.getToken();
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
   
   // DELETE LOCALLY FIRST - check both id and _id (MongoDB uses _id)
   const updatedMeetings = scheduledMeetings.filter(m => {

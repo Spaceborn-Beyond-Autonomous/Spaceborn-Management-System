@@ -4,7 +4,7 @@ import { normalizeDepartmentFields } from '../utils/departments';
 class AuthService {
   constructor() {
     // Configuration from environment variables
-    this.API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    this.API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
     this.SESSION_TIMEOUT = parseInt(process.env.REACT_APP_SESSION_TIMEOUT) || 8 * 60 * 60 * 1000; // 8 hours
     this.TOKEN_REFRESH_THRESHOLD = parseInt(process.env.REACT_APP_TOKEN_REFRESH_THRESHOLD) || 60 * 60 * 1000; // 1 hour
     this.MAX_LOGIN_ATTEMPTS = parseInt(process.env.REACT_APP_MAX_LOGIN_ATTEMPTS) || 5;

@@ -1,7 +1,7 @@
 // src/services/leaveService.js
 // Backend-compatible version - works with any REST API
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 // Helper for API calls
 const apiRequest = async (endpoint, options = {}) => {

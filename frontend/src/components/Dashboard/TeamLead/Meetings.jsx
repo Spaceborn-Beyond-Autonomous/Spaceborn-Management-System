@@ -45,7 +45,7 @@ const safeMeetings = scheduledMeetings || [];
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       // Build query parameters
       const params = new URLSearchParams();
@@ -166,7 +166,7 @@ const safeMeetings = scheduledMeetings || [];
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const meetingData = {
         ...formData,
@@ -250,7 +250,7 @@ const deleteMeeting = async (meetingId) => {
   
   // Get token
   const token = authService.getToken();
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
   
   // Delete locally FIRST (instant UI update)
   const currentMeetings = scheduledMeetings || [];

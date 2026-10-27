@@ -41,7 +41,7 @@ const Meetings = ({ userRole = 'Manager' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const params = new URLSearchParams();
       if (filter !== 'all') params.append('filter', filter);
@@ -138,7 +138,7 @@ const Meetings = ({ userRole = 'Manager' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const meetingData = {
         ...formData,
@@ -222,7 +222,7 @@ const Meetings = ({ userRole = 'Manager' }) => {
   if (!window.confirm('Delete this meeting?')) return;
   
   const token = authService.getToken();
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
   
   // DELETE LOCALLY FIRST - check both id and _id (MongoDB uses _id)
   const updatedMeetings = scheduledMeetings.filter(m => {

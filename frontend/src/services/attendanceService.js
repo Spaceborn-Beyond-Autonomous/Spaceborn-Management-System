@@ -83,7 +83,7 @@ async getAttendanceRoster(filters = {}) {
     return this.getMockAttendance(filters);
   }
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
   const token = authService.getToken();
 
   try {
@@ -109,7 +109,7 @@ async getAllAttendance(filters = {}) {
     return this.getMockAttendance(filters);
   }
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
   const token = authService.getToken();
 
   try {
@@ -133,7 +133,7 @@ async getAttendanceStats(date = null) {
   if (this.USE_MOCK) return this.getMockStats();
   
   try {
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
     const token = authService.getToken();
     const url = date ? `${API_BASE_URL}/attendance/stats?date=${date}` : `${API_BASE_URL}/attendance/stats`;
     const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -152,7 +152,7 @@ async getAttendanceByDepartment(date = null) {
   if (this.USE_MOCK) return this.getMockDepartmentStats();
   
   try {
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
     const token = authService.getToken();
     const url = date ? `${API_BASE_URL}/attendance/by-department?date=${date}` : `${API_BASE_URL}/attendance/by-department`;
     const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -178,7 +178,7 @@ async getLiveAttendance() {
       return { success: true, message: 'Attendance marked successfully (mock)' };
     }
 
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
     const token = authService.getToken();
     
     try {

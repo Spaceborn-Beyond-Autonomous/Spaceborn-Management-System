@@ -1,5 +1,5 @@
 // src/services/roadmapService.js
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 const getToken = () => localStorage.getItem('authToken') || localStorage.getItem('token');
 
 const getErrorMessage = async (response, fallback) => {

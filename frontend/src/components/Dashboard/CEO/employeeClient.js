@@ -1,7 +1,7 @@
 // Minimal client helpers for employee modal actions
 // Uses userController routes already implemented in backend/src/controllers/userController.js
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 export async function updateEmployeeById(token, id, payload) {
   const res = await fetch(`${API_BASE_URL}/users/${id}`, {

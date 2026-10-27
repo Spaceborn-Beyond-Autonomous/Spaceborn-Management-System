@@ -68,7 +68,7 @@ const TeamLeadLeaveManagement = ({ userRole = 'Team Lead' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       const [leavesRes, breaksRes] = await Promise.all([
         fetch(`${API_BASE_URL}/team-lead/leave-requests`, {

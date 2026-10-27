@@ -3,7 +3,7 @@ import { getInitialsFromName } from '../utils/taskMapper';
 
 class UserService {
   constructor() {
-    this.API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    this.API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
   }
 
   async apiRequest(endpoint, options = {}) {

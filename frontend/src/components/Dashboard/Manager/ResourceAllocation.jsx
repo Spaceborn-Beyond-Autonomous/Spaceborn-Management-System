@@ -27,7 +27,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
   const fetchResourceRequests = async () => {
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
       if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockRequests();
@@ -62,7 +62,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
   const fetchTrackingHistory = async () => {
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
       if (!token || process.env.REACT_APP_USE_MOCK_AUTH === 'true') {
         loadMockTrackingHistory();
@@ -205,7 +205,7 @@ const ResourceAllocation = ({ userRole = 'Manager' }) => {
   const approveRejectRequest = async (requestId, action) => {
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       const currentUser = authService.getCurrentUser();
 
       const endpoint = action === 'approve'

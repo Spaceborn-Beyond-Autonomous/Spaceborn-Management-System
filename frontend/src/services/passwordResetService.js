@@ -1,7 +1,7 @@
 // src/services/passwordResetService.js
 import authService from './authService';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 class PasswordResetService {
   // Request password reset (from login page)

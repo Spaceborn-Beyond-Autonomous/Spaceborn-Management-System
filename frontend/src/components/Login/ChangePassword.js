@@ -2,7 +2,7 @@
 
 class AuthService {
   constructor() {
-    this.API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    this.API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
     this.SESSION_TIMEOUT = parseInt(process.env.REACT_APP_SESSION_TIMEOUT) || 8 * 60 * 60 * 1000;
     this.USE_MOCK = process.env.REACT_APP_USE_MOCK_AUTH === 'true';
     

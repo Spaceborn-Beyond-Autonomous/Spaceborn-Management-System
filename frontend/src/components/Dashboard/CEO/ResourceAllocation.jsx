@@ -34,7 +34,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
       // Only CEO/Manager should be able to process requests; UI actions will still call APIs below
 
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       // Existing backend route used by current implementation
       const response = await fetch(`${API_BASE_URL}/resources/pending`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -61,7 +61,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
 
     try {
       const token = authService.getToken();
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       const currentUser = authService.getCurrentUser();
 
       const endpoint = action === 'approve'
@@ -104,7 +104,7 @@ const ResourceAllocation = ({ userRole = 'CEO' }) => {
         return;
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       const response = await fetch(`${API_BASE_URL}/resources/tracking`, {
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -28,7 +28,7 @@ const Login = ({ onLogin }) => {
 
   const fetchWorkingHours = async () => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       const response = await fetch(`${API_BASE_URL}/config/working-hours`);
       
       if (response.ok) {
@@ -80,7 +80,7 @@ const Login = ({ onLogin }) => {
 
     try {
       // Try to login with backend API
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       
       // First try: Login with employee ID
       let response = await fetch(`${API_BASE_URL}/auth/login`, {
