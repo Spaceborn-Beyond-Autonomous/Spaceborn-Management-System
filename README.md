@@ -99,6 +99,4 @@ Spaceborn-Management-System/
 └── render.yaml            # Render deployment config
 ```
 
-## License
 
-MIT
