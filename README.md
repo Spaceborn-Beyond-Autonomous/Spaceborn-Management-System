@@ -2,7 +2,7 @@
 
 Internal operations and employee management portal for tracking daily tasks, attendance, leave requests, and team performance.
 
-## Demo Accounts
+##  Demo Accounts
 
 The database comes pre-seeded with these test users:
 
