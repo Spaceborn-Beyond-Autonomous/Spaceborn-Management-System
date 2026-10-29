@@ -20,12 +20,40 @@ Log in using your Employee ID and password at the login screen.
 
 ## Features
 
-- **Daily Work Reports:** Employees submit standup notes and blockers; managers review submissions filtered by date.
-- **Task Management:** Create, assign, and track task progress across departments.
-- **Attendance & Breaks:** Clock-in, clock-out, and break logging.
-- **Leave Management:** Submit leave requests with balance tracking; manager and team lead approval flows.
-- **Role-based Dashboards:** Dedicated views for CEO, COO, Managers, Team Leads, and Employees.
-- **Database:** Uses embedded PostgreSQL (PGlite) locally so no database installation is needed. Automatically connects to PostgreSQL in production when `DATABASE_URL` is set.
+### Date & Time Tracking
+- **Date-wise Daily Work Reports:** Employees submit daily standup summaries, completed work, and blockers. Managers can filter and browse submissions day-by-day using an interactive date picker.
+- **Attendance Clock-In & Clock-Out:** Real-time timestamp logging for check-in and check-out, automatically calculating daily working hours.
+- **Hour Break Logging:** Shift break tracker that records break start time, end time, and total accumulated break duration.
+- **Attendance History & Calendar:** Day-by-day logs showing attendance status (Present, Absent, On Leave, Late) alongside official company holidays.
+
+### Task & Project Management
+- **Task Assignment:** Create and assign tasks with descriptions, assignees, target due dates, and department tags.
+- **Priority & Status Tracking:** Filter tasks by priority (Low, Medium, High, Urgent) and lifecycle state (Pending, In Progress, Review, Completed).
+- **Project Roadmaps & Milestones:** Track active company projects, target delivery deadlines, and milestone completion percentages.
+
+### Leave & Time-Off Management
+- **Leave Requests:** Apply for leave by specifying start date, end date, total days, reason, and leave type (Casual, Sick, Annual, Emergency).
+- **Balance Tracking:** Automatic calculation of allocated, used, and remaining leave days for each employee.
+- **Approval Workflow:** Managers and team leads can review, approve, or reject pending leave applications with status notifications.
+
+### Meeting Scheduling
+- **Meeting Planner:** Schedule team and departmental meetings with date, start time, duration, location/link, and agenda.
+- **Attendee Tracking:** View scheduled meetings and participant lists directly on the dashboard calendar.
+
+### Executive & Resource Management
+- **Executive Decisions:** Timestamped registry for leadership decisions, policy updates, and strategic announcements.
+- **Resource Allocation:** Request hardware, software licenses, or equipment with date tracking and approval status.
+- **Company Health & Metrics:** Overview of active headcounts, department capacity, open risks, and attendance rates.
+
+### Role-Based Access
+- **CEO & COO:** Full organizational visibility, strategic metrics, executive decisions, and company health overview.
+- **Manager:** Team task tracking, date-wise report reviews, employee roster, and leave approvals.
+- **Team Lead:** Team task delegation, standup reviews, and resource requests.
+- **Member (Employee):** Clock-in/out, daily work report submission, personal tasks, and leave applications.
+
+### Database Architecture
+- **Local Development:** Uses embedded PostgreSQL (PGlite) stored in `backend/data/spaceborn_pgdata/`. No external database installation or Docker container required.
+- **Production:** Automatically connects to managed PostgreSQL (e.g. Render, Supabase, AWS RDS) when `DATABASE_URL` is configured.
 
 ## Running Locally
 
