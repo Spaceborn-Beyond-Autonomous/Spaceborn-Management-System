@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>3D World Digital Twin & Autonomous Flight Engine</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    canvas { touch-action: none; }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-4">
+  <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-lg max-w-4xl mx-auto space-y-4">
+    
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
+      <div>
+        <h2 class="text-xl font-bold tracking-tight flex items-center gap-2">
+          <span class="inline-block w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+          3D World Model & Digital Twin Simulator
+        </h2>
+        <p class="text-xs text-[var(--muted-foreground)] mt-0.5">
+          LiDAR Scan &rarr; CAD Mesh (.step) &rarr; Ground Plane (Z=0) &rarr; Georeferenced WPML Path
+        </p>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-mono bg-[var(--background)] px-3 py-1.5 rounded-lg border border-[var(--border)]">
+        <span class="text-[var(--muted-foreground)]">GPS ANCHOR:</span>
+        <span class="text-emerald-400 font-semibold">28.6145° N, 77.2092° E</span>
+        <span class="text-[var(--muted-foreground)] ml-2">IMU:</span>
+        <span class="text-sky-400 font-semibold">042.5° NE</span>
+      </div>
+    </div>
+
+    <!-- 3D Canvas Viewport -->
+    <div class="relative w-full h-[380px] bg-slate-950 rounded-xl overflow-hidden border border-[var(--border)] shadow-inner">
+      <canvas id="worldCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+      
+      <!-- Overlay Telemetry HUD -->
+      <div class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-lg p-2.5 text-xs font-mono text-slate-200 space-y-1 shadow-md">
+        <div class="flex justify-between gap-4">
+          <span class="text-slate-400">STATE:</span>
+          <span id="hudState" class="font-bold text-emerald-400">EXECUTING_WPML</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-slate-400">DRONE ALT (Z):</span>
+          <span id="hudAlt" class="font-bold text-sky-400">2.50 m (AGL)</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-slate-400">STANDOFF:</span>
+          <span id="hudStandoff" class="font-bold text-amber-400">4.00 m</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-slate-400">LIDAR PROX:</span>
+          <span id="hudProx" class="font-bold text-emerald-400">4.12 m (CLEAR)</span>
+        </div>
+      </div>
+
+      <!-- Controls Hint -->
+      <div class="absolute bottom-3 right-3 text-[11px] font-mono bg-slate-900/70 border border-slate-800 text-slate-400 px-2 py-1 rounded">
+        Drag to Orbit 3D Angle
+      </div>
+    </div>
+
+    <!-- Interactive Control Deck -->
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-1">
+      <button id="btnPlay" class="flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl transition shadow-sm">
+        <span>▶ Pause / Resume</span>
+      </button>
+
+      <button id="btnObstacle" class="flex items-center justify-center gap-2 px-3 py-2.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 font-medium text-xs rounded-xl transition">
+        <span>⚠️ Trigger Human Obstacle</span>
+      </button>
+
+      <button id="btnWire" class="flex items-center justify-center gap-2 px-3 py-2.5 bg-[var(--background)] hover:bg-[var(--border)] text-[var(--foreground)] border border-[var(--border)] font-medium text-xs rounded-xl transition">
+        <span>⚡ Toggle Wire Hazard (7m)</span>
+      </button>
+
+      <button id="btnMode" class="flex items-center justify-center gap-2 px-3 py-2.5 bg-[var(--background)] hover:bg-[var(--border)] text-[var(--foreground)] border border-[var(--border)] font-medium text-xs rounded-xl transition">
+        <span>🔄 LiDAR Points vs CAD</span>
+      </button>
+    </div>
+
+    <!-- Explanatory Footnotes -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-xs border-t border-[var(--border)]">
+      <div class="p-3 bg-[var(--background)] rounded-xl border border-[var(--border)]">
+        <span class="font-bold text-emerald-500 block mb-1">1. Reference Ground Plane Z=0</span>
+        The rail tracks act as the zero baseline. All altitudes (bogie 0.8m, roof 4.1m, wire 7.2m) are locked mathematically with zero GPS drift.
+      </div>
+      <div class="p-3 bg-[var(--background)] rounded-xl border border-[var(--border)]">
+        <span class="font-bold text-sky-500 block mb-1">2. WPML Trajectory</span>
+        The green ribbon indicates the autonomous path generated from the CAD bounds: 4m standoff, caboose U-turn, and return sweep.
+      </div>
+      <div class="p-3 bg-[var(--background)] rounded-xl border border-[var(--border)]">
+        <span class="font-bold text-amber-500 block mb-1">3. FSM Reflex Brake</span>
+        If a human appears on the tracks, the LiDAR proximity drops below 2.5m, immediately triggering an instant hardware hover brake.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById('worldCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    function resize() {
+      width = canvas.parentElement.clientWidth;
+      height = canvas.parentElement.clientHeight;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Camera view parameters (Isometric 3D Projection)
+    let rotX = 0.55;
+    let rotY = -0.75;
+    let zoom = 1.35;
+    let isDragging = false;
+    let lastMouseX = 0, lastMouseY = 0;
+
+    canvas.addEventListener('mousedown', e => {
+      isDragging = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      rotY += dx * 0.008;
+      rotX = Math.max(0.1, Math.min(1.4, rotX + dy * 0.008));
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+
+    // 3D Projection Helper
+    function project(x, y, z) {
+      // Rotate around Y
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const x1 = x * cosY - y * sinY;
+      const y1 = x * sinY + y * cosY;
+      
+      // Rotate around X
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      const y2 = y1 * cosX - z * sinX;
+      const z2 = y1 * sinX + z * cosX;
+
+      const scale = zoom * 18;
+      return {
+        x: width / 2 + x1 * scale,
+        y: height / 2 + y2 * scale
+      };
+    }
+
+    // Simulation State
+    let isPlaying = true;
+    let showPoints = false;
+    let showWire = true;
+    let hasHumanObstacle = false;
+    let humanX = 4;
+    let humanY = -3.5;
+
+    let droneT = 0.05;
+    let droneSpeed = 0.003;
+    let fsmState = 'EXECUTING_WPML';
+
+    document.getElementById('btnPlay').onclick = () => isPlaying = !isPlaying;
+    document.getElementById('btnMode').onclick = () => showPoints = !showPoints;
+    document.getElementById('btnWire').onclick = () => showWire = !showWire;
+    document.getElementById('btnObstacle').onclick = () => {
+      hasHumanObstacle = !hasHumanObstacle;
+      document.getElementById('btnObstacle').classList.toggle('bg-amber-600', hasHumanObstacle);
+      document.getElementById('btnObstacle').classList.toggle('text-white', hasHumanObstacle);
+    };
+
+    // Train Geometry (Length: 24m normalized, Width: 3.2m, Height: 4.0m)
+    const trainLength = 22;
+    const trainWidth = 3.2;
+    const trainHeight = 4.0;
+
+    // WPML Flight Path generator (Corridor loop)
+    function getPathPoint(t) {
+      const standoff = 4.0;
+      const totalLen = trainLength;
+      // Phase 1: Left flank (t: 0 -> 0.45)
+      if (t < 0.45) {
+        const u = t / 0.45;
+        return {
+          x: -totalLen/2 + u * totalLen,
+          y: -(trainWidth/2 + standoff),
+          z: 2.5,
+          desc: "Left Flank Scan (Alt 2.5m)"
+        };
+      }
+      // Phase 2: Caboose U-Turn arc (t: 0.45 -> 0.55)
+      else if (t < 0.55) {
+        const u = (t - 0.45) / 0.10;
+        const angle = -Math.PI/2 + u * Math.PI;
+        const radius = trainWidth/2 + standoff;
+        return {
+          x: totalLen/2 + Math.cos(angle) * radius * 0.7,
+          y: Math.sin(angle) * radius,
+          z: 3.0,
+          desc: "Caboose U-Turn Arc"
+        };
+      }
+      // Phase 3: Right flank (t: 0.55 -> 1.0)
+      else {
+        const u = (t - 0.55) / 0.45;
+        return {
+          x: totalLen/2 - u * totalLen,
+          y: (trainWidth/2 + standoff),
+          z: 2.5,
+          desc: "Right Flank Return (Alt 2.5m)"
+        };
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Draw Reference Ground Plane Grid (Z = 0)
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      const gridSize = 16;
+      for (let x = -gridSize; x <= gridSize; x += 4) {
+        const p1 = project(x, -gridSize, 0);
+        const p2 = project(x, gridSize, 0);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+      for (let y = -gridSize; y <= gridSize; y += 4) {
+        const p1 = project(-gridSize, y, 0);
+        const p2 = project(gridSize, y, 0);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+
+      // 2. Draw Train Tracks (2 Parallel Rails on Ground Plane)
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2.5;
+      [-1.0, 1.0].forEach(offset => {
+        const r1 = project(-trainLength/2 - 5, offset, 0);
+        const r2 = project(trainLength/2 + 5, offset, 0);
+        ctx.beginPath();
+        ctx.moveTo(r1.x, r1.y);
+        ctx.lineTo(r2.x, r2.y);
+        ctx.stroke();
+      });
+
+      // 3. Draw Train 3D Model (.step CAD box or LiDAR points)
+      const halfL = trainLength / 2;
+      const halfW = trainWidth / 2;
+
+      if (!showPoints) {
+        // Solid CAD Faces (Locomotive + Wagons)
+        const wagons = 4;
+        const wLen = trainLength / wagons;
+
+        for (let i = 0; i < wagons; i++) {
+          const xStart = -halfL + i * wLen + 0.2;
+          const xEnd = -halfL + (i + 1) * wLen - 0.2;
+
+          // Box 8 Vertices
+          const v = [
+            project(xStart, -halfW, 0.4),
+            project(xEnd, -halfW, 0.4),
+            project(xEnd, halfW, 0.4),
+            project(xStart, halfW, 0.4),
+            project(xStart, -halfW, trainHeight),
+            project(xEnd, -halfW, trainHeight),
+            project(xEnd, halfW, trainHeight),
+            project(xStart, halfW, trainHeight)
+          ];
+
+          // Top Face
+          ctx.fillStyle = i === 0 ? '#1e3a8a' : '#334155';
+          ctx.strokeStyle = '#64748b';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(v[4].x, v[4].y);
+          ctx.lineTo(v[5].x, v[5].y);
+          ctx.lineTo(v[6].x, v[6].y);
+          ctx.lineTo(v[7].x, v[7].y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Left Side Face
+          ctx.fillStyle = i === 0 ? '#1d4ed8' : '#1e293b';
+          ctx.beginPath();
+          ctx.moveTo(v[0].x, v[0].y);
+          ctx.lineTo(v[1].x, v[1].y);
+          ctx.lineTo(v[5].x, v[5].y);
+          ctx.lineTo(v[4].x, v[4].y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Front nose for locomotive (i === wagons - 1)
+          if (i === wagons - 1) {
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.moveTo(v[1].x, v[1].y);
+            ctx.lineTo(v[2].x, v[2].y);
+            ctx.lineTo(v[6].x, v[6].y);
+            ctx.lineTo(v[5].x, v[5].y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          }
+        }
+      } else {
+        // Point Cloud representation (Synthesized LiDAR dots)
+        ctx.fillStyle = '#38bdf8';
+        for (let x = -halfL; x <= halfL; x += 0.8) {
+          for (let z = 0.5; z <= trainHeight; z += 0.8) {
+            const pL = project(x, -halfW, z);
+            const pR = project(x, halfW, z);
+            ctx.fillRect(pL.x - 1, pL.y - 1, 2, 2);
+            ctx.fillRect(pR.x - 1, pR.y - 1, 2, 2);
+          }
+          for (let y = -halfW; y <= halfW; y += 0.8) {
+            const pTop = project(x, y, trainHeight);
+            ctx.fillRect(pTop.x - 1, pTop.y - 1, 2, 2);
+          }
+        }
+      }
+
+      // 4. Overhead Catenary Cable Hazard (Z = 7.0m)
+      if (showWire) {
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 6]);
+        const wire1 = project(-halfL - 5, 0, 7.0);
+        const wire2 = project(halfL + 5, 0, 7.0);
+        ctx.beginPath();
+        ctx.moveTo(wire1.x, wire1.y);
+        ctx.lineTo(wire2.x, wire2.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Wire poles
+        [-halfL + 2, 0, halfL - 2].forEach(px => {
+          const base = project(px, 2.8, 0);
+          const top = project(px, 0, 7.0);
+          ctx.strokeStyle = '#ef444466';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(base.x, base.y);
+          ctx.lineTo(top.x, top.y);
+          ctx.stroke();
+        });
+      }
+
+      // 5. Draw the WPML Green Flight Ribbon
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let s = 0; s <= 1.0; s += 0.02) {
+        const pt = getPathPoint(s);
+        const proj = project(pt.x, pt.y, pt.z);
+        if (s === 0) ctx.moveTo(proj.x, proj.y);
+        else ctx.lineTo(proj.x, proj.y);
+      }
+      ctx.stroke();
+
+      // Waypoint Dots
+      for (let s = 0; s <= 1.0; s += 0.1) {
+        const pt = getPathPoint(s);
+        const proj = project(pt.x, pt.y, pt.z);
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(proj.x, proj.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 6. Draw Human Obstacle (If Triggered)
+      if (hasHumanObstacle) {
+        const hBase = project(humanX, humanY, 0);
+        const hHead = project(humanX, humanY, 1.8);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(hBase.x, hBase.y);
+        ctx.lineTo(hHead.x, hHead.y);
+        ctx.stroke();
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(hHead.x, hHead.y - 4, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2.5m Warning Bubble around Human
+        ctx.strokeStyle = '#f59e0b55';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        const bubble = project(humanX, humanY, 0.9);
+        ctx.beginPath();
+        ctx.ellipse(bubble.x, bubble.y, 25, 14, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // 7. Update Drone Position & FSM Collision Check
+      const dronePos = getPathPoint(droneT);
+      let isBlocked = false;
+
+      if (hasHumanObstacle) {
+        const distToHuman = Math.hypot(dronePos.x - humanX, dronePos.y - humanY);
+        if (distToHuman < 3.2) {
+          isBlocked = true;
+          fsmState = 'EMERGENCY_BRAKE_PAUSE';
+          document.getElementById('hudState').textContent = 'EMERGENCY_BRAKE_PAUSE';
+          document.getElementById('hudState').className = 'font-bold text-amber-400 animate-pulse';
+          document.getElementById('hudProx').textContent = `${distToHuman.toFixed(2)} m (OBSTACLE!)`;
+          document.getElementById('hudProx').className = 'font-bold text-amber-400 animate-pulse';
+        }
+      }
+
+      if (!isBlocked) {
+        fsmState = 'EXECUTING_WPML';
+        document.getElementById('hudState').textContent = 'EXECUTING_WPML';
+        document.getElementById('hudState').className = 'font-bold text-emerald-400';
+        document.getElementById('hudProx').textContent = '4.00 m (CLEAR)';
+        document.getElementById('hudProx').className = 'font-bold text-emerald-400';
+        if (isPlaying) {
+          droneT = (droneT + droneSpeed) % 1.0;
+        }
+      }
+
+      // Draw Drone (Yellow Quadcopter Icon)
+      const dProj = project(dronePos.x, dronePos.y, dronePos.z);
+      
+      // Shadow on Ground Plane
+      const dShadow = project(dronePos.x, dronePos.y, 0);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.beginPath();
+      ctx.ellipse(dShadow.x, dShadow.y, 8, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tether line to shadow
+      ctx.strokeStyle = '#0284c755';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(dShadow.x, dShadow.y);
+      ctx.lineTo(dProj.x, dProj.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Drone Body
+      ctx.fillStyle = isBlocked ? '#f59e0b' : '#38bdf8';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(dProj.x, dProj.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Camera Gimbal Ray aimed at train
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.lineWidth = 2;
+      const targetPoint = project(dronePos.x, dronePos.y > 0 ? halfW : -halfW, 1.2);
+      ctx.beginPath();
+      ctx.moveTo(dProj.x, dProj.y);
+      ctx.lineTo(targetPoint.x, targetPoint.y);
+      ctx.stroke();
+
+      // Update HUD Numbers
+      document.getElementById('hudAlt').textContent = `${dronePos.z.toFixed(2)} m (AGL)`;
+
+      requestAnimationFrame(draw);
+    }
+
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>
