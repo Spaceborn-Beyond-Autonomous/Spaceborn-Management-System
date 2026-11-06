@@ -117,6 +117,10 @@ Docker Compose runs the complete application: the React frontend and Express API
 
 Set `APP_PORT` in `.env` to change the host port. To stop the containers while preserving database and upload data, run `docker compose down`. To remove that data too, run `docker compose down --volumes`.
 
+### Separate frontend and backend deployments
+
+When the React frontend is deployed separately (for example, on Vercel), set the frontend build environment variable `REACT_APP_API_URL` to the backend's public API base URL, including `/api` (for example, `https://your-api.example.com/api`). Set it in the frontend hosting project's production environment and redeploy; React embeds this value at build time. The backend must be reachable over HTTPS. You can check it at `<backend-origin>/api/health` before testing login.
+
 ## Project Structure
 
 ```text

@@ -66,9 +66,9 @@ const LoginSystem = ({ onLoginSuccess }) => {
     setError('');
     setIsLoading(true);
 
+    const API_BASE_URL = (process.env.REACT_APP_API_URL || '/api').replace(/\/+$/, '');
+
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
-      
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,7 +122,7 @@ const LoginSystem = ({ onLoginSuccess }) => {
       
     } catch (error) {
       console.error('Login error:', error);
-      setError('Login failed. Please check your connection and try again.');
+      setError(`Could not connect to the API (${API_BASE_URL}). Check the frontend REACT_APP_API_URL setting and backend availability.`);
     }
     
     setIsLoading(false);
