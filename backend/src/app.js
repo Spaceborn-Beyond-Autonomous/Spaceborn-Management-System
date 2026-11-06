@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
+const connectDB = require('./config/db');
 
 const app = express();
 
@@ -12,6 +13,23 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Initialize once per warm serverless instance before handling API requests.
+let databaseReady;
+app.use('/api', async (req, res, next) => {
+  try {
+    if (!databaseReady) databaseReady = connectDB();
+    await databaseReady;
+    next();
+  } catch (error) {
+    databaseReady = null;
+    console.error('API database initialization failed:', error);
+    res.status(503).json({
+      status: 'ERROR',
+      message: 'The API database is unavailable. Check DATABASE_URL and database connectivity.'
+    });
+  }
+});
 
 // ======================
 // API Route registrations

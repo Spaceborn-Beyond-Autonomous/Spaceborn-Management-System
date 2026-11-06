@@ -1,12 +1,7 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+﻿const dotenv = require('dotenv');
 const connectDB = require('./src/config/db');
 
 dotenv.config();
-connectDB();
 
 const app = require('./src/app');
 
@@ -90,8 +85,21 @@ app.get('/api/test', (req, res) => {
   res.json({ ok: true, engine: 'PostgreSQL' });
 });
 
-const PORT = process.env.PORT || 5000;
+// Vercel imports this file as the Express request handler. Start a listener
+// only when running as a standalone Node service (for example, on Render).
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+  connectDB()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error('Database initialization failed:', error);
+      process.exit(1);
+    });
+}
+
+module.exports = app;

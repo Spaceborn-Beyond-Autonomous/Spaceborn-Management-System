@@ -51,6 +51,10 @@ async function connectDB() {
 
   const databaseUrl = process.env.DATABASE_URL;
 
+  if (process.env.VERCEL && !databaseUrl) {
+    throw new Error('DATABASE_URL is required on Vercel; the local PGlite database is not persistent there.');
+  }
+
   if (databaseUrl) {
     console.log('🔌 Connecting to PostgreSQL via DATABASE_URL (Render / Cloud)...');
     db = new Pool({

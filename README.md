@@ -121,6 +121,8 @@ Set `APP_PORT` in `.env` to change the host port. To stop the containers while p
 
 When the React frontend is deployed separately (for example, on Vercel), set the frontend build environment variable `REACT_APP_API_URL` to the backend's public API base URL, including `/api` (for example, `https://your-api.example.com/api`). Set it in the frontend hosting project's production environment and redeploy; React embeds this value at build time. The backend must be reachable over HTTPS. You can check it at `<backend-origin>/api/health` before testing login.
 
+For a backend deployed on Vercel, set the Vercel project root directory to `backend` and configure `DATABASE_URL` to a reachable managed PostgreSQL database. Vercel functions do not provide persistent storage for the local PGlite database. Configure `JWT_SECRET` there as well.
+
 ## Project Structure
 
 ```text
