@@ -107,6 +107,16 @@ This project can be deployed as a unified web service with a managed PostgreSQL 
 | `JWT_SECRET` | Secret key for signing auth tokens | `"spaceborn-secret-key"` |
 | `JWT_EXPIRE` | Auth token duration | `"24h"` |
 
+## Deployment with Docker Compose
+
+Docker Compose runs the complete application: the React frontend and Express API are served together by the app container, with PostgreSQL in a separate container. Database files and uploaded attachments are kept in named volumes.
+
+1. Copy `.env.docker.example` to `.env` and set strong, unique values for `POSTGRES_PASSWORD` and `JWT_SECRET`.
+2. Start the application with `docker compose up --build -d`.
+3. Open `http://localhost:5000`. The API health endpoint is `http://localhost:5000/api/health`.
+
+Set `APP_PORT` in `.env` to change the host port. To stop the containers while preserving database and upload data, run `docker compose down`. To remove that data too, run `docker compose down --volumes`.
+
 ## Project Structure
 
 ```text
