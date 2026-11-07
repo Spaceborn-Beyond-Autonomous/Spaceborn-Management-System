@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const { Pool } = require('pg');
-const { PGlite } = require('@electric-sql/pglite');
 
 let db = null;
 let isConnected = false;
@@ -59,9 +58,14 @@ async function connectDB() {
     console.log('🔌 Connecting to PostgreSQL via DATABASE_URL (Render / Cloud)...');
     db = new Pool({
       connectionString: databaseUrl,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      // Keep idle and concurrent connections small on memory-constrained hosts.
+      max: Number(process.env.PG_POOL_MAX) || 2,
+      idleTimeoutMillis: 10000
     });
   } else {
+    // PGlite includes a WASM runtime; don't load it in cloud deployments using pg.
+    const { PGlite } = require('@electric-sql/pglite');
     const dataDir = path.resolve(__dirname, '../../data/spaceborn_pgdata');
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });

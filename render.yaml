@@ -4,12 +4,16 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: npm run build
+    # Use lockfiles, skip backend devDependencies, and avoid CRA source maps
+    # to lower peak build memory on small Render instances.
+    buildCommand: npm ci --prefix backend --omit=dev && npm ci --prefix frontend && npm run build --prefix frontend
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: GENERATE_SOURCEMAP
+        value: "false"
       - key: DATABASE_URL
         fromDatabase:
           name: spaceborn-db
