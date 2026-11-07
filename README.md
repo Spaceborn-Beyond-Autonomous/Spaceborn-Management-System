@@ -111,7 +111,9 @@ This project can be deployed as a unified web service with a managed PostgreSQL 
 The frontend can be hosted separately on Vercel. In that case, set the Vercel
 build environment variable `REACT_APP_API_URL` to the Render service URL ending
 in `/api`, then redeploy the frontend. The Render service only installs backend
-production dependencies and runs the API.
+production dependencies and runs the API. Node's old-space limit is set to 320
+MiB to leave room under Render's 512 MiB instance limit for native memory and the
+PostgreSQL client. Google Drive's SDK is loaded only when a Drive upload runs.
 
 ## Deployment with Docker Compose
 

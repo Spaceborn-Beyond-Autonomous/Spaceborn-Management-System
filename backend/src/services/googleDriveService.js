@@ -1,9 +1,10 @@
 const { Readable } = require('stream');
-const { google } = require('googleapis');
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
 const getOAuthClient = (accessToken) => {
+  // googleapis is large; load it only for a Drive upload instead of on API startup.
+  const { google } = require('googleapis');
   const client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
