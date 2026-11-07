@@ -2,7 +2,7 @@
 .gitignore
 **/node_modules
 **/build
-**/data
+backend/data
 **/uploads
 **/.env
 **/.env.*

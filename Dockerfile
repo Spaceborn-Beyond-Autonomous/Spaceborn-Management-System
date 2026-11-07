@@ -1,9 +1,6 @@
 FROM node:20-bookworm-slim AS frontend-build
 WORKDIR /app
 
-COPY backend/package*.json ./backend/
-RUN npm ci --prefix backend
-
 COPY frontend/package*.json ./frontend/
 RUN npm ci --prefix frontend
 
