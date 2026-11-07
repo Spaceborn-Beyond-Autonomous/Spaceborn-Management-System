@@ -94,7 +94,7 @@ This project can be deployed as a unified web service with a managed PostgreSQL 
 1. Push this repository to GitHub.
 2. In [Render](https://dashboard.render.com), go to **New** > **Blueprint**.
 3. Select this repo. Render will read `render.yaml` and set up:
-   - A Node.js web service that builds the React app with source maps disabled and starts the API with `npm start`.
+   - A Node.js web service that runs the backend API.
    - A free PostgreSQL database linked via `DATABASE_URL`.
 4. Click **Apply**.
 
@@ -108,11 +108,10 @@ This project can be deployed as a unified web service with a managed PostgreSQL 
 | `JWT_EXPIRE` | Auth token duration | `"24h"` |
 | `PG_POOL_MAX` | Maximum PostgreSQL connections opened by this service | `2` |
 
-The free web instance has a 512 MiB memory ceiling. The Render build uses lockfiles,
-skips backend development dependencies, and disables source maps to reduce peak
-build memory. If the service still exceeds the limit after deploy, inspect Render
-runtime logs and memory graphs; move the frontend build to a static site or upgrade
-the web instance if runtime load is the cause.
+The frontend can be hosted separately on Vercel. In that case, set the Vercel
+build environment variable `REACT_APP_API_URL` to the Render service URL ending
+in `/api`, then redeploy the frontend. The Render service only installs backend
+production dependencies and runs the API.
 
 ## Deployment with Docker Compose
 

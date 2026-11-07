@@ -4,16 +4,13 @@ services:
     runtime: node
     plan: free
     region: oregon
-    # Use lockfiles, skip backend devDependencies, and avoid CRA source maps
-    # to lower peak build memory on small Render instances.
-    buildCommand: npm ci --prefix backend --omit=dev && npm ci --prefix frontend && npm run build --prefix frontend
-    startCommand: npm start
+    # The frontend is hosted on Vercel; this Render service only runs the API.
+    buildCommand: npm ci --prefix backend --omit=dev
+    startCommand: npm start --prefix backend
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
-      - key: GENERATE_SOURCEMAP
-        value: "false"
       - key: DATABASE_URL
         fromDatabase:
           name: spaceborn-db
